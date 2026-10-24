@@ -1,7 +1,23 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.serialization)
 }
+
+// API de BackVynils publicada en Render, la que usan release y el CI
+val renderApiBaseUrl = "https://backvynils-q6yc.onrender.com/"
+
+// En debug se puede usar otra API, por ejemplo la de Docker: -PapiBaseUrl=... o apiBaseUrl en local.properties
+val localProperties = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.exists() }?.reader()?.use { load(it) }
+}
+val debugApiBaseUrl = (providers.gradleProperty("apiBaseUrl").orNull ?: localProperties.getProperty("apiBaseUrl"))
+    ?.trim()
+    ?.takeIf { it.isNotEmpty() }
+    // Retrofit exige que la URL base termine en «/»
+    ?.let { if (it.endsWith("/")) it else "$it/" }
+    ?: renderApiBaseUrl
 
 android {
     namespace = "com.equipo2.vinilos"
@@ -17,7 +33,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "API_BASE_URL", "\"https://backvynils-q6yc.onrender.com/\"")
+        buildConfigField("String", "API_BASE_URL", "\"$renderApiBaseUrl\"")
     }
 
     signingConfigs {
@@ -28,6 +44,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "API_BASE_URL", "\"$debugApiBaseUrl\"")
+        }
         release {
             optimization {
                 enable = true

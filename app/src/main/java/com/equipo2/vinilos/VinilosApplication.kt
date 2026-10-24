@@ -2,14 +2,19 @@ package com.equipo2.vinilos
 
 import android.app.Application
 import androidx.annotation.VisibleForTesting
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
+import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import com.equipo2.vinilos.data.network.imageHttpClient
 import com.equipo2.vinilos.ui.thememode.applyThemeMode
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-/** Arranque de la app: crea los repositorios y aplica el tema guardado. */
-class VinilosApplication : Application() {
+/** Arranque de la app: crea los repositorios, aplica el tema guardado y configura la carga de portadas. */
+class VinilosApplication : Application(), SingletonImageLoader.Factory {
 
     private val appScope = MainScope()
 
@@ -27,6 +32,15 @@ class VinilosApplication : Application() {
 
         // Después se aplica cada vez que se guarda uno nuevo
         appScope.launch { themeMode.collect { applyThemeMode(it) } }
+    }
+
+    /** Coil usa este cargador en toda la app, con el cliente que acepta Let's Encrypt en Android viejos. */
+    override fun newImageLoader(context: PlatformContext): ImageLoader {
+        // Se crea una sola vez y al descargar la primera portada, no al abrir la app
+        val client by lazy { imageHttpClient(context) }
+        return ImageLoader.Builder(context)
+            .components { add(OkHttpNetworkFetcherFactory(callFactory = { client })) }
+            .build()
     }
 
     companion object {
