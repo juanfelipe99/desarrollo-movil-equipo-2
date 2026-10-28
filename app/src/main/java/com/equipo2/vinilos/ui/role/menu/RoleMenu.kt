@@ -54,18 +54,10 @@ class RoleMenu(
         }
     }
 
-    /** Claro, del sistema u oscuro en un solo control. Elegir otro cierra el menú y cambia el tema. */
+    /** Claro, del sistema u oscuro en un solo interruptor. Elegir otro cierra el menú y cambia el tema. */
     private fun bindThemeMode(binding: PopupRoleMenuBinding, themeMode: ThemeMode) {
-        val buttons = mapOf(
-            ThemeMode.LIGHT to binding.themeLight,
-            ThemeMode.SYSTEM to binding.themeSystem,
-            ThemeMode.DARK to binding.themeDark,
-        )
-        binding.themeModeGroup.check(buttons.getValue(themeMode).id)
-
-        binding.themeModeGroup.addOnButtonCheckedListener { _, buttonId, isChecked ->
-            val mode = buttons.entries.first { it.value.id == buttonId }.key
-            if (!isChecked || mode == themeMode) return@addOnButtonCheckedListener
+        binding.themeModeSwitch.show(themeMode)
+        binding.themeModeSwitch.onModeSelected = { mode ->
             dismiss()
             onThemeModeSelected(mode)
         }

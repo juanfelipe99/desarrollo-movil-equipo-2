@@ -9,7 +9,6 @@ import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
 import androidx.test.espresso.matcher.ViewMatchers.Visibility
-import androidx.test.espresso.matcher.ViewMatchers.isChecked
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isSelected
 import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
@@ -111,7 +110,7 @@ class HU07RolesTest {
         waitForNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 
         onView(withId(R.id.roleChip)).perform(click())
-        onView(withId(R.id.themeDark)).inRoot(isPlatformPopup()).check(matches(isChecked()))
+        onView(withId(R.id.themeDark)).inRoot(isPlatformPopup()).check(matches(isSelected()))
         onView(withId(R.id.themeLight)).inRoot(isPlatformPopup()).perform(click())
         waitForNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
