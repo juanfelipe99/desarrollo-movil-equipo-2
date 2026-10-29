@@ -42,7 +42,7 @@ class HU07RolesTest {
         onView(withId(R.id.visitorButton)).check(matches(isDisplayed()))
         onView(withId(R.id.collectorButton)).check(matches(isDisplayed()))
         onView(withId(R.id.toolbar)).check(matches(withEffectiveVisibility(Visibility.GONE)))
-        onView(withId(R.id.bottomNav)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        onView(withId(R.id.navBar)).check(matches(withEffectiveVisibility(Visibility.GONE)))
     }
 
     @Test
@@ -139,7 +139,7 @@ class HU07RolesTest {
         chooseInRoleMenu(R.id.optionRoleSelect)
 
         onView(withText(R.string.role_select_question)).check(matches(isDisplayed()))
-        onView(withId(R.id.bottomNav)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        onView(withId(R.id.navBar)).check(matches(withEffectiveVisibility(Visibility.GONE)))
     }
 
     @Test
@@ -150,7 +150,7 @@ class HU07RolesTest {
 
         onView(toolbarTitle(R.string.album_create_title)).check(matches(isDisplayed()))
         onView(withId(R.id.roleChipSlot)).check(matches(withEffectiveVisibility(Visibility.GONE)))
-        onView(withId(R.id.bottomNav)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        onView(withId(R.id.navBar)).check(matches(withEffectiveVisibility(Visibility.GONE)))
     }
 
     @Test

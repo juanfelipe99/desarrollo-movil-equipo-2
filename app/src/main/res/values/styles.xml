@@ -26,6 +26,23 @@
         <item name="android:color">@color/md_primary_container</item>
     </style>
 
+    <!-- La misma barra como riel, para el teléfono en horizontal. -->
+    <style name="Widget.Vinilos.NavigationRail" parent="Widget.Material3.NavigationRailView">
+        <item name="android:background">@color/md_surface_container</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="itemActiveIndicatorStyle">
+            @style/Widget.Vinilos.NavigationRail.ActiveIndicator
+        </item>
+        <item name="itemIconTint">@color/nav_item_icon</item>
+        <item name="itemTextColor">@color/nav_item_text</item>
+        <item name="itemTextAppearanceActive">@style/TextAppearance.Vinilos.LabelMedium.Bold</item>
+        <item name="itemTextAppearanceInactive">@style/TextAppearance.Vinilos.LabelMedium</item>
+    </style>
+
+    <style name="Widget.Vinilos.NavigationRail.ActiveIndicator" parent="Widget.Material3.NavigationRailView.ActiveIndicator">
+        <item name="android:color">@color/md_primary_container</item>
+    </style>
+
     <style name="Widget.Vinilos.Divider" parent="">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>

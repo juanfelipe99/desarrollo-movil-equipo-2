@@ -14,9 +14,10 @@ import com.equipo2.vinilos.ui.common.AppSnackbar
 import com.equipo2.vinilos.ui.common.applySystemBarsPadding
 import com.equipo2.vinilos.ui.role.changedMessageRes
 import com.equipo2.vinilos.ui.role.chip.RoleChip
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 
-/** Única actividad de la app, con la barra superior, las pantallas y la barra inferior. */
+/** Única actividad de la app, con la barra superior, las pantallas y la barra de navegación. */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -39,14 +40,16 @@ class MainActivity : AppCompatActivity() {
 
     /** Muestra un aviso encima de anchor, snackbarAnchor o la barra inferior, el primero visible. */
     fun showSnackbar(message: CharSequence, isError: Boolean = false, anchor: View? = null) {
-        val target = listOf(anchor, snackbarAnchor, binding.bottomNav).firstOrNull { it?.isShown == true }
+        // El riel de la vista horizontal está al lado, así que el aviso va abajo del todo
+        val bottomNav = binding.navBar.takeIf { it is BottomNavigationView }
+        val target = listOf(anchor, snackbarAnchor, bottomNav).firstOrNull { it?.isShown == true }
         snackbar = AppSnackbar.show(binding.root, message, isError, target)
     }
 
     private fun setUpNavigation(firstLaunch: Boolean) {
         val navController = binding.navHost.getFragment<NavHostFragment>().navController
-        binding.toolbar.setupWithNavController(navController, AppBarConfiguration(binding.bottomNav.menu))
-        binding.bottomNav.setupWithNavController(navController)
+        binding.toolbar.setupWithNavController(navController, AppBarConfiguration(binding.navBar.menu))
+        binding.navBar.setupWithNavController(navController)
         navController.addOnDestinationChangedListener { _, destination, _ ->
             // El aviso es de la pantalla que se deja, y la nueva muestra el suyo después de llegar
             snackbar?.dismiss()
@@ -66,8 +69,8 @@ class MainActivity : AppCompatActivity() {
         binding.toolbarDivider.isVisible = !roleSelect
         binding.roleChipSlot.isVisible = !albumCreate
 
-        binding.bottomNav.isVisible = !roleSelect && !albumCreate
-        binding.bottomNavDivider.isVisible = binding.bottomNav.isVisible
+        binding.navBar.isVisible = !roleSelect && !albumCreate
+        binding.navDivider.isVisible = binding.navBar.isVisible
 
         // Crear álbum lleva una X en lugar de la flecha de volver
         if (albumCreate) {

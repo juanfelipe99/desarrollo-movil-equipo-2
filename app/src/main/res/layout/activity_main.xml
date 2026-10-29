@@ -48,13 +48,15 @@
             app:navGraph="@navigation/nav_graph" />
 
         <View
-            android:id="@+id/bottomNavDivider"
+            android:id="@+id/navDivider"
             style="@style/Widget.Vinilos.Divider" />
 
+        <!-- En horizontal es un riel a la izquierda, ver layout-land -->
         <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottomNav"
+            android:id="@+id/navBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:menu="@menu/bottom_nav" />
+            app:menu="@menu/bottom_nav"
+            tools:viewBindingType="com.google.android.material.navigation.NavigationBarView" />
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
