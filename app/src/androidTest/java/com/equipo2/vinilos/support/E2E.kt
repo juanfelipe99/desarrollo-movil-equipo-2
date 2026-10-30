@@ -4,7 +4,10 @@ import android.view.View
 import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.UiController
+import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
@@ -13,6 +16,8 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.platform.app.InstrumentationRegistry
 import com.equipo2.vinilos.R
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.textfield.TextInputLayout
 import org.hamcrest.Description
 import org.hamcrest.Matcher
@@ -42,6 +47,29 @@ fun enterAs(collector: Boolean) {
 fun chooseInRoleMenu(@IdRes optionId: Int) {
     onView(withId(R.id.roleChip)).perform(click())
     onView(withId(optionId)).inRoot(isPlatformPopup()).perform(click())
+}
+
+/**
+ * Baja hasta la vista con las barras escondidas, como quedan cuando el usuario baja.
+ * Con las barras a la vista, el final del contenido queda fuera de la pantalla o detrás de la barra inferior.
+ */
+fun scrollToWithBarsHidden(): ViewAction = object : ViewAction {
+    private val scrollTo = scrollTo()
+
+    override fun getConstraints(): Matcher<View> = scrollTo.constraints
+
+    override fun getDescription() = "esconder las barras y ${scrollTo.description}"
+
+    override fun perform(uiController: UiController, view: View) {
+        val root = view.rootView
+        root.findViewById<AppBarLayout>(R.id.appBar)?.setExpanded(false, false)
+        root.findViewById<View>(R.id.bottomBar)?.let { bar ->
+            val behavior = (bar.layoutParams as CoordinatorLayout.LayoutParams).behavior
+            (behavior as? HideBottomViewOnScrollBehavior<View>)?.slideDown(bar, false)
+        }
+        uiController.loopMainThreadUntilIdle()
+        scrollTo.perform(uiController, view)
+    }
 }
 
 /** Elige una opción del desplegable, que es una ventana aparte. */

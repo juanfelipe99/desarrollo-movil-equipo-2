@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- El contenido llega hasta abajo, detrás de la barra inferior (80 dp más la línea de 1 dp).
+     Por eso las listas y el botón «+» suman 81 dp a su margen de abajo, y así lo último no queda tapado. -->
+<resources>
+    <dimen name="fab_margin_bottom">97dp</dimen>
+    <dimen name="album_grid_padding_bottom">169dp</dimen>
+    <dimen name="artist_list_padding_bottom">97dp</dimen>
+    <dimen name="album_detail_padding_bottom">113dp</dimen>
+</resources>

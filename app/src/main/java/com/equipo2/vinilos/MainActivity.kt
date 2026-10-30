@@ -2,10 +2,14 @@ package com.equipo2.vinilos
 
 import android.os.Bundle
 import android.view.View
+import android.view.accessibility.AccessibilityManager
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
@@ -14,7 +18,8 @@ import com.equipo2.vinilos.ui.common.AppSnackbar
 import com.equipo2.vinilos.ui.common.applySystemBarsPadding
 import com.equipo2.vinilos.ui.role.changedMessageRes
 import com.equipo2.vinilos.ui.role.chip.RoleChip
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.snackbar.Snackbar
 
 /** Única actividad de la app, con la barra superior, las pantallas y la barra de navegación. */
@@ -22,9 +27,29 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+    /** Vista que flota sobre la barra inferior, como el botón «+». Los avisos salen encima y se mueve con las barras. */
     var snackbarAnchor: View? = null
+        set(value) {
+            field = value
+            placeSnackbarAnchor(animate = false)
+        }
 
     private var snackbar: Snackbar? = null
+
+    private var toolbarHidesOnScroll = false
+    private var appBarOffset = 0
+    private var bottomBarHidden = false
+
+    /** Con TalkBack las barras se quedan fijas, porque si desaparecen el lector no las encuentra. */
+    private val barsHideOnScroll by lazy {
+        ContextCompat.getSystemService(this, AccessibilityManager::class.java)?.isTouchExplorationEnabled != true
+    }
+
+    /** Solo en vertical, en horizontal la navegación es un riel que no se esconde. */
+    @Suppress("UNCHECKED_CAST")
+    private val bottomBarBehavior: HideBottomViewOnScrollBehavior<View>?
+        get() = (binding.bottomBar?.layoutParams as? CoordinatorLayout.LayoutParams)?.behavior
+            as? HideBottomViewOnScrollBehavior<View>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,16 +59,47 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.root.applySystemBarsPadding()
 
+        setUpBars()
         setUpNavigation(firstLaunch = savedInstanceState == null)
         RoleChip(this, binding.roleChip, onRoleChanged = { role -> showSnackbar(getString(role.changedMessageRes)) })
     }
 
     /** Muestra un aviso encima de anchor, snackbarAnchor o la barra inferior, el primero visible. */
     fun showSnackbar(message: CharSequence, isError: Boolean = false, anchor: View? = null) {
-        // El riel de la vista horizontal está al lado, así que el aviso va abajo del todo
-        val bottomNav = binding.navBar.takeIf { it is BottomNavigationView }
+        // Sin la barra inferior a la vista, por el riel o porque se escondió, el aviso va abajo del todo
+        val bottomNav = binding.navBar.takeIf { binding.bottomBar != null && bottomBarBehavior?.isScrolledDown != true }
         val target = listOf(anchor, snackbarAnchor, bottomNav).firstOrNull { it?.isShown == true }
         snackbar = AppSnackbar.show(binding.root, message, isError, target)
+    }
+
+    private fun setUpBars() {
+        binding.appBar.addOnOffsetChangedListener { _, offset ->
+            appBarOffset = offset
+            placeSnackbarAnchor(animate = false)
+        }
+
+        val bottomBar = binding.bottomBar ?: return
+        if (!barsHideOnScroll) {
+            bottomBar.updateLayoutParams<CoordinatorLayout.LayoutParams> { behavior = null }
+            return
+        }
+        bottomBarBehavior?.addOnScrollStateChangedListener { _, state ->
+            bottomBarHidden = state == HideBottomViewOnScrollBehavior.STATE_SCROLLED_DOWN
+            placeSnackbarAnchor(animate = true)
+        }
+    }
+
+    /** Baja la vista flotante con la barra inferior y la sube lo que la pantalla deja fuera mientras se ve la superior. */
+    private fun placeSnackbarAnchor(animate: Boolean) {
+        val view = snackbarAnchor ?: return
+        if (!::binding.isInitialized) return
+        // Mientras se ve la barra superior, el contenido sobresale por abajo lo que esa barra puede esconderse
+        val belowScreen = if (toolbarHidesOnScroll) binding.appBar.totalScrollRange + appBarOffset else 0
+        val bottomBarSpace = if (bottomBarHidden) binding.bottomBar?.height ?: 0 else 0
+        val y = (bottomBarSpace - belowScreen).toFloat()
+
+        view.animate().cancel()
+        if (animate) view.animate().translationY(y) else view.translationY = y
     }
 
     private fun setUpNavigation(firstLaunch: Boolean) {
@@ -60,22 +116,41 @@ class MainActivity : AppCompatActivity() {
         if (firstLaunch) navController.navigate(R.id.action_global_roleSelect)
     }
 
-    /** Oculta las barras que no lleva cada pantalla. */
+    /** Oculta las barras que no lleva cada pantalla y muestra las que se habían escondido al bajar. */
     private fun updateBars(@IdRes destinationId: Int) {
         val roleSelect = destinationId == R.id.roleSelectFragment
         val albumCreate = destinationId == R.id.albumCreateFragment
 
+        // Se ocultan la barra y la línea, no el AppBarLayout, porque sin él la pantalla quedaría debajo de la barra de estado
         binding.toolbar.isVisible = !roleSelect
         binding.toolbarDivider.isVisible = !roleSelect
+        binding.appBar.setExpanded(true, false)
         binding.roleChipSlot.isVisible = !albumCreate
+        // En el formulario la X para cerrar debe estar siempre a mano
+        setToolbarHidesOnScroll(barsHideOnScroll && !albumCreate)
 
         binding.navBar.isVisible = !roleSelect && !albumCreate
         binding.navDivider.isVisible = binding.navBar.isVisible
+        binding.bottomBar?.let { bottomBarBehavior?.slideUp(it, false) }
 
         // Crear álbum lleva una X en lugar de la flecha de volver
         if (albumCreate) {
             binding.toolbar.setNavigationIcon(R.drawable.ic_close)
             binding.toolbar.setNavigationContentDescription(R.string.cd_close_without_saving)
+        }
+    }
+
+    private fun setToolbarHidesOnScroll(hides: Boolean) {
+        toolbarHidesOnScroll = hides
+        val flags = if (hides) {
+            AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL or
+                AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or
+                AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP
+        } else {
+            0
+        }
+        listOf(binding.toolbar, binding.toolbarDivider).forEach { bar ->
+            bar.updateLayoutParams<AppBarLayout.LayoutParams> { scrollFlags = flags }
         }
     }
 }

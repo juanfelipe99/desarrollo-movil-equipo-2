@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Abajo queda espacio para que el botón «+» no tape la última fila. -->
+    <!-- Abajo queda espacio para que el botón «+» y la barra inferior no tapen la última fila. -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/albumGrid"
         android:layout_width="match_parent"
@@ -13,7 +13,7 @@
         android:clipToPadding="false"
         android:paddingHorizontal="@dimen/album_grid_padding"
         android:paddingTop="@dimen/album_grid_padding"
-        android:paddingBottom="88dp"
+        android:paddingBottom="@dimen/album_grid_padding_bottom"
         android:visibility="gone"
         tools:itemCount="6"
         tools:listitem="@layout/item_album"
@@ -34,7 +34,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="@dimen/fab_margin_bottom"
         android:contentDescription="@string/cd_create_album"
         android:visibility="gone"
         app:backgroundTint="@color/md_primary"

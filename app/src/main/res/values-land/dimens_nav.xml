@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- En horizontal la navegación es un riel al lado, así que abajo solo queda el margen de siempre. -->
+<resources>
+    <dimen name="fab_margin_bottom">16dp</dimen>
+    <dimen name="album_grid_padding_bottom">88dp</dimen>
+    <dimen name="artist_list_padding_bottom">16dp</dimen>
+    <dimen name="album_detail_padding_bottom">32dp</dimen>
+</resources>

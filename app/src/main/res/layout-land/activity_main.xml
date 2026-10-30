@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- En horizontal falta alto, así que la navegación pasa a un riel a la izquierda y la barra superior baja a 56 dp. -->
+<!-- En horizontal falta alto, así que la navegación pasa a un riel a la izquierda y la barra superior baja a 56 dp.
+     El riel no quita alto, por eso solo la barra superior se esconde al bajar. -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -9,7 +10,6 @@
     tools:context=".MainActivity">
 
     <LinearLayout
-        android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal">
@@ -27,44 +27,52 @@
             android:layout_width="1dp"
             android:layout_height="match_parent" />
 
-        <LinearLayout
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_weight="1">
 
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolbar"
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/appBar"
                 android:layout_width="match_parent"
-                android:layout_height="56dp">
+                android:layout_height="wrap_content"
+                android:background="@color/md_surface"
+                android:stateListAnimator="@null"
+                app:liftOnScroll="false">
 
-                <FrameLayout
-                    android:id="@+id/roleChipSlot"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:layout_marginEnd="8dp">
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp">
 
-                    <include
-                        android:id="@+id/roleChip"
-                        layout="@layout/view_role_chip"
+                    <FrameLayout
+                        android:id="@+id/roleChipSlot"
                         android:layout_width="wrap_content"
-                        android:layout_height="@dimen/touch_target" />
-                </FrameLayout>
-            </com.google.android.material.appbar.MaterialToolbar>
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginEnd="8dp">
 
-            <View
-                android:id="@+id/toolbarDivider"
-                style="@style/Widget.Vinilos.Divider" />
+                        <include
+                            android:id="@+id/roleChip"
+                            layout="@layout/view_role_chip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="@dimen/touch_target" />
+                    </FrameLayout>
+                </com.google.android.material.appbar.MaterialToolbar>
+
+                <View
+                    android:id="@+id/toolbarDivider"
+                    style="@style/Widget.Vinilos.Divider" />
+            </com.google.android.material.appbar.AppBarLayout>
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/navHost"
                 android:name="androidx.navigation.fragment.NavHostFragment"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_height="match_parent"
                 app:defaultNavHost="true"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 app:navGraph="@navigation/nav_graph" />
-        </LinearLayout>
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

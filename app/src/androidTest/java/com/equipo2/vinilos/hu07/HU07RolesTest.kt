@@ -22,6 +22,7 @@ import com.equipo2.vinilos.support.chooseInRoleMenu
 import com.equipo2.vinilos.support.enterAs
 import com.equipo2.vinilos.support.toolbarTitle
 import com.equipo2.vinilos.support.waitForNightMode
+import com.equipo2.vinilos.support.waitUntil
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -51,7 +52,8 @@ class HU07RolesTest {
 
         pressBackUnconditionally()
 
-        assertEquals(Lifecycle.State.DESTROYED, app.state)
+        // Android termina de cerrar la actividad un momento después de volver
+        waitUntil { app.state == Lifecycle.State.DESTROYED }
     }
 
     @Test
