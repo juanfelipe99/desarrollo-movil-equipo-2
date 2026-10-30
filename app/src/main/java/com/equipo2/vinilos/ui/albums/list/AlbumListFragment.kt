@@ -9,16 +9,19 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.data.model.Role
 import com.equipo2.vinilos.databinding.FragmentAlbumListBinding
 import com.equipo2.vinilos.ui.albums.create.AlbumCreateFragment
 import com.equipo2.vinilos.ui.albums.detail.AlbumDetailFragment
+import com.equipo2.vinilos.ui.common.ScrollsToTop
 import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.keepSnackbarsAbove
 import com.equipo2.vinilos.ui.common.navigateIfPossible
 import com.equipo2.vinilos.ui.common.showSnackbar
+import com.equipo2.vinilos.ui.common.smoothScrollToTop
 import com.equipo2.vinilos.ui.role.RoleViewModel
 import com.equipo2.vinilos.ui.state.UiState
 import com.equipo2.vinilos.ui.state.showEmpty
@@ -26,7 +29,7 @@ import com.equipo2.vinilos.ui.state.showError
 import com.equipo2.vinilos.ui.state.showLoading
 
 /** Lista de álbumes (HU01). */
-class AlbumListFragment : Fragment(R.layout.fragment_album_list) {
+class AlbumListFragment : Fragment(R.layout.fragment_album_list), ScrollsToTop {
 
     private val roleViewModel: RoleViewModel by activityViewModels { RoleViewModel.Factory }
     private val viewModel: AlbumListViewModel by viewModels { AlbumListViewModel.Factory }
@@ -40,6 +43,10 @@ class AlbumListFragment : Fragment(R.layout.fragment_album_list) {
         setUpCatalog(binding)
         setUpCreateAlbumButton(binding)
         showCreatedAlbumMessage()
+    }
+
+    override fun scrollToTop() {
+        view?.findViewById<RecyclerView>(R.id.albumGrid)?.smoothScrollToTop()
     }
 
     /** Cuadrícula con el conteo, que abre el detalle al tocar un álbum, los estados de carga, vacío y error, y deslizar para recargar. */

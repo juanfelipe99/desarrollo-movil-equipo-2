@@ -8,13 +8,16 @@ import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.equipo2.vinilos.databinding.ActivityMainBinding
 import com.equipo2.vinilos.ui.common.AppSnackbar
+import com.equipo2.vinilos.ui.common.ScrollsToTop
 import com.equipo2.vinilos.ui.common.applySystemBarsPadding
 import com.equipo2.vinilos.ui.role.changedMessageRes
 import com.equipo2.vinilos.ui.role.chip.RoleChip
@@ -52,6 +55,8 @@ class MainActivity : AppCompatActivity() {
             as? HideBottomViewOnScrollBehavior<View>
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Antes de super.onCreate, para que la pantalla de inicio pase al tema de la app
+        installSplashScreen()
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
@@ -106,6 +111,7 @@ class MainActivity : AppCompatActivity() {
         val navController = binding.navHost.getFragment<NavHostFragment>().navController
         binding.toolbar.setupWithNavController(navController, AppBarConfiguration(binding.navBar.menu))
         binding.navBar.setupWithNavController(navController)
+        binding.navBar.setOnItemReselectedListener { item -> onTabReselected(navController, item.itemId) }
         navController.addOnDestinationChangedListener { _, destination, _ ->
             // El aviso es de la pantalla que se deja, y la nueva muestra el suyo después de llegar
             snackbar?.dismiss()
@@ -114,6 +120,22 @@ class MainActivity : AppCompatActivity() {
 
         // Al abrir va a la selección de rol, y al recrearse se queda donde estaba
         if (firstLaunch) navController.navigate(R.id.action_global_roleSelect)
+    }
+
+    /**
+     * Tocar otra vez la pestaña en la que ya se está, como en Reddit o X.
+     * Desde el detalle vuelve a la lista, y en la lista sube al inicio y muestra las barras.
+     */
+    private fun onTabReselected(navController: NavController, @IdRes tabId: Int) {
+        if (navController.currentDestination?.id != tabId) {
+            navController.popBackStack(tabId, false)
+            return
+        }
+
+        binding.appBar.setExpanded(true, true)
+        binding.bottomBar?.let { bottomBarBehavior?.slideUp(it) }
+        val screen = binding.navHost.getFragment<NavHostFragment>().childFragmentManager.primaryNavigationFragment
+        (screen as? ScrollsToTop)?.scrollToTop()
     }
 
     /** Oculta las barras que no lleva cada pantalla y muestra las que se habían escondido al bajar. */

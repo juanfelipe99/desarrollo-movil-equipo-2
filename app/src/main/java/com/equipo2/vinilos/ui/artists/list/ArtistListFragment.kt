@@ -7,19 +7,22 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.databinding.FragmentArtistListBinding
 import com.equipo2.vinilos.ui.artists.detail.ArtistDetailFragment
+import com.equipo2.vinilos.ui.common.ScrollsToTop
 import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.navigateIfPossible
+import com.equipo2.vinilos.ui.common.smoothScrollToTop
 import com.equipo2.vinilos.ui.state.UiState
 import com.equipo2.vinilos.ui.state.showEmpty
 import com.equipo2.vinilos.ui.state.showError
 import com.equipo2.vinilos.ui.state.showLoading
 
 /** Lista de artistas (HU03). */
-class ArtistListFragment : Fragment(R.layout.fragment_artist_list) {
+class ArtistListFragment : Fragment(R.layout.fragment_artist_list), ScrollsToTop {
 
     private val viewModel: ArtistListViewModel by viewModels { ArtistListViewModel.Factory }
 
@@ -29,6 +32,10 @@ class ArtistListFragment : Fragment(R.layout.fragment_artist_list) {
         val binding = FragmentArtistListBinding.bind(view)
         setUpFilters(binding)
         setUpList(binding)
+    }
+
+    override fun scrollToTop() {
+        view?.findViewById<RecyclerView>(R.id.artistList)?.smoothScrollToTop()
     }
 
     /** Todos, Músicos y Bandas: siempre hay uno elegido y el ViewModel lo recuerda al girar. */
