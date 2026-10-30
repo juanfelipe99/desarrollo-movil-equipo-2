@@ -20,6 +20,14 @@ object BackVynils {
         return List(albums.length()) { albums.getJSONObject(it).getString("name") }
     }
 
+    /** Álbumes con una descripción más larga que length, que en el detalle se corta con «Ver más». */
+    fun albumNamesWithDescriptionLongerThan(length: Int): List<String> {
+        val albums = JSONArray(request("albums", "GET"))
+        return List(albums.length()) { albums.getJSONObject(it) }
+            .filter { it.getString("description").length > length }
+            .map { it.getString("name") }
+    }
+
     fun musicianNames(): List<String> = names("musicians")
 
     fun bandNames(): List<String> = names("bands")

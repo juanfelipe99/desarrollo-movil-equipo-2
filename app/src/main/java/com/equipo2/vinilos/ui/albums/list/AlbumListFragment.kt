@@ -14,6 +14,7 @@ import com.equipo2.vinilos.data.model.Role
 import com.equipo2.vinilos.databinding.FragmentAlbumListBinding
 import com.equipo2.vinilos.ui.albums.create.AlbumCreateFragment
 import com.equipo2.vinilos.ui.albums.detail.AlbumDetailFragment
+import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.keepSnackbarsAbove
 import com.equipo2.vinilos.ui.common.navigateIfPossible
@@ -41,7 +42,7 @@ class AlbumListFragment : Fragment(R.layout.fragment_album_list) {
         showCreatedAlbumMessage()
     }
 
-    /** Cuadrícula con el conteo, que abre el detalle al tocar un álbum, y los estados de carga, vacío y error. */
+    /** Cuadrícula con el conteo, que abre el detalle al tocar un álbum, los estados de carga, vacío y error, y deslizar para recargar. */
     private fun setUpCatalog(binding: FragmentAlbumListBinding) {
         val countAdapter = AlbumCountAdapter()
         val adapter = AlbumAdapter { album ->
@@ -54,6 +55,9 @@ class AlbumListFragment : Fragment(R.layout.fragment_album_list) {
             }
         }
         binding.albumGrid.adapter = ConcatAdapter(countAdapter, adapter)
+        bindPullToRefresh(binding.albumsRefresh, viewModel.pullRefresh, binding.albumGrid, binding.albumsMessage.root) {
+            viewModel.refresh()
+        }
 
         viewLifecycleOwner.collectWhileVisible(viewModel.state) { state ->
             when (state) {
@@ -74,6 +78,7 @@ class AlbumListFragment : Fragment(R.layout.fragment_album_list) {
             binding.albumsLoading.root.isVisible = state == UiState.Loading
             binding.albumsMessage.root.isVisible = state == UiState.Empty || state is UiState.Error
             binding.albumGrid.isVisible = state is UiState.Success
+            binding.albumsRefresh.isEnabled = state != UiState.Loading
         }
     }
 

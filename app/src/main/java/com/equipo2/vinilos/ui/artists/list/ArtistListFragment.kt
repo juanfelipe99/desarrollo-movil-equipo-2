@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.databinding.FragmentArtistListBinding
 import com.equipo2.vinilos.ui.artists.detail.ArtistDetailFragment
+import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.navigateIfPossible
 import com.equipo2.vinilos.ui.state.UiState
@@ -46,13 +47,16 @@ class ArtistListFragment : Fragment(R.layout.fragment_artist_list) {
         }
     }
 
-    /** Filas que abren el detalle al tocar una, el contador y los estados de carga, vacío y error. */
+    /** Filas que abren el detalle al tocar una, el contador, los estados de carga, vacío y error, y deslizar para recargar. */
     private fun setUpList(binding: FragmentArtistListBinding) {
         val adapter = ArtistAdapter { artist ->
             findNavController().navigateIfPossible(R.id.action_artistList_to_artistDetail, ArtistDetailFragment.args(artist))
         }
         binding.artistList.layoutManager = LinearLayoutManager(requireContext())
         binding.artistList.adapter = adapter
+        bindPullToRefresh(binding.artistsRefresh, viewModel.pullRefresh, binding.artistList, binding.artistsMessage.root) {
+            viewModel.refresh()
+        }
 
         viewLifecycleOwner.collectWhileVisible(viewModel.state) { state ->
             when (state) {
@@ -74,6 +78,7 @@ class ArtistListFragment : Fragment(R.layout.fragment_artist_list) {
             binding.artistsLoading.root.isVisible = state == UiState.Loading
             binding.artistsMessage.root.isVisible = state == UiState.Empty || state is UiState.Error
             binding.artistList.isVisible = state is UiState.Success
+            binding.artistsRefresh.isEnabled = state != UiState.Loading
         }
     }
 }

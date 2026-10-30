@@ -19,6 +19,8 @@
     <string name="error_network_body">Revisa tu conexión a internet e inténtalo de nuevo.</string>
     <string name="error_server_body">El servidor no está disponible en este momento. Inténtalo más tarde.</string>
     <string name="error_network_retry">Reintentar</string>
+    <string name="refresh_failed_network">No pudimos actualizar. Revisa tu conexión a internet.</string>
+    <string name="refresh_failed_server">No pudimos actualizar. El servidor no está disponible en este momento.</string>
 
     <string name="form_required_note">Todos los campos son obligatorios (*).</string>
     <string name="action_cancel">Cancelar</string>

@@ -30,11 +30,12 @@ class HU02AlbumDetailTest {
     @get:Rule
     val app = VinilosRule()
 
-    private fun openAlbumAsVisitor(): String {
+    /** Abre como visitante el primero de candidates cuyo nombre no se repite en el catálogo. */
+    private fun openAlbumAsVisitor(candidates: List<String> = BackVynils.albumNames()): String {
         val albums = BackVynils.albumNames()
-        assertTrue("BackVynils no tiene álbumes", albums.isNotEmpty())
+        assertTrue("BackVynils no tiene álbumes", candidates.isNotEmpty())
 
-        val albumName = albums.first { candidate ->
+        val albumName = candidates.first { candidate ->
             albums.count { it == candidate } == 1
         }
 
@@ -89,7 +90,8 @@ class HU02AlbumDetailTest {
 
     @Test
     fun visitante_puedeExpandirLaDescripcionDelAlbum() {
-        openAlbumAsVisitor()
+        // Solo las descripciones de más de 170 caracteres tienen «Ver más»
+        openAlbumAsVisitor(BackVynils.albumNamesWithDescriptionLongerThan(170))
         expandAlbumDescription()
     }
 

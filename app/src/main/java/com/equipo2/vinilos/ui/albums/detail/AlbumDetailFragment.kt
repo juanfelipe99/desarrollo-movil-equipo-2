@@ -22,6 +22,7 @@ import com.equipo2.vinilos.databinding.ItemAlbumCommentBinding
 import com.equipo2.vinilos.databinding.ItemAlbumInfoBinding
 import com.equipo2.vinilos.databinding.ItemTrackBinding
 import com.equipo2.vinilos.databinding.ViewPerformerChipBinding
+import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.initialsOf
 import com.equipo2.vinilos.ui.common.toLongText
@@ -41,6 +42,9 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
         super.onViewCreated(view, savedInstanceState)
 
         val binding = FragmentAlbumDetailBinding.bind(view)
+        bindPullToRefresh(binding.albumRefresh, viewModel.pullRefresh, binding.albumScroll, binding.albumError.root) {
+            viewModel.refresh()
+        }
 
         viewLifecycleOwner.collectWhileVisible(viewModel.state) { state ->
             when (state) {
@@ -54,6 +58,7 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
             binding.albumLoading.root.isVisible = state == UiState.Loading
             binding.albumError.root.isVisible = state is UiState.Error
             binding.albumContent.isVisible = state is UiState.Success
+            binding.albumRefresh.isEnabled = state != UiState.Loading
         }
     }
 
