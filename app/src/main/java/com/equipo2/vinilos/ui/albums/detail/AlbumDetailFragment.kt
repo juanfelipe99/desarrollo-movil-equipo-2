@@ -10,30 +10,37 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import coil3.load
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.data.model.Album
 import com.equipo2.vinilos.data.model.AlbumComment
 import com.equipo2.vinilos.data.model.Performer
+import com.equipo2.vinilos.data.model.Role
 import com.equipo2.vinilos.data.model.Track
 import com.equipo2.vinilos.databinding.FragmentAlbumDetailBinding
 import com.equipo2.vinilos.databinding.ItemAlbumCommentBinding
 import com.equipo2.vinilos.databinding.ItemAlbumInfoBinding
 import com.equipo2.vinilos.databinding.ItemTrackBinding
 import com.equipo2.vinilos.databinding.ViewPerformerChipBinding
+import com.equipo2.vinilos.ui.albums.tracks.TrackAddSheet
 import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.initialsOf
+import com.equipo2.vinilos.ui.common.navigateIfPossible
 import com.equipo2.vinilos.ui.common.toLongText
+import com.equipo2.vinilos.ui.role.RoleViewModel
 import com.equipo2.vinilos.ui.state.UiState
 import com.equipo2.vinilos.ui.state.addEmptySection
 import com.equipo2.vinilos.ui.state.showError
 import com.equipo2.vinilos.ui.state.showLoading
 
-/** Detalle de álbum (HU02). */
+/** Detalle de álbum (HU02), donde el coleccionista también agrega tracks (HU08). */
 class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
 
+    private val roleViewModel: RoleViewModel by activityViewModels { RoleViewModel.Factory }
     private val viewModel: AlbumDetailViewModel by viewModels {
         AlbumDetailViewModel.factory(requireArguments().getInt(ARG_ALBUM_ID))
     }
@@ -60,6 +67,12 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
             binding.albumContent.isVisible = state is UiState.Success
             binding.albumRefresh.isEnabled = state != UiState.Loading
         }
+
+        // Solo el coleccionista agrega tracks, y el vacío de tracks le dice cómo
+        viewLifecycleOwner.collectWhileVisible(roleViewModel.role) { role ->
+            binding.addTrackButton.isVisible = role == Role.COLLECTOR
+            (viewModel.state.value as? UiState.Success)?.let { showTracks(binding, it.data.tracks) }
+        }
     }
 
     private fun showAlbum(binding: FragmentAlbumDetailBinding, album: Album) {
@@ -74,6 +87,9 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
 
         showDescription(binding, album.description)
         showTracks(binding, album.tracks)
+        binding.addTrackButton.setOnClickListener {
+            findNavController().navigateIfPossible(R.id.action_albumDetail_to_trackAdd, TrackAddSheet.args(album.id, album.name))
+        }
         showComments(binding, album.comments)
     }
 
@@ -122,10 +138,15 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
         binding.tracksListEnd.isVisible = tracks.isNotEmpty()
 
         if (tracks.isEmpty()) {
+            val body = if (roleViewModel.role.value == Role.COLLECTOR) {
+                R.string.album_detail_tracks_empty_body_collector
+            } else {
+                R.string.album_detail_tracks_empty_body
+            }
             binding.tracksEmpty.addEmptySection(
                 R.drawable.ic_music_note,
                 getString(R.string.album_detail_tracks_empty_title),
-                getString(R.string.album_detail_tracks_empty_body),
+                getString(body),
             )
             return
         }

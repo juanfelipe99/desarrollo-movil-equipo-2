@@ -21,6 +21,8 @@
     <string name="album_detail_track_number">%1$d</string>
     <string name="album_detail_tracks_empty_title">Este álbum aún no tiene tracks</string>
     <string name="album_detail_tracks_empty_body">Las canciones aparecerán aquí cuando se registren.</string>
+    <string name="album_detail_tracks_empty_body_collector">Usa «Agregar track» para añadir la primera canción.</string>
+    <string name="album_detail_add_track">Agregar track</string>
 
     <string name="album_detail_comments_title">Comentarios</string>
     <plurals name="album_detail_comments_count">

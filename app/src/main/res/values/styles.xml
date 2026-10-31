@@ -63,6 +63,23 @@
         <item name="cornerRadius">24dp</item>
     </style>
 
+    <!-- Botón tonal junto al título de una sección, como «Agregar track»: 32 dp visibles en un área táctil de 48 dp. -->
+    <style name="Widget.Vinilos.Button.SectionAction" parent="Widget.Material3.Button.TonalButton.Icon">
+        <item name="android:minHeight">48dp</item>
+        <item name="android:insetTop">8dp</item>
+        <item name="android:insetBottom">8dp</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="cornerRadius">16dp</item>
+        <item name="backgroundTint">@color/md_primary_container</item>
+        <item name="android:textColor">@color/md_on_primary_container</item>
+        <item name="android:textAppearance">@style/TextAppearance.Vinilos.LabelLarge</item>
+        <item name="icon">@drawable/ic_add</item>
+        <item name="iconSize">18dp</item>
+        <item name="iconPadding">8dp</item>
+        <item name="iconTint">@color/md_on_primary_container</item>
+    </style>
+
     <!-- Etiqueta siempre arriba y texto de ejemplo siempre visible, como en el prototipo. -->
     <style name="Widget.Vinilos.FormField" parent="Widget.Material3.TextInputLayout.OutlinedBox">
         <item name="android:layout_width">match_parent</item>
