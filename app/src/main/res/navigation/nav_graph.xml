@@ -46,7 +46,24 @@
             <argument
                 android:name="albumId"
                 app:argType="integer" />
+
+            <action
+                android:id="@+id/action_albumDetail_to_trackAdd"
+                app:destination="@id/trackAddSheet" />
         </fragment>
+
+        <dialog
+            android:id="@+id/trackAddSheet"
+            android:name="com.equipo2.vinilos.ui.albums.tracks.TrackAddSheet">
+
+            <argument
+                android:name="albumId"
+                app:argType="integer" />
+
+            <argument
+                android:name="albumName"
+                app:argType="string" />
+        </dialog>
     </navigation>
 
     <navigation
