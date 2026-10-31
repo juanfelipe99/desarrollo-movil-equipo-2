@@ -69,11 +69,11 @@ class MainActivity : AppCompatActivity() {
         RoleChip(this, binding.roleChip, onRoleChanged = { role -> showSnackbar(getString(role.changedMessageRes)) })
     }
 
-    /** Muestra un aviso encima de anchor, snackbarAnchor o la barra inferior, el primero visible. */
-    fun showSnackbar(message: CharSequence, isError: Boolean = false, anchor: View? = null) {
+    /** Muestra un aviso encima de snackbarAnchor o de la barra inferior, el primero visible. */
+    fun showSnackbar(message: CharSequence, isError: Boolean = false) {
         // Sin la barra inferior a la vista, por el riel o porque se escondió, el aviso va abajo del todo
-        val bottomNav = binding.navBar.takeIf { binding.bottomBar != null && bottomBarBehavior?.isScrolledDown != true }
-        val target = listOf(anchor, snackbarAnchor, bottomNav).firstOrNull { it?.isShown == true }
+        val bottomNav = binding.navBar.takeIf { binding.bottomBar != null && !bottomBarHidden }
+        val target = listOf(snackbarAnchor, bottomNav).firstOrNull { it?.isShown == true }
         snackbar = AppSnackbar.show(binding.root, message, isError, target)
     }
 
@@ -132,8 +132,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        binding.appBar.setExpanded(true, true)
-        binding.bottomBar?.let { bottomBarBehavior?.slideUp(it) }
+        showBars(animate = true)
         val screen = binding.navHost.getFragment<NavHostFragment>().childFragmentManager.primaryNavigationFragment
         (screen as? ScrollsToTop)?.scrollToTop()
     }
@@ -146,20 +145,25 @@ class MainActivity : AppCompatActivity() {
         // Se ocultan la barra y la línea, no el AppBarLayout, porque sin él la pantalla quedaría debajo de la barra de estado
         binding.toolbar.isVisible = !roleSelect
         binding.toolbarDivider.isVisible = !roleSelect
-        binding.appBar.setExpanded(true, false)
         binding.roleChipSlot.isVisible = !albumCreate
         // En el formulario la X para cerrar debe estar siempre a mano
         setToolbarHidesOnScroll(barsHideOnScroll && !albumCreate)
 
         binding.navBar.isVisible = !roleSelect && !albumCreate
         binding.navDivider.isVisible = binding.navBar.isVisible
-        binding.bottomBar?.let { bottomBarBehavior?.slideUp(it, false) }
+        showBars(animate = false)
 
         // Crear álbum lleva una X en lugar de la flecha de volver
         if (albumCreate) {
             binding.toolbar.setNavigationIcon(R.drawable.ic_close)
             binding.toolbar.setNavigationContentDescription(R.string.cd_close_without_saving)
         }
+    }
+
+    /** Vuelve a mostrar las barras que se escondieron al bajar. */
+    private fun showBars(animate: Boolean) {
+        binding.appBar.setExpanded(true, animate)
+        binding.bottomBar?.let { bottomBarBehavior?.slideUp(it, animate) }
     }
 
     private fun setToolbarHidesOnScroll(hides: Boolean) {
