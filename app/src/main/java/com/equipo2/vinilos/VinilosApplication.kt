@@ -2,6 +2,8 @@ package com.equipo2.vinilos
 
 import android.app.Application
 import androidx.annotation.VisibleForTesting
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
@@ -20,6 +22,8 @@ class VinilosApplication : Application(), SingletonImageLoader.Factory {
 
     override fun onCreate() {
         super.onCreate()
+        // La app solo está en español, y así lo que dibuja Android, como el selector de fecha, tampoco sale en otro idioma
+        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("es"))
         container = AppContainer(this)
         applySavedThemeMode()
     }

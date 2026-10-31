@@ -27,7 +27,9 @@
             android:layout_width="1dp"
             android:layout_height="match_parent" />
 
+        <!-- Los avisos salen aquí, a la derecha del riel, y no encima de él -->
         <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:id="@+id/snackbarParent"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1">

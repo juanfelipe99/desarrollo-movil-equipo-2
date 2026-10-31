@@ -75,7 +75,8 @@ class MainActivity : AppCompatActivity() {
         // Sin la barra inferior a la vista, por el riel o porque se escondió, el aviso va abajo del todo
         val bottomNav = binding.navBar.takeIf { binding.bottomBar != null && !bottomBarHidden }
         val target = listOf(snackbarAnchor, bottomNav).firstOrNull { it?.isShown == true }
-        snackbar = AppSnackbar.show(binding.root, message, isError, target)
+        // En horizontal el aviso va en el área del contenido, sin tapar el riel
+        snackbar = AppSnackbar.show(binding.snackbarParent ?: binding.root, message, isError, target)
     }
 
     private fun setUpBars() {

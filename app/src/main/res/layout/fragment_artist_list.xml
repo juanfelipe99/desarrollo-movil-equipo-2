@@ -31,8 +31,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:chipSpacingHorizontal="8dp"
+                    app:chipSpacingVertical="8dp"
                     app:selectionRequired="true"
-                    app:singleLine="true"
                     app:singleSelection="true">
 
                     <com.google.android.material.chip.Chip
