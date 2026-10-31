@@ -12,6 +12,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
@@ -127,8 +128,10 @@ class MainActivity : AppCompatActivity() {
      * Desde el detalle vuelve a la lista, y en la lista sube al inicio y muestra las barras.
      */
     private fun onTabReselected(navController: NavController, @IdRes tabId: Int) {
-        if (navController.currentDestination?.id != tabId) {
-            navController.popBackStack(tabId, false)
+        // Cada pestaña es un subgrafo y su lista es la primera pantalla
+        val list = (navController.graph.findNode(tabId) as NavGraph).startDestinationId
+        if (navController.currentDestination?.id != list) {
+            navController.popBackStack(list, false)
             return
         }
 

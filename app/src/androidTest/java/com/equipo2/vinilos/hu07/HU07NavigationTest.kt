@@ -9,21 +9,27 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.isSelected
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.hu01.openAlbum
 import com.equipo2.vinilos.hu01.shownAlbums
+import com.equipo2.vinilos.hu03.artistRowName
+import com.equipo2.vinilos.hu03.openArtists
+import com.equipo2.vinilos.hu03.sortedLikeTheApp
+import com.equipo2.vinilos.support.BackVynils
 import com.equipo2.vinilos.support.VinilosRule
 import com.equipo2.vinilos.support.enterAs
 import com.equipo2.vinilos.support.toolbarTitle
 import com.equipo2.vinilos.support.waitUntil
 import org.hamcrest.Matcher
+import org.hamcrest.Matchers.not
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Tocar otra vez la pestaña en la que ya se está, contra la API publicada. */
+/** Barra de navegación: tocar otra vez la pestaña y cambiar de pestaña desde un detalle, contra la API publicada. */
 @RunWith(AndroidJUnit4::class)
 class HU07NavigationTest {
 
@@ -36,7 +42,7 @@ class HU07NavigationTest {
         enterAs(collector = false)
         onView(withId(R.id.albumGrid)).perform(scrollToEnd())
 
-        onView(withId(R.id.albumListFragment)).perform(click())
+        onView(withId(R.id.albumsGraph)).perform(click())
 
         var grid: RecyclerView? = null
         onView(withId(R.id.albumGrid)).check { view, _ -> grid = view as RecyclerView }
@@ -50,9 +56,38 @@ class HU07NavigationTest {
         enterAs(collector = false)
         openAlbum(shownAlbums().first().album.name)
 
-        onView(withId(R.id.albumListFragment)).perform(click())
+        onView(withId(R.id.albumsGraph)).perform(click())
 
         onView(toolbarTitle(R.string.album_list_title)).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun irAArtistasDesdeElDetalleDeUnAlbum_yVolver_marcaAlbumesYSigueEnElDetalle() {
+        app.launch()
+        enterAs(collector = false)
+        openAlbum(shownAlbums().first().album.name)
+
+        onView(withId(R.id.artistsGraph)).perform(click())
+        onView(withId(R.id.albumsGraph)).perform(click())
+
+        onView(toolbarTitle(R.string.album_detail_title)).check(matches(isDisplayed()))
+        onView(withId(R.id.albumsGraph)).check(matches(isSelected()))
+        onView(withId(R.id.artistsGraph)).check(matches(not(isSelected())))
+    }
+
+    @Test
+    fun irAAlbumesDesdeElDetalleDeUnArtista_yVolver_marcaArtistasYSigueEnElDetalle() {
+        app.launch()
+        openArtists()
+        val firstArtist = sortedLikeTheApp(BackVynils.musicianNames() + BackVynils.bandNames()).first()
+        onView(artistRowName(firstArtist)).perform(click())
+
+        onView(withId(R.id.albumsGraph)).perform(click())
+        onView(withId(R.id.artistsGraph)).perform(click())
+
+        onView(toolbarTitle(R.string.artist_detail_title)).check(matches(isDisplayed()))
+        onView(withId(R.id.artistsGraph)).check(matches(isSelected()))
+        onView(withId(R.id.albumsGraph)).check(matches(not(isSelected())))
     }
 }
 

@@ -45,7 +45,7 @@ fun testBand(id: Int, name: String, creationYear: Int) =
 /** Entra como visitante y abre la pestaña Artistas de la barra inferior. */
 fun openArtists() {
     enterAs(collector = false)
-    onView(withId(R.id.artistListFragment)).perform(click())
+    onView(withId(R.id.artistsGraph)).perform(click())
 }
 
 /** Nombre de una fila del listado, sin confundirlo con otros textos de la pantalla. */
