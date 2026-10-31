@@ -40,6 +40,7 @@
                 android:layout_height="wrap_content"
                 android:background="@color/md_surface"
                 android:stateListAnimator="@null"
+                app:layout_behavior="com.equipo2.vinilos.ui.common.TolerantAppBarBehavior"
                 app:liftOnScroll="false">
 
                 <com.google.android.material.appbar.MaterialToolbar

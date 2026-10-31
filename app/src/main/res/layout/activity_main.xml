@@ -14,6 +14,7 @@
         android:layout_height="wrap_content"
         android:background="@color/md_surface"
         android:stateListAnimator="@null"
+        app:layout_behavior="com.equipo2.vinilos.ui.common.TolerantAppBarBehavior"
         app:liftOnScroll="false">
 
         <com.google.android.material.appbar.MaterialToolbar
@@ -59,7 +60,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:orientation="vertical"
-        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior">
+        app:layout_behavior="com.equipo2.vinilos.ui.common.TolerantHideBottomViewBehavior">
 
         <View
             android:id="@+id/navDivider"
