@@ -26,10 +26,12 @@ import com.equipo2.vinilos.databinding.ItemAlbumInfoBinding
 import com.equipo2.vinilos.databinding.ItemTrackBinding
 import com.equipo2.vinilos.databinding.ViewPerformerChipBinding
 import com.equipo2.vinilos.ui.albums.tracks.TrackAddSheet
+import com.equipo2.vinilos.ui.albums.tracks.TrackAddSheet.Companion.toTrack
 import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.initialsOf
 import com.equipo2.vinilos.ui.common.navigateIfPossible
+import com.equipo2.vinilos.ui.common.showSnackbar
 import com.equipo2.vinilos.ui.common.toLongText
 import com.equipo2.vinilos.ui.role.RoleViewModel
 import com.equipo2.vinilos.ui.state.UiState
@@ -72,6 +74,20 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
         viewLifecycleOwner.collectWhileVisible(roleViewModel.role) { role ->
             binding.addTrackButton.isVisible = role == Role.COLLECTOR
             (viewModel.state.value as? UiState.Success)?.let { showTracks(binding, it.data.tracks) }
+        }
+        showAddedTrack()
+    }
+
+    /** Al cerrarse la hoja con un track nuevo, aparece al final de la lista marcado y con el aviso «Track agregado». */
+    private fun showAddedTrack() {
+        val savedState = findNavController().currentBackStackEntry?.savedStateHandle ?: return
+
+        viewLifecycleOwner.collectWhileVisible(savedState.getStateFlow<Bundle?>(TrackAddSheet.ADDED_TRACK, null)) { added ->
+            if (added == null) return@collectWhileVisible
+            viewModel.onTrackAdded(added.toTrack())
+            showSnackbar(getString(R.string.snackbar_track_added))
+            // Se quita para que el aviso no se repita al girar
+            savedState.remove<Bundle>(TrackAddSheet.ADDED_TRACK)
         }
     }
 
@@ -151,11 +167,16 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
             return
         }
 
+        val newIds = viewModel.newTrackIds.value
         tracks.forEachIndexed { index, track ->
             val row = ItemTrackBinding.inflate(layoutInflater, binding.tracksList, true)
             row.trackNumber.text = getString(R.string.album_detail_track_number, index + 1)
             row.trackName.text = track.name
             row.trackDuration.text = track.duration
+
+            val isNew = track.id in newIds
+            row.trackNewBadge.isVisible = isNew
+            if (isNew) row.trackRow.setBackgroundResource(R.color.new_row)
         }
     }
 

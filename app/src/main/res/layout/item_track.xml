@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -7,12 +8,12 @@
 
     <View style="@style/Widget.Vinilos.Divider" />
 
-    <LinearLayout
+    <!-- El track recién agregado lleva fondo de fila nueva y «Nuevo» junto al nombre (HU08) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/trackRow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
         android:minHeight="56dp"
-        android:orientation="horizontal"
         android:paddingHorizontal="16dp">
 
         <TextView
@@ -22,17 +23,44 @@
             android:gravity="end"
             android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
             android:textColor="@color/md_on_surface_variant"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             tools:text="1" />
 
         <TextView
             android:id="@+id/trackName"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_weight="1"
             android:textAppearance="@style/TextAppearance.Vinilos.BodyLarge"
             android:textColor="@color/md_on_surface"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/trackNewBadge"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toEndOf="@id/trackNumber"
+            app:layout_constraintTop_toTopOf="parent"
             tools:text="Decisiones" />
+
+        <TextView
+            android:id="@+id/trackNewBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_badge_new"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:text="@string/album_list_new_badge"
+            android:textAppearance="@style/TextAppearance.Vinilos.LabelMedium.Bold"
+            android:textColor="@color/md_on_primary"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/trackDuration"
+            app:layout_constraintStart_toEndOf="@id/trackName"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
 
         <TextView
             android:id="@+id/trackDuration"
@@ -42,6 +70,9 @@
             android:fontFeatureSettings="tnum"
             android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
             android:textColor="@color/md_on_surface_variant"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             tools:text="5:05" />
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>

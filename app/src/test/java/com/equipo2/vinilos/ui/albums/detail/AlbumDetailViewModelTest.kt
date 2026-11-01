@@ -1,6 +1,8 @@
 package com.equipo2.vinilos.ui.albums.detail
 
+import androidx.lifecycle.SavedStateHandle
 import com.equipo2.vinilos.data.model.Album
+import com.equipo2.vinilos.data.model.Track
 import com.equipo2.vinilos.data.repository.DataError
 import com.equipo2.vinilos.support.FakeAlbumRepository
 import com.equipo2.vinilos.support.MainDispatcherRule
@@ -104,5 +106,30 @@ class AlbumDetailViewModelTest {
 
         assertEquals(UiState.Success(album), viewModel.state.value)
         assertEquals(ErrorReason.SERVER, viewModel.pullRefresh.failures.first())
+    }
+
+    @Test
+    fun alAgregarUnTrack_apareceAlFinal_yQuedaMarcadoComoNuevo() {
+        repository.detail = { Result.success(album) }
+        val viewModel = AlbumDetailViewModel(repository, albumId = 100)
+
+        val track = Track(id = 45, name = "Todos vuelven", duration = "4:56")
+        viewModel.onTrackAdded(track)
+
+        assertEquals(listOf(track), (viewModel.state.value as UiState.Success).data.tracks)
+        assertEquals(listOf(45), viewModel.newTrackIds.value.toList())
+        // Se muestra sin volver a pedir el álbum
+        assertEquals(listOf(100), repository.detailRequests)
+    }
+
+    @Test
+    fun losTracksNuevos_seConservanSiSeRecreaLaPantalla() {
+        repository.detail = { Result.success(album) }
+        val savedState = SavedStateHandle()
+        AlbumDetailViewModel(repository, albumId = 100, savedState).onTrackAdded(Track(id = 45, name = "Todos vuelven", duration = "4:56"))
+
+        val recreated = AlbumDetailViewModel(repository, albumId = 100, savedState)
+
+        assertEquals(listOf(45), recreated.newTrackIds.value.toList())
     }
 }

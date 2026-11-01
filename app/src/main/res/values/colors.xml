@@ -32,4 +32,6 @@
     <color name="placeholder_icon">#7A6C90</color>
     <color name="launcher_background">#6A2FA0</color>
     <color name="white_18">#2EFFFFFF</color>
+    <!-- Fondo del track recién agregado (HU08) -->
+    <color name="new_row">#F1E7FC</color>
 </resources>
