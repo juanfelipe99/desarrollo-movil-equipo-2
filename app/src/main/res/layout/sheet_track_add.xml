@@ -77,10 +77,15 @@
             android:layout_marginEnd="8dp"
             android:text="@string/action_cancel" />
 
+        <!-- Mismos colores que Guardar en Crear álbum, también mientras envía -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/trackAddButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/action_add" />
+            android:text="@string/action_add"
+            android:textColor="@color/button_save_text"
+            app:backgroundTint="@color/button_save_background"
+            app:iconGravity="textStart"
+            app:iconTint="@color/md_on_surface_variant" />
     </LinearLayout>
 </LinearLayout>

@@ -2,6 +2,7 @@ package com.equipo2.vinilos.ui.albums.tracks
 
 import androidx.annotation.StringRes
 import com.equipo2.vinilos.R
+import com.equipo2.vinilos.data.model.NewTrack
 
 /** Lo escrito en la hoja de Agregar track. */
 data class TrackForm(
@@ -29,3 +30,6 @@ private fun TrackForm.durationError(): Int? = when {
     !isValidDuration(duration) -> R.string.error_track_duration_invalid
     else -> null
 }
+
+/** Track para la API, que solo se pide con el formulario válido. */
+fun TrackForm.toNewTrack() = NewTrack(name = name.trim(), duration = duration.trim())

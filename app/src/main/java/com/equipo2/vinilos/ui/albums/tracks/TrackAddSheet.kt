@@ -5,8 +5,12 @@ import android.view.View
 import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.equipo2.vinilos.R
+import com.equipo2.vinilos.data.model.Track
 import com.equipo2.vinilos.databinding.SheetTrackAddBinding
+import com.equipo2.vinilos.ui.common.AppSnackbar
+import com.equipo2.vinilos.ui.common.buttonProgress
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.showError
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -17,7 +21,9 @@ import com.google.android.material.textfield.TextInputLayout
 /** Hoja inferior para agregar un track al álbum (HU08). */
 class TrackAddSheet : BottomSheetDialogFragment(R.layout.sheet_track_add) {
 
-    private val viewModel: TrackAddViewModel by viewModels()
+    private val viewModel: TrackAddViewModel by viewModels {
+        TrackAddViewModel.factory(requireArguments().getInt(ARG_ALBUM_ID))
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -30,6 +36,8 @@ class TrackAddSheet : BottomSheetDialogFragment(R.layout.sheet_track_add) {
         viewLifecycleOwner.collectWhileVisible(viewModel.errors) { errors ->
             TrackField.entries.forEach { field -> binding.fieldOf(field).showError(errors[field]) }
         }
+        setUpSaving(binding)
+        setUpResults(binding)
 
         // Cancelar, Atrás, tocar fuera o deslizar hacia abajo cierran sin guardar
         binding.trackCancelButton.setOnClickListener { dismiss() }
@@ -45,7 +53,34 @@ class TrackAddSheet : BottomSheetDialogFragment(R.layout.sheet_track_add) {
         }
     }
 
-    /** Si falta algo, le da el foco al primer campo con error. */
+    /** Mientras envía: Agregar deshabilitado con «Agregando…», y la hoja no se puede cerrar para no perder el resultado. */
+    private fun setUpSaving(binding: SheetTrackAddBinding) {
+        val progress = requireContext().buttonProgress()
+
+        viewLifecycleOwner.collectWhileVisible(viewModel.isSaving) { saving ->
+            isCancelable = !saving
+            binding.trackCancelButton.isEnabled = !saving
+            binding.trackAddButton.isEnabled = !saving
+            binding.trackAddButton.icon = progress.takeIf { saving }
+            binding.trackAddButton.setText(if (saving) R.string.track_add_saving else R.string.action_add)
+        }
+    }
+
+    /** Si se agregó, el detalle recibe el track y la hoja se cierra. Si falló, avisa dentro de la hoja. */
+    private fun setUpResults(binding: SheetTrackAddBinding) {
+        viewLifecycleOwner.collectWhileVisible(viewModel.events) { event ->
+            when (event) {
+                is TrackAddEvent.Added -> {
+                    val navController = findNavController()
+                    navController.previousBackStackEntry?.savedStateHandle?.set(ADDED_TRACK, event.track.toBundle())
+                    dismiss()
+                }
+                TrackAddEvent.Failed -> AppSnackbar.show(binding.root, getString(R.string.error_track_add_failed), isError = true)
+            }
+        }
+    }
+
+    /** Envía el track, o le da el foco al primer campo con error. */
     private fun add(binding: SheetTrackAddBinding) {
         if (viewModel.add()) return
         binding.fieldOf(viewModel.errors.value.keys.first()).editText?.requestFocus()
@@ -57,10 +92,18 @@ class TrackAddSheet : BottomSheetDialogFragment(R.layout.sheet_track_add) {
     }
 
     companion object {
+        /** Clave con la que el detalle del álbum recibe el track recién agregado. */
+        const val ADDED_TRACK = "addedTrack"
+
         /** Deben coincidir con los argumentos de trackAddSheet en nav_graph.xml. */
         private const val ARG_ALBUM_ID = "albumId"
         private const val ARG_ALBUM_NAME = "albumName"
 
         fun args(albumId: Int, albumName: String): Bundle = bundleOf(ARG_ALBUM_ID to albumId, ARG_ALBUM_NAME to albumName)
+
+        private fun Track.toBundle(): Bundle = bundleOf("id" to id, "name" to name, "duration" to duration)
+
+        /** El track que llegó en [ADDED_TRACK]. */
+        fun Bundle.toTrack() = Track(id = getInt("id"), name = getString("name").orEmpty(), duration = getString("duration").orEmpty())
     }
 }

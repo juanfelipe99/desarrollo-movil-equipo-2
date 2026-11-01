@@ -1,6 +1,7 @@
 package com.equipo2.vinilos.ui.albums.tracks
 
 import com.equipo2.vinilos.R
+import com.equipo2.vinilos.data.model.NewTrack
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -51,5 +52,12 @@ class TrackFormTest {
         listOf("", "456", "4:60", "4:5", "4:355", "123:00", ":35", "4:", "4.35", "a:bc").forEach { duration ->
             assertFalse(duration, isValidDuration(duration))
         }
+    }
+
+    @Test
+    fun toNewTrack_quitaLosEspaciosDeLosTextos() {
+        val track = TrackForm(name = "  Todos vuelven ", duration = " 4:56 ").toNewTrack()
+
+        assertEquals(NewTrack(name = "Todos vuelven", duration = "4:56"), track)
     }
 }

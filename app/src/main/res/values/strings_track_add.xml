@@ -13,4 +13,8 @@
     <string name="error_track_name_required">Escribe el nombre del track.</string>
     <string name="error_track_duration_required">Escribe la duración.</string>
     <string name="error_track_duration_invalid">Formato inválido. Escribe minutos y segundos, por ejemplo 4:35.</string>
+
+    <string name="track_add_saving">Agregando…</string>
+    <string name="error_track_add_failed">No pudimos agregar el track. Inténtalo de nuevo.</string>
+    <string name="snackbar_track_added">Track agregado</string>
 </resources>
