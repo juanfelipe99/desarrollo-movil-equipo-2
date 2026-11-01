@@ -3,6 +3,7 @@ package com.equipo2.vinilos.data.network.album
 import com.equipo2.vinilos.data.model.Album
 import com.equipo2.vinilos.data.model.AlbumComment
 import com.equipo2.vinilos.data.model.NewAlbum
+import com.equipo2.vinilos.data.model.NewTrack
 import com.equipo2.vinilos.data.model.Performer
 import com.equipo2.vinilos.data.model.Track
 import com.equipo2.vinilos.data.network.fromApiDate
@@ -32,6 +33,12 @@ data class CreateAlbumRequest(
     val genre: String,
     val recordLabel: String,
 )
+@Serializable
+data class AddTrackRequest(
+    val name: String,
+    val duration: String,
+)
+
 @Serializable
 data class TrackDto(
     val id: Int,
@@ -73,6 +80,10 @@ internal fun NewAlbum.toRequest() = CreateAlbumRequest(
 )
 
 
+internal fun NewTrack.toRequest() = AddTrackRequest(name = name, duration = duration)
+
+internal fun TrackDto.toTrack() = Track(id = id, name = name, duration = duration)
+
 internal fun AlbumDto.toAlbum(commentAuthors: Map<Int, String> = emptyMap()) = Album(
     id = id,
     name = name,
@@ -81,13 +92,7 @@ internal fun AlbumDto.toAlbum(commentAuthors: Map<Int, String> = emptyMap()) = A
     description = description,
     genre = genre,
     recordLabel = recordLabel,
-    tracks = tracks.map { track ->
-        Track(
-            id = track.id,
-            name = track.name,
-            duration = track.duration,
-        )
-    },
+    tracks = tracks.map { it.toTrack() },
     performers = performers.map { performer ->
         Performer(
             id = performer.id,
