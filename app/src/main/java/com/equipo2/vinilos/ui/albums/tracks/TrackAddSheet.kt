@@ -17,6 +17,9 @@ class TrackAddSheet : BottomSheetDialogFragment(R.layout.sheet_track_add) {
 
         val binding = SheetTrackAddBinding.bind(view)
         binding.trackAddSubtitle.text = getString(R.string.track_add_subtitle, requireArguments().getString(ARG_ALBUM_NAME))
+
+        // Cancelar, Atrás, tocar fuera o deslizar hacia abajo cierran sin guardar
+        binding.trackCancelButton.setOnClickListener { dismiss() }
     }
 
     override fun onStart() {

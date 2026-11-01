@@ -28,4 +28,59 @@
         android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
         android:textColor="@color/md_on_surface_variant"
         tools:text="Para el álbum Buscando América" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/trackNameField"
+        style="@style/Widget.Vinilos.FormField"
+        android:layout_marginTop="20dp"
+        android:hint="@string/field_track_name"
+        app:placeholderText="@string/placeholder_track_name">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/trackNameInput"
+            style="@style/Widget.Vinilos.FormField.Input"
+            android:imeOptions="actionNext"
+            android:inputType="textCapSentences"
+            android:maxLength="100" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- El teclado de hora tiene los dos puntos, que el numérico no siempre trae -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/trackDurationField"
+        style="@style/Widget.Vinilos.FormField"
+        android:layout_marginTop="20dp"
+        android:hint="@string/field_track_duration"
+        app:helperText="@string/help_track_duration"
+        app:placeholderText="@string/placeholder_track_duration">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/trackDurationInput"
+            style="@style/Widget.Vinilos.FormField.Input"
+            android:digits="0123456789:"
+            android:imeOptions="actionDone"
+            android:inputType="time"
+            android:maxLength="5" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="end"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/trackCancelButton"
+            style="@style/Widget.Vinilos.Button.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="@string/action_cancel" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/trackAddButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/action_add" />
+    </LinearLayout>
 </LinearLayout>
