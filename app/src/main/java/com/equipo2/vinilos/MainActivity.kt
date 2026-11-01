@@ -13,6 +13,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph
+import androidx.navigation.fragment.DialogFragmentNavigator
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
@@ -39,6 +40,10 @@ class MainActivity : AppCompatActivity() {
         }
 
     private var snackbar: Snackbar? = null
+
+    /** Pantalla que se ve, sin contar las hojas que se abren encima. */
+    @IdRes
+    private var screenId = 0
 
     private var toolbarHidesOnScroll = false
     private var appBarOffset = 0
@@ -115,6 +120,10 @@ class MainActivity : AppCompatActivity() {
         binding.navBar.setupWithNavController(navController)
         binding.navBar.setOnItemReselectedListener { item -> onTabReselected(navController, item.itemId) }
         navController.addOnDestinationChangedListener { _, destination, _ ->
+            // Abrir o cerrar una hoja como Agregar track no cambia de pantalla: el aviso y las barras se quedan
+            if (destination is DialogFragmentNavigator.Destination || destination.id == screenId) return@addOnDestinationChangedListener
+            screenId = destination.id
+
             // El aviso es de la pantalla que se deja, y la nueva muestra el suyo después de llegar
             snackbar?.dismiss()
             updateBars(destination.id)
