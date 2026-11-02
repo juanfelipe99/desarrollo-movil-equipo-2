@@ -28,5 +28,8 @@
     <string name="action_add">Agregar</string>
     <string name="action_accept">Aceptar</string>
 
+    <!-- Distintivo del álbum o el track recién creado -->
+    <string name="badge_new">Nuevo</string>
+
     <string name="cd_close_snackbar">Cerrar aviso</string>
 </resources>

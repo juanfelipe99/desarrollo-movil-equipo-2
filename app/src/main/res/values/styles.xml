@@ -43,6 +43,18 @@
         <item name="android:color">@color/md_primary_container</item>
     </style>
 
+    <!-- Distintivo «Nuevo» del álbum o el track recién creado. -->
+    <style name="Widget.Vinilos.BadgeNew" parent="">
+        <item name="android:background">@drawable/bg_badge_new</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="android:text">@string/badge_new</item>
+        <item name="android:textAppearance">@style/TextAppearance.Vinilos.LabelMedium.Bold</item>
+        <item name="android:textColor">@color/md_on_primary</item>
+    </style>
+
     <style name="Widget.Vinilos.Divider" parent="">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>

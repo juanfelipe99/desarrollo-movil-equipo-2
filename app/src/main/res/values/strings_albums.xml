@@ -14,8 +14,6 @@
         <item quantity="other">%d álbumes en el catálogo</item>
     </plurals>
     <string name="album_list_no_performers">Sin intérpretes</string>
-
-    <string name="album_list_new_badge">Nuevo</string>
     <!-- Año de lanzamiento y género, por ejemplo «1984 · Salsa». -->
     <string name="album_list_subtitle">%1$d · %2$s</string>
 </resources>
