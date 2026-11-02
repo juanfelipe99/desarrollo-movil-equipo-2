@@ -119,14 +119,15 @@ class MainActivity : AppCompatActivity() {
         binding.toolbar.setupWithNavController(navController, AppBarConfiguration(binding.navBar.menu))
         binding.navBar.setupWithNavController(navController)
         binding.navBar.setOnItemReselectedListener { item -> onTabReselected(navController, item.itemId) }
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            // Abrir o cerrar una hoja como Agregar track no cambia de pantalla: el aviso y las barras se quedan
-            if (destination is DialogFragmentNavigator.Destination || destination.id == screenId) return@addOnDestinationChangedListener
-            screenId = destination.id
+        navController.addOnDestinationChangedListener { controller, destination, _ ->
+            // Una hoja como Agregar track se abre sobre la pantalla de abajo, que es la que cuenta, también al recrearse
+            val screen = if (destination is DialogFragmentNavigator.Destination) controller.previousBackStackEntry?.destination else destination
+            if (screen == null || screen.id == screenId) return@addOnDestinationChangedListener
+            screenId = screen.id
 
             // El aviso es de la pantalla que se deja, y la nueva muestra el suyo después de llegar
             snackbar?.dismiss()
-            updateBars(destination.id)
+            updateBars(screen.id)
         }
 
         // Al abrir va a la selección de rol, y al recrearse se queda donde estaba

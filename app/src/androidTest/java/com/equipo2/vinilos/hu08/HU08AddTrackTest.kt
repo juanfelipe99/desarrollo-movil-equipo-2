@@ -20,6 +20,7 @@ import com.equipo2.vinilos.support.BackVynils
 import com.equipo2.vinilos.support.VinilosRule
 import com.equipo2.vinilos.support.enterAs
 import com.equipo2.vinilos.support.hasFieldError
+import com.equipo2.vinilos.support.rotateScreen
 import com.equipo2.vinilos.support.scrollToWithBarsHidden
 import com.equipo2.vinilos.support.useAlbumRepository
 import com.equipo2.vinilos.support.waitUntil
@@ -112,6 +113,24 @@ class HU08AddTrackTest {
     }
 
     @Test
+    fun agregarDespuesDeGirarLaPantalla_igualApareceElTrackNuevo() {
+        val albumId = openNewAlbum(collector = true)
+        openAddTrackSheet()
+        fillTrack(TRACK_NAME, "4:56")
+
+        rotateScreen()
+        onView(withId(R.id.trackDurationInput)).perform(closeSoftKeyboard())
+        waitForSheetToSettle()
+        onView(withId(R.id.trackAddButton)).perform(click())
+
+        onView(withText(R.string.snackbar_track_added)).check(matches(isDisplayed()))
+        onView(allOf(withId(R.id.trackNewBadge), hasSibling(withText(TRACK_NAME))))
+            .perform(scrollToWithBarsHidden())
+            .check(matches(isDisplayed()))
+        assertEquals(listOf(TRACK_NAME), BackVynils.trackNames(albumId))
+    }
+
+    @Test
     fun siNoSePuedeAgregar_laHojaSigueAbiertaConLoEscrito_yAvisa() {
         useAlbumRepository(FailingTrackRepository(VinilosApplication.container.albumRepository))
         openNewAlbum(collector = true)
@@ -135,9 +154,14 @@ class HU08AddTrackTest {
         return albumId
     }
 
-    /** Abre la hoja y espera a que termine de subir, porque un toque a mitad de camino cae fuera de ella. */
+    /** Abre la hoja y espera a que termine de subir. */
     private fun openAddTrackSheet() {
         onView(withId(R.id.addTrackButton)).perform(scrollToWithBarsHidden(), click())
+        waitForSheetToSettle()
+    }
+
+    /** Un toque mientras la hoja todavía sube cae fuera de ella. */
+    private fun waitForSheetToSettle() {
         var lastTop = -1
         waitUntil {
             val top = addButtonTop()

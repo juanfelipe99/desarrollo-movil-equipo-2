@@ -79,7 +79,8 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
 
     /** Al cerrarse la hoja con un track nuevo, aparece al final de la lista marcado y con el aviso «Track agregado». */
     private fun showAddedTrack() {
-        val savedState = findNavController().currentBackStackEntry?.savedStateHandle ?: return
+        // La entrada del detalle y no la de arriba, que al girar con la hoja abierta es la de la hoja
+        val savedState = findNavController().getBackStackEntry(R.id.albumDetailFragment).savedStateHandle
 
         viewLifecycleOwner.collectWhileVisible(savedState.getStateFlow<Bundle?>(TrackAddSheet.ADDED_TRACK, null)) { added ->
             if (added == null) return@collectWhileVisible

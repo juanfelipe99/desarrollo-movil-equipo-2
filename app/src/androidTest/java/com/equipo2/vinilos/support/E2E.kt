@@ -1,5 +1,7 @@
 package com.equipo2.vinilos.support
 
+import android.app.Activity
+import android.content.ContextWrapper
 import android.view.View
 import androidx.annotation.IdRes
 import androidx.annotation.StringRes
@@ -12,6 +14,7 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
+import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.platform.app.InstrumentationRegistry
@@ -88,3 +91,18 @@ fun waitUntil(timeoutMs: Long = 10_000, condition: () -> Boolean) {
 }
 
 fun waitForNightMode(mode: Int) = waitUntil { AppCompatDelegate.getDefaultNightMode() == mode }
+
+/** Recrea la actividad como al girar la pantalla: el ViewModel sobrevive y las vistas se crean de nuevo. */
+fun rotateScreen() {
+    onView(isRoot()).perform(object : ViewAction {
+        override fun getConstraints(): Matcher<View> = isRoot()
+        override fun getDescription() = "girar la pantalla"
+        override fun perform(uiController: UiController, view: View) {
+            // En las versiones nuevas de Android la raíz no tiene la actividad como contexto, pero el contenido sí
+            var context = view.findViewById<View>(android.R.id.content).context
+            while (context !is Activity) context = (context as ContextWrapper).baseContext
+            context.recreate()
+            uiController.loopMainThreadUntilIdle()
+        }
+    })
+}

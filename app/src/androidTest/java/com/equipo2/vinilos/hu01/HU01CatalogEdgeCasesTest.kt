@@ -1,7 +1,5 @@
 package com.equipo2.vinilos.hu01
 
-import android.app.Activity
-import android.content.ContextWrapper
 import android.view.View
 import android.widget.ImageView
 import androidx.test.espresso.Espresso.onView
@@ -12,7 +10,6 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -33,6 +30,7 @@ import com.equipo2.vinilos.hu07.tapSave
 import com.equipo2.vinilos.support.BackVynils
 import com.equipo2.vinilos.support.VinilosRule
 import com.equipo2.vinilos.support.enterAs
+import com.equipo2.vinilos.support.rotateScreen
 import com.equipo2.vinilos.support.toolbarTitle
 import com.equipo2.vinilos.support.useAlbumRepository
 import kotlinx.coroutines.runBlocking
@@ -210,21 +208,6 @@ private fun hasNoImage(): Matcher<View> = object : TypeSafeMatcher<View>() {
     }
 
     override fun matchesSafely(view: View) = view is ImageView && view.drawable == null
-}
-
-/** Recrea la actividad como al girar la pantalla: el ViewModel sobrevive y las vistas se crean de nuevo. */
-private fun rotateScreen() {
-    onView(isRoot()).perform(object : ViewAction {
-        override fun getConstraints(): Matcher<View> = isRoot()
-        override fun getDescription() = "girar la pantalla"
-        override fun perform(uiController: UiController, view: View) {
-            // En las versiones nuevas de Android la raíz no tiene la actividad como contexto, pero el contenido sí
-            var context = view.findViewById<View>(android.R.id.content).context
-            while (context !is Activity) context = (context as ContextWrapper).baseContext
-            context.recreate()
-            uiController.loopMainThreadUntilIdle()
-        }
-    })
 }
 
 /** Dos toques seguidos sin esperar a que la app navegue, como un usuario impaciente. */
