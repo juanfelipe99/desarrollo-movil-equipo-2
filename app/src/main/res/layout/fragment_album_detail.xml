@@ -178,6 +178,8 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
                             android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:maxLines="1"
                             android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
                             android:textColor="@color/md_on_surface_variant" />
 
