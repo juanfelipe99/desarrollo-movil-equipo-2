@@ -33,6 +33,7 @@ data class CreateAlbumRequest(
     val genre: String,
     val recordLabel: String,
 )
+
 @Serializable
 data class AddTrackRequest(
     val name: String,
@@ -69,7 +70,6 @@ data class CommentAuthorDto(
 @Serializable
 data class CommentIdDto(val id: Int)
 
-
 internal fun NewAlbum.toRequest() = CreateAlbumRequest(
     name = name,
     cover = cover,
@@ -78,7 +78,6 @@ internal fun NewAlbum.toRequest() = CreateAlbumRequest(
     genre = genre,
     recordLabel = recordLabel,
 )
-
 
 internal fun NewTrack.toRequest() = AddTrackRequest(name = name, duration = duration)
 

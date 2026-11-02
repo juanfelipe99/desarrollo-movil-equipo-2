@@ -25,6 +25,7 @@
     <string name="form_required_note">Todos los campos son obligatorios (*).</string>
     <string name="action_cancel">Cancelar</string>
     <string name="action_save">Guardar</string>
+    <string name="action_add">Agregar</string>
     <string name="action_accept">Aceptar</string>
 
     <string name="cd_close_snackbar">Cerrar aviso</string>

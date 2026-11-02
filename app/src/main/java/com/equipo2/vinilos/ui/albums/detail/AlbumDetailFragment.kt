@@ -26,7 +26,6 @@ import com.equipo2.vinilos.databinding.ItemAlbumInfoBinding
 import com.equipo2.vinilos.databinding.ItemTrackBinding
 import com.equipo2.vinilos.databinding.ViewPerformerChipBinding
 import com.equipo2.vinilos.ui.albums.tracks.TrackAddSheet
-import com.equipo2.vinilos.ui.albums.tracks.TrackAddSheet.Companion.toTrack
 import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.initialsOf
@@ -84,7 +83,7 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
 
         viewLifecycleOwner.collectWhileVisible(savedState.getStateFlow<Bundle?>(TrackAddSheet.ADDED_TRACK, null)) { added ->
             if (added == null) return@collectWhileVisible
-            viewModel.onTrackAdded(added.toTrack())
+            viewModel.onTrackAdded(TrackAddSheet.trackOf(added))
             showSnackbar(getString(R.string.snackbar_track_added))
             // Se quita para que el aviso no se repita al girar
             savedState.remove<Bundle>(TrackAddSheet.ADDED_TRACK)

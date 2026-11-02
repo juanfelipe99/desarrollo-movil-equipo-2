@@ -72,7 +72,7 @@ class TrackAddSheet : BottomSheetDialogFragment(R.layout.sheet_track_add) {
             when (event) {
                 is TrackAddEvent.Added -> {
                     val navController = findNavController()
-                    navController.previousBackStackEntry?.savedStateHandle?.set(ADDED_TRACK, event.track.toBundle())
+                    navController.previousBackStackEntry?.savedStateHandle?.set(ADDED_TRACK, event.track.toResult())
                     dismiss()
                 }
                 TrackAddEvent.Failed -> AppSnackbar.show(binding.root, getString(R.string.error_track_add_failed), isError = true)
@@ -101,9 +101,17 @@ class TrackAddSheet : BottomSheetDialogFragment(R.layout.sheet_track_add) {
 
         fun args(albumId: Int, albumName: String): Bundle = bundleOf(ARG_ALBUM_ID to albumId, ARG_ALBUM_NAME to albumName)
 
-        private fun Track.toBundle(): Bundle = bundleOf("id" to id, "name" to name, "duration" to duration)
+        /** El track recién agregado que llegó en [ADDED_TRACK]. */
+        fun trackOf(result: Bundle) = Track(
+            id = result.getInt(TRACK_ID),
+            name = result.getString(TRACK_NAME).orEmpty(),
+            duration = result.getString(TRACK_DURATION).orEmpty(),
+        )
 
-        /** El track que llegó en [ADDED_TRACK]. */
-        fun Bundle.toTrack() = Track(id = getInt("id"), name = getString("name").orEmpty(), duration = getString("duration").orEmpty())
+        private fun Track.toResult(): Bundle = bundleOf(TRACK_ID to id, TRACK_NAME to name, TRACK_DURATION to duration)
+
+        private const val TRACK_ID = "id"
+        private const val TRACK_NAME = "name"
+        private const val TRACK_DURATION = "duration"
     }
 }
