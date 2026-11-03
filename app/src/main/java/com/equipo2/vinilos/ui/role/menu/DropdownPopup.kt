@@ -13,7 +13,12 @@ private const val DIM_AMOUNT = 0.32f
 /** Muestra el contenido como menú desplegable debajo del anchor, alineado a su derecha. */
 internal fun showDropdown(anchor: View, content: View): PopupWindow {
     val resources = anchor.resources
-    val width = resources.getDimensionPixelSize(R.dimen.role_menu_width)
+    // Con la letra grande el menú crece con ella, sin pasar del ancho de la pantalla
+    val maxWidth = resources.displayMetrics.widthPixels - 2 * resources.getDimensionPixelSize(R.dimen.role_menu_screen_margin)
+    val width = minOf(
+        (resources.getDimensionPixelSize(R.dimen.role_menu_width) * maxOf(1f, resources.configuration.fontScale)).toInt(),
+        maxWidth,
+    )
     val offset = resources.getDimensionPixelOffset(R.dimen.role_menu_offset)
 
     // Se mide antes de mostrarlo para saber si cabe debajo del anchor

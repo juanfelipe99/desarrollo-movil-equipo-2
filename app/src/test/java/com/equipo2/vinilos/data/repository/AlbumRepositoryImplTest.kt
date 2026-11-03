@@ -1,9 +1,14 @@
 package com.equipo2.vinilos.data.repository
 
+import com.equipo2.vinilos.data.model.NewTrack
+import com.equipo2.vinilos.data.model.Track
 import com.equipo2.vinilos.data.network.ApiClient
 import com.equipo2.vinilos.data.network.album.AlbumServiceAdapter
 import com.equipo2.vinilos.support.FakeApiServer
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -106,7 +111,45 @@ class AlbumRepositoryImplTest {
         assertTrue(repository.getAlbumById(999).exceptionOrNull() is DataError.NotFound)
     }
 
+    @Test
+    fun addTrack_enviaNombreYDuracion_yDevuelveElTrackCreado() = runTest {
+        server.respond("albums/100/tracks", TRACK_CREATED_JSON)
+
+        val track = repository.addTrack(100, NewTrack(name = "Todos vuelven", duration = "4:56")).getOrThrow()
+
+        assertEquals(listOf("albums/100/tracks"), server.requests)
+        val sent = Json.parseToJsonElement(server.bodies.getValue("albums/100/tracks")).jsonObject
+        assertEquals("Todos vuelven", sent.getValue("name").jsonPrimitive.content)
+        assertEquals("4:56", sent.getValue("duration").jsonPrimitive.content)
+        assertEquals(Track(id = 45, name = "Todos vuelven", duration = "4:56"), track)
+    }
+
+    @Test
+    fun addTrack_siElAlbumNoExiste_devuelveNoEncontrado() = runTest {
+        val error = repository.addTrack(999, NewTrack(name = "Todos vuelven", duration = "4:56")).exceptionOrNull()
+
+        assertTrue(error is DataError.NotFound)
+    }
+
+    @Test
+    fun addTrack_siElServidorFalla_devuelveErrorDelServidor() = runTest {
+        server.respond("albums/100/tracks", """{"message":"Internal error"}""", code = 500)
+
+        val error = repository.addTrack(100, NewTrack(name = "Todos vuelven", duration = "4:56")).exceptionOrNull()
+
+        assertTrue(error is DataError.Server)
+    }
+
     private companion object {
+        // Así responde BackVynils: el track con su id y el álbum al que quedó asociado
+        const val TRACK_CREATED_JSON = """
+            {"name": "Todos vuelven", "duration": "4:56",
+             "album": {"id": 100, "name": "Buscando América", "cover": "https://ejemplo.com/a.jpg",
+                       "releaseDate": "1984-08-01T00:00:00.000Z", "description": "Rubén Blades",
+                       "genre": "Salsa", "recordLabel": "Elektra"},
+             "id": 45}
+        """
+
         const val ALBUMS_JSON = """
             [
               {"id": 100, "name": "Buscando América", "cover": "https://ejemplo.com/a.jpg",

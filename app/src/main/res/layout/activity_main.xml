@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Al bajar por el contenido las dos barras se esconden y al subir vuelven, ver MainActivity. -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,11 +8,14 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <LinearLayout
-        android:id="@+id/content"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:background="@color/md_surface"
+        android:stateListAnimator="@null"
+        app:layout_behavior="com.equipo2.vinilos.ui.common.TolerantAppBarBehavior"
+        app:liftOnScroll="false">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -37,24 +41,36 @@
         <View
             android:id="@+id/toolbarDivider"
             style="@style/Widget.Vinilos.Divider" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/navHost"
-            android:name="androidx.navigation.fragment.NavHostFragment"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            app:defaultNavHost="true"
-            app:navGraph="@navigation/nav_graph" />
+    <!-- Llega hasta abajo, detrás de la barra inferior, y cada lista deja @dimen/nav_bar_space al final. -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/navHost"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:defaultNavHost="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:navGraph="@navigation/nav_graph" />
+
+    <!-- En horizontal es un riel a la izquierda, ver layout-land -->
+    <LinearLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        app:layout_behavior="com.equipo2.vinilos.ui.common.TolerantHideBottomViewBehavior">
 
         <View
-            android:id="@+id/bottomNavDivider"
+            android:id="@+id/navDivider"
             style="@style/Widget.Vinilos.Divider" />
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottomNav"
+            android:id="@+id/navBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:menu="@menu/bottom_nav" />
+            app:menu="@menu/bottom_nav"
+            tools:viewBindingType="com.google.android.material.navigation.NavigationBarView" />
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

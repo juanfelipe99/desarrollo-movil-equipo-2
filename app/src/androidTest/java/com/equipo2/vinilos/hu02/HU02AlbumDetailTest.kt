@@ -4,7 +4,6 @@ package com.equipo2.vinilos.hu02
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
@@ -16,6 +15,7 @@ import com.equipo2.vinilos.hu01.openAlbum
 import com.equipo2.vinilos.support.BackVynils
 import com.equipo2.vinilos.support.VinilosRule
 import com.equipo2.vinilos.support.enterAs
+import com.equipo2.vinilos.support.scrollToWithBarsHidden
 import com.equipo2.vinilos.support.toolbarTitle
 import com.equipo2.vinilos.support.useAlbumRepository
 import org.hamcrest.Matchers.allOf
@@ -30,11 +30,12 @@ class HU02AlbumDetailTest {
     @get:Rule
     val app = VinilosRule()
 
-    private fun openAlbumAsVisitor(): String {
+    /** Abre como visitante el primero de candidates cuyo nombre no se repite en el catálogo. */
+    private fun openAlbumAsVisitor(candidates: List<String> = BackVynils.albumNames()): String {
         val albums = BackVynils.albumNames()
-        assertTrue("BackVynils no tiene álbumes", albums.isNotEmpty())
+        assertTrue("BackVynils no tiene álbumes", candidates.isNotEmpty())
 
-        val albumName = albums.first { candidate ->
+        val albumName = candidates.first { candidate ->
             albums.count { it == candidate } == 1
         }
 
@@ -62,15 +63,15 @@ class HU02AlbumDetailTest {
             .check(matches(isDisplayed()))
 
         onView(withId(R.id.albumDescription))
-            .perform(scrollTo())
+            .perform(scrollToWithBarsHidden())
             .check(matches(isDisplayed()))
 
         onView(withId(R.id.tracksCount))
-            .perform(scrollTo())
+            .perform(scrollToWithBarsHidden())
             .check(matches(isDisplayed()))
 
         onView(withId(R.id.commentsCount))
-            .perform(scrollTo())
+            .perform(scrollToWithBarsHidden())
             .check(matches(isDisplayed()))
     }
 
@@ -89,7 +90,8 @@ class HU02AlbumDetailTest {
 
     @Test
     fun visitante_puedeExpandirLaDescripcionDelAlbum() {
-        openAlbumAsVisitor()
+        // Solo las descripciones de más de 170 caracteres tienen «Ver más»
+        openAlbumAsVisitor(BackVynils.albumNamesWithDescriptionLongerThan(170))
         expandAlbumDescription()
     }
 

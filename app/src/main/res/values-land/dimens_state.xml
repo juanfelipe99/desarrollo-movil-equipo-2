@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- En horizontal el alto no alcanza para empezar a 120 dp, así que el mensaje va centrado y el ícono es más chico. -->
+<resources>
+    <!-- center -->
+    <integer name="state_message_gravity">17</integer>
+    <dimen name="state_message_padding_top">16dp</dimen>
+    <dimen name="state_message_padding_bottom">16dp</dimen>
+    <dimen name="state_icon_circle_size">72dp</dimen>
+    <dimen name="state_icon_margin_bottom">16dp</dimen>
+    <dimen name="state_retry_margin_top">16dp</dimen>
+</resources>

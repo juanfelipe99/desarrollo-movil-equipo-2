@@ -89,16 +89,16 @@
         <item name="tint">@color/md_on_primary_container</item>
     </style>
 
-    <!-- Botón de solo ícono del control de tema, de 48 dp de ancho. -->
-    <style name="Widget.Vinilos.ThemeModeButton" parent="Widget.Material3.Button.OutlinedButton">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:minWidth">48dp</item>
-        <item name="android:paddingStart">12dp</item>
-        <item name="android:paddingEnd">12dp</item>
-        <item name="iconGravity">textStart</item>
-        <item name="iconPadding">0dp</item>
-        <item name="iconSize">20dp</item>
+    <!-- Ícono del interruptor de tema, de 20 dp en un área táctil de 48 dp de alto. -->
+    <style name="Widget.Vinilos.ThemeModeSlot" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="tint">@color/theme_mode_slot_icon</item>
     </style>
 
     <style name="Widget.Vinilos.MenuDivider" parent="Widget.Vinilos.Divider">

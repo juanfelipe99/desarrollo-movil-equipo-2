@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Riel de 36 dp centrado en el área táctil de 48 dp, con el borde del interruptor del prototipo. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetTop="6dp"
+    android:insetBottom="6dp">
+    <shape>
+        <corners android:radius="18dp" />
+        <solid android:color="@color/md_surface_variant" />
+        <stroke
+            android:width="2dp"
+            android:color="@color/md_outline" />
+    </shape>
+</inset>

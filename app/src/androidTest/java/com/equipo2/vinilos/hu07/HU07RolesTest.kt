@@ -9,7 +9,6 @@ import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
 import androidx.test.espresso.matcher.ViewMatchers.Visibility
-import androidx.test.espresso.matcher.ViewMatchers.isChecked
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isSelected
 import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
@@ -23,6 +22,7 @@ import com.equipo2.vinilos.support.chooseInRoleMenu
 import com.equipo2.vinilos.support.enterAs
 import com.equipo2.vinilos.support.toolbarTitle
 import com.equipo2.vinilos.support.waitForNightMode
+import com.equipo2.vinilos.support.waitUntil
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -43,7 +43,7 @@ class HU07RolesTest {
         onView(withId(R.id.visitorButton)).check(matches(isDisplayed()))
         onView(withId(R.id.collectorButton)).check(matches(isDisplayed()))
         onView(withId(R.id.toolbar)).check(matches(withEffectiveVisibility(Visibility.GONE)))
-        onView(withId(R.id.bottomNav)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        onView(withId(R.id.navBar)).check(matches(withEffectiveVisibility(Visibility.GONE)))
     }
 
     @Test
@@ -52,7 +52,8 @@ class HU07RolesTest {
 
         pressBackUnconditionally()
 
-        assertEquals(Lifecycle.State.DESTROYED, app.state)
+        // Android termina de cerrar la actividad un momento después de volver
+        waitUntil { app.state == Lifecycle.State.DESTROYED }
     }
 
     @Test
@@ -111,7 +112,7 @@ class HU07RolesTest {
         waitForNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 
         onView(withId(R.id.roleChip)).perform(click())
-        onView(withId(R.id.themeDark)).inRoot(isPlatformPopup()).check(matches(isChecked()))
+        onView(withId(R.id.themeDark)).inRoot(isPlatformPopup()).check(matches(isSelected()))
         onView(withId(R.id.themeLight)).inRoot(isPlatformPopup()).perform(click())
         waitForNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
@@ -140,7 +141,7 @@ class HU07RolesTest {
         chooseInRoleMenu(R.id.optionRoleSelect)
 
         onView(withText(R.string.role_select_question)).check(matches(isDisplayed()))
-        onView(withId(R.id.bottomNav)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        onView(withId(R.id.navBar)).check(matches(withEffectiveVisibility(Visibility.GONE)))
     }
 
     @Test
@@ -151,7 +152,7 @@ class HU07RolesTest {
 
         onView(toolbarTitle(R.string.album_create_title)).check(matches(isDisplayed()))
         onView(withId(R.id.roleChipSlot)).check(matches(withEffectiveVisibility(Visibility.GONE)))
-        onView(withId(R.id.bottomNav)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        onView(withId(R.id.navBar)).check(matches(withEffectiveVisibility(Visibility.GONE)))
     }
 
     @Test

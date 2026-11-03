@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mensajes de error y de lista vacía. En vertical empiezan a 120 dp de arriba, como en el prototipo. -->
+<resources>
+    <!-- center_horizontal -->
+    <integer name="state_message_gravity">1</integer>
+    <dimen name="state_message_padding_top">120dp</dimen>
+    <dimen name="state_message_padding_bottom">32dp</dimen>
+    <dimen name="state_icon_circle_size">88dp</dimen>
+    <dimen name="state_icon_margin_bottom">24dp</dimen>
+    <dimen name="state_retry_margin_top">24dp</dimen>
+</resources>

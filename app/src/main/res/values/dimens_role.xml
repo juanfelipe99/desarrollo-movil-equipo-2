@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="role_menu_width">280dp</dimen>
+    <dimen name="role_menu_screen_margin">8dp</dimen>
     <dimen name="role_menu_offset">4dp</dimen>
     <dimen name="role_menu_elevation">3dp</dimen>
 

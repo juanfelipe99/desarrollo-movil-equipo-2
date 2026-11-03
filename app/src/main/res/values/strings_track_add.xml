@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="es">
+    <string name="track_add_title">Agregar track</string>
+    <string name="track_add_subtitle">Para el álbum %1$s</string>
+
+    <string name="field_track_name">Nombre del track *</string>
+    <string name="placeholder_track_name">Ej. Decisiones</string>
+    <string name="field_track_duration">Duración en minutos y segundos *</string>
+    <string name="placeholder_track_duration">Ej. 4:35</string>
+    <string name="help_track_duration">Minutos y segundos, por ejemplo 5:05.</string>
+
+    <string name="error_track_name_required">Escribe el nombre del track.</string>
+    <string name="error_track_duration_required">Escribe la duración.</string>
+    <string name="error_track_duration_invalid">Formato inválido. Escribe minutos y segundos, por ejemplo 4:35.</string>
+
+    <string name="track_add_saving">Agregando…</string>
+    <string name="error_track_add_failed">No pudimos agregar el track. Inténtalo de nuevo.</string>
+    <string name="snackbar_track_added">Track agregado</string>
+</resources>

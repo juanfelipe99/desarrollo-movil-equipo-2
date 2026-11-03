@@ -2,6 +2,7 @@ package com.equipo2.vinilos.support
 
 import com.equipo2.vinilos.BuildConfig
 import org.json.JSONArray
+import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -20,6 +21,14 @@ object BackVynils {
         return List(albums.length()) { albums.getJSONObject(it).getString("name") }
     }
 
+    /** Álbumes con una descripción más larga que length, que en el detalle se corta con «Ver más». */
+    fun albumNamesWithDescriptionLongerThan(length: Int): List<String> {
+        val albums = JSONArray(request("albums", "GET"))
+        return List(albums.length()) { albums.getJSONObject(it) }
+            .filter { it.getString("description").length > length }
+            .map { it.getString("name") }
+    }
+
     fun musicianNames(): List<String> = names("musicians")
 
     fun bandNames(): List<String> = names("bands")
@@ -29,20 +38,49 @@ object BackVynils {
         return List(items.length()) { items.getJSONObject(it).getString("name") }
     }
 
+    /** Crea un álbum de prueba sin tracks y devuelve su id. */
+    fun createAlbum(name: String): Int {
+        val album = JSONObject()
+            .put("name", name)
+            .put("cover", "https://ejemplo.com/portada.jpg")
+            .put("releaseDate", "2020-01-01")
+            .put("description", "Álbum creado por una prueba E2E.")
+            .put("genre", "Rock")
+            .put("recordLabel", "EMI")
+        return JSONObject(request("albums", "POST", album.toString())).getInt("id")
+    }
+
+    /** Nombres de los tracks del álbum, en orden. */
+    fun trackNames(albumId: Int): List<String> {
+        val tracks = JSONObject(request("albums/$albumId", "GET")).getJSONArray("tracks")
+        return List(tracks.length()) { tracks.getJSONObject(it).getString("name") }
+    }
+
     /** Borra los álbumes con este prefijo para no dejar datos de prueba. */
     fun deleteAlbumsStartingWith(prefix: String) {
         val albums = JSONArray(request("albums", "GET"))
         for (i in 0 until albums.length()) {
             val album = albums.getJSONObject(i)
-            if (album.getString("name").startsWith(prefix)) request("albums/${album.getInt("id")}", "DELETE")
+            if (!album.getString("name").startsWith(prefix)) continue
+
+            // La API no borra un álbum que tenga tracks, así que primero se borran ellos
+            val id = album.getInt("id")
+            val tracks = album.getJSONArray("tracks")
+            for (t in 0 until tracks.length()) request("albums/$id/tracks/${tracks.getJSONObject(t).getInt("id")}", "DELETE")
+            request("albums/$id", "DELETE")
         }
     }
 
-    private fun request(path: String, method: String): String {
+    private fun request(path: String, method: String, body: String? = null): String {
         val connection = URL(BuildConfig.API_BASE_URL + path).openConnection() as HttpURLConnection
         connection.requestMethod = method
         connection.connectTimeout = TIMEOUT_MS
         connection.readTimeout = TIMEOUT_MS
+        if (body != null) {
+            connection.doOutput = true
+            connection.setRequestProperty("Content-Type", "application/json")
+            connection.outputStream.use { it.write(body.toByteArray()) }
+        }
         return try {
             connection.inputStream.bufferedReader().use { it.readText() }
         } finally {

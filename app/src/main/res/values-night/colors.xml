@@ -30,4 +30,6 @@
     <color name="md_inverse_surface">#EEE8F5</color>
     <color name="md_inverse_on_surface">#1E1A26</color>
     <color name="placeholder_icon">#A398B4</color>
+    <!-- Fondo del track recién agregado (HU08) -->
+    <color name="new_row">#3A2560</color>
 </resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- El disco de ic_vinilos_logo en el lienzo de 288 dp de la pantalla de inicio, dentro del círculo de 192 dp que Android deja ver.
+     Lint pide no pasar de 200 dp, pero la pantalla de inicio exige ese lienzo y solo se dibuja una vez al abrir. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="288"
+    android:viewportHeight="288"
+    tools:ignore="VectorRaster">
+    <path
+        android:fillColor="@color/md_on_surface"
+        android:pathData="M144,64a80,80 0,1 1,0 160a80,80 0,1 1,0 -160z" />
+    <path
+        android:fillColor="@color/md_background"
+        android:pathData="M144,114.67a29.33,29.33 0,1 1,0 58.67a29.33,29.33 0,1 1,0 -58.67z" />
+    <path
+        android:fillColor="@color/md_primary"
+        android:pathData="M144,125.33a18.67,18.67 0,1 1,0 37.33a18.67,18.67 0,1 1,0 -37.33z" />
+</vector>

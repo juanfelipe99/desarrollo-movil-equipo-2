@@ -8,7 +8,11 @@ import com.equipo2.vinilos.support.MainDispatcherRule
 import com.equipo2.vinilos.ui.state.ErrorReason
 import com.equipo2.vinilos.ui.state.UiState
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import java.time.LocalDate
@@ -192,6 +196,48 @@ class AlbumListViewModelTest {
 
         val items = (recreated.state.value as UiState.Success).data
         assertEquals(AlbumItem(album(101), isNew = true), items.first())
+    }
+
+    @Test
+    fun alDeslizarParaRecargar_conservaLosAlbumesMientrasCarga_yLuegoMuestraLosNuevos() {
+        repository.albums = { Result.success(listOf(album(100))) }
+        val viewModel = AlbumListViewModel(repository)
+
+        val response = pendingResponse()
+        viewModel.refresh()
+
+        assertEquals(UiState.Success(listOf(AlbumItem(album(100), isNew = false))), viewModel.state.value)
+        assertTrue(viewModel.pullRefresh.running.value)
+
+        response.complete(Result.success(listOf(album(100), album(101))))
+
+        assertEquals(2, (viewModel.state.value as UiState.Success).data.size)
+        assertFalse(viewModel.pullRefresh.running.value)
+    }
+
+    @Test
+    fun siLaRecargaFalla_conservaLosAlbumes_yAvisaElMotivo() = runTest {
+        repository.albums = { Result.success(listOf(album(100))) }
+        val viewModel = AlbumListViewModel(repository)
+
+        repository.albums = { Result.failure(DataError.Network()) }
+        viewModel.refresh()
+
+        assertEquals(UiState.Success(listOf(AlbumItem(album(100), isNew = false))), viewModel.state.value)
+        assertEquals(ErrorReason.CONNECTION, viewModel.pullRefresh.failures.first())
+        assertFalse(viewModel.pullRefresh.running.value)
+    }
+
+    @Test
+    fun alDeslizarDesdeElError_vuelveACargarComoAlReintentar() {
+        repository.albums = { Result.failure(DataError.Server(500)) }
+        val viewModel = AlbumListViewModel(repository)
+
+        pendingResponse()
+        viewModel.refresh()
+
+        assertEquals(UiState.Loading, viewModel.state.value)
+        assertFalse(viewModel.pullRefresh.running.value)
     }
 
     private fun album(id: Int) = Album(

@@ -16,6 +16,9 @@ class FakeApiServer : Closeable {
     /** Rutas pedidas, en orden. */
     val requests: MutableList<String> = mutableListOf()
 
+    /** Cuerpo de la última petición a cada ruta que envió datos, como un POST. */
+    val bodies = ConcurrentHashMap<String, String>()
+
     val baseUrl: String
         get() = "http://127.0.0.1:${server.address.port}/"
 
@@ -23,6 +26,8 @@ class FakeApiServer : Closeable {
         server.createContext("/") { exchange ->
             val path = exchange.requestURI.path.removePrefix("/")
             synchronized(requests) { requests += path }
+            val body = exchange.requestBody.bufferedReader().use { it.readText() }
+            if (body.isNotEmpty()) bodies[path] = body
 
             // Lo que no se configuró responde 404, como una ruta que no existe
             val response = responses[path] ?: Response(404, """{"message":"Not Found"}""")

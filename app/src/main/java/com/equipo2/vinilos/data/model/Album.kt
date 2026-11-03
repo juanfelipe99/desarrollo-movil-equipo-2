@@ -34,6 +34,11 @@ data class Album(
     val comments: List<AlbumComment> = emptyList(),
 )
 
+data class NewTrack(
+    val name: String,
+    val duration: String,
+)
+
 data class NewAlbum(
     val name: String,
     val cover: String,
