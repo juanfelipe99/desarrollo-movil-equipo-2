@@ -26,6 +26,7 @@ import com.equipo2.vinilos.databinding.ItemAlbumInfoBinding
 import com.equipo2.vinilos.databinding.ItemTrackBinding
 import com.equipo2.vinilos.databinding.ViewPerformerChipBinding
 import com.equipo2.vinilos.ui.albums.tracks.TrackAddSheet
+import com.equipo2.vinilos.ui.common.bindExpandableText
 import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.initialsOf
@@ -101,7 +102,7 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
         binding.albumGenre.show(R.drawable.ic_music_note, R.string.album_detail_genre_label, album.genre)
         binding.albumRecordLabel.show(R.drawable.ic_sell, R.string.album_detail_record_label_label, album.recordLabel)
 
-        showDescription(binding, album.description)
+        bindExpandableText(binding.albumDescription, binding.albumDescriptionToggle, album.description)
         showTracks(binding, album.tracks)
         binding.addTrackButton.setOnClickListener {
             findNavController().navigateIfPossible(R.id.action_albumDetail_to_trackAdd, TrackAddSheet.args(album.id, album.name))
@@ -126,25 +127,6 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
             chip.performerName.text = performer.name
             chip.performerPhoto.load(performer.image)
         }
-    }
-
-    /** Los textos largos se cortan en la última palabra antes de 170 caracteres, y «Ver más» los muestra completos. */
-    private fun showDescription(binding: FragmentAlbumDetailBinding, description: String) {
-        val isLong = description.length > DESCRIPTION_PREVIEW_LENGTH
-        val preview = description.take(DESCRIPTION_PREVIEW_LENGTH).substringBeforeLast(' ').trimEnd() + "…"
-        var expanded = false
-
-        fun render() {
-            binding.albumDescription.text = if (expanded || !isLong) description else preview
-            binding.albumDescriptionToggle.setText(if (expanded) R.string.album_detail_collapse else R.string.album_detail_expand)
-        }
-
-        binding.albumDescriptionToggle.isVisible = isLong
-        binding.albumDescriptionToggle.setOnClickListener {
-            expanded = !expanded
-            render()
-        }
-        render()
     }
 
     private fun showTracks(binding: FragmentAlbumDetailBinding, tracks: List<Track>) {
@@ -230,7 +212,6 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
 
         fun args(albumId: Int): Bundle = bundleOf(ARG_ALBUM_ID to albumId)
 
-        private const val DESCRIPTION_PREVIEW_LENGTH = 170
         private const val MAX_RATING = 5
     }
 }

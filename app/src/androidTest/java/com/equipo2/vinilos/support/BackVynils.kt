@@ -29,6 +29,42 @@ object BackVynils {
             .map { it.getString("name") }
     }
 
+    /** Lo que el detalle de un artista (HU04) muestra en sus contadores. */
+    data class ArtistSummary(val name: String, val description: String, val albums: Int, val prizes: Int)
+
+    /** Bandas con al menos un integrante, con los nombres de sus integrantes. */
+    fun bandMembers(): Map<ArtistSummary, List<String>> {
+        val bands = JSONArray(request("bands", "GET"))
+        return List(bands.length()) { bands.getJSONObject(it) }
+            .associate { band ->
+                val members = band.optJSONArray("musicians") ?: JSONArray()
+                band.toSummary() to List(members.length()) { members.getJSONObject(it).getString("name") }
+            }
+            .filterValues { it.isNotEmpty() }
+    }
+
+    /** Músicos que no pertenecen a ninguna banda. */
+    fun musiciansWithoutBand(): List<ArtistSummary> {
+        val inBand = bandMembers().values.flatten().toSet()
+        return summaries("musicians").filter { it.name !in inBand }
+    }
+
+    /** Músicos y bandas cuya descripción se corta con «Ver más». */
+    fun artistsWithDescriptionLongerThan(length: Int): List<ArtistSummary> =
+        (summaries("musicians") + summaries("bands")).filter { it.description.length > length }
+
+    private fun summaries(path: String): List<ArtistSummary> {
+        val items = JSONArray(request(path, "GET"))
+        return List(items.length()) { items.getJSONObject(it).toSummary() }
+    }
+
+    private fun JSONObject.toSummary() = ArtistSummary(
+        name = getString("name"),
+        description = optString("description"),
+        albums = optJSONArray("albums")?.length() ?: 0,
+        prizes = optJSONArray("performerPrizes")?.length() ?: 0,
+    )
+
     fun musicianNames(): List<String> = names("musicians")
 
     fun bandNames(): List<String> = names("bands")
