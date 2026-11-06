@@ -8,8 +8,18 @@
     <string name="album_list_title">Álbumes</string>
     <string name="artist_list_title">Artistas</string>
     <string name="collector_list_title">Coleccionistas</string>
-    <!-- Avisos de las pantallas que llegan en el sprint 2 (HU04 y HU05). -->
-    <string name="collector_list_soon_body">La lista de coleccionistas llegará en la próxima versión de la app.</string>
+
+    <!-- Listado de coleccionistas (HU05) -->
+    <plurals name="collector_list_count">
+        <item quantity="one">%d coleccionista</item>
+        <item quantity="many">%d coleccionistas</item>
+        <item quantity="other">%d coleccionistas</item>
+    </plurals>
+    <plurals name="collector_album_count">
+        <item quantity="one">%d álbum en su colección</item>
+        <item quantity="many">%d álbumes en su colección</item>
+        <item quantity="other">%d álbumes en su colección</item>
+    </plurals>
 
     <string name="coming_soon_title">Muy pronto</string>
 

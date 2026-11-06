@@ -101,7 +101,7 @@
 
         <fragment
             android:id="@+id/collectorListFragment"
-            android:name="com.equipo2.vinilos.ui.collectors.CollectorListFragment"
+            android:name="com.equipo2.vinilos.ui.collectors.list.CollectorListFragment"
             android:label="@string/collector_list_title" />
     </navigation>
 </navigation>

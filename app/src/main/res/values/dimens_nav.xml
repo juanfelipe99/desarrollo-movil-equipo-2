@@ -5,6 +5,7 @@
     <dimen name="fab_margin_bottom">97dp</dimen>
     <dimen name="album_grid_padding_bottom">169dp</dimen>
     <dimen name="artist_list_padding_bottom">97dp</dimen>
+    <dimen name="collector_list_padding_bottom">97dp</dimen>
     <dimen name="album_detail_padding_bottom">113dp</dimen>
 
     <!-- Lo que hay que desplazarse en una misma dirección para que las barras se escondan o vuelvan -->
