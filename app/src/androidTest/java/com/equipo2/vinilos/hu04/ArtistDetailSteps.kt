@@ -9,6 +9,7 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
@@ -74,9 +75,12 @@ fun openArtist(name: String) {
     onView(artistRowName(name)).perform(click())
 }
 
-/** El detalle que se ve es el de este artista. */
+/**
+ * El detalle que se ve es el de este artista. Al volver con Atrás el detalle conserva donde se había bajado,
+ * así que primero se sube hasta el nombre. Sin esconder las barras, para no cambiar lo que revise la prueba después.
+ */
 fun checkShowingArtist(name: String) {
-    onView(allOf(withId(R.id.artistName), withText(name))).check(matches(isDisplayed()))
+    onView(allOf(withId(R.id.artistName), withText(name))).perform(scrollTo()).check(matches(isDisplayed()))
 }
 
 /** Fila de un integrante dentro de la sección Integrantes. */

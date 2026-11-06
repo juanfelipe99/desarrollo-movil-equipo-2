@@ -5,6 +5,7 @@ import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.Visibility
+import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
 import androidx.test.espresso.matcher.ViewMatchers.withId
@@ -23,6 +24,7 @@ import com.equipo2.vinilos.support.rotateScreen
 import com.equipo2.vinilos.support.scrollToWithBarsHidden
 import com.equipo2.vinilos.support.toolbarTitle
 import com.equipo2.vinilos.support.useArtistRepository
+import org.hamcrest.Matchers.allOf
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -79,14 +81,25 @@ class HU04ArtistStatesTest {
 
         onView(withId(R.id.albumsCount)).perform(scrollToWithBarsHidden())
             .check(matches(withText(countText(R.plurals.artist_detail_albums_count, 2))))
-        onView(withText("Buscando América")).check(matches(isDisplayed()))
-        onView(withText("Poeta del pueblo")).check(matches(isDisplayed()))
+        // Se baja hasta el carrusel y no solo hasta su título: en pantallas pequeñas queda debajo del borde.
+        // En un carrusel angosto el segundo álbum puede quedar cortado, por eso se revisa que esté en la lista
+        onView(withId(R.id.albumsList)).perform(scrollToWithBarsHidden()).check(
+            matches(
+                allOf(
+                    isDisplayed(),
+                    hasDescendant(withText("Buscando América")),
+                    hasDescendant(withText("Poeta del pueblo")),
+                    hasDescendant(withText("1984 · Salsa")),
+                ),
+            ),
+        )
 
         onView(withId(R.id.prizesCount)).perform(scrollToWithBarsHidden())
             .check(matches(withText(countText(R.plurals.artist_detail_prizes_count, 1))))
-        onView(withText("Grammy Award")).perform(scrollToWithBarsHidden()).check(matches(isDisplayed()))
+        // La fecha es lo último de la tarjeta: al verla, el nombre y la organización también se ven
+        onView(withText("10 de diciembre de 1978")).perform(scrollToWithBarsHidden()).check(matches(isDisplayed()))
+        onView(withText("Grammy Award")).check(matches(isDisplayed()))
         onView(withText("National Academy of Recording Arts & Sciences")).check(matches(isDisplayed()))
-        onView(withText("10 de diciembre de 1978")).check(matches(isDisplayed()))
     }
 
     @Test
@@ -124,8 +137,9 @@ class HU04ArtistStatesTest {
 
         onView(withId(R.id.membersCount)).perform(scrollToWithBarsHidden())
             .check(matches(withText(countText(R.plurals.artist_detail_members_count, 0))))
+        // El cuerpo es lo último de la tarjeta: al verlo, el título también se ve
+        onView(withText(R.string.artist_detail_members_empty_body)).perform(scrollToWithBarsHidden()).check(matches(isDisplayed()))
         onView(withText(R.string.artist_detail_members_empty_title)).check(matches(isDisplayed()))
-        onView(withText(R.string.artist_detail_members_empty_body)).check(matches(isDisplayed()))
 
         onView(withText(R.string.artist_detail_albums_empty_body)).perform(scrollToWithBarsHidden()).check(matches(isDisplayed()))
         onView(withId(R.id.albumsCount)).check(matches(withText(countText(R.plurals.artist_detail_albums_count, 0))))
@@ -172,7 +186,8 @@ class HU04ArtistStatesTest {
         onView(withText(errorTitle)).check(matches(isDisplayed()))
         onView(withText(R.string.error_network_body)).check(matches(isDisplayed()))
 
-        onView(withId(R.id.stateRetry)).perform(click())
+        // En pantallas pequeñas el botón queda debajo del mensaje y hay que bajar
+        onView(withId(R.id.stateRetry)).perform(scrollToWithBarsHidden(), click())
 
         checkShowingArtist(queen.name)
         assertEquals(2, repository.detailRequests.size)
