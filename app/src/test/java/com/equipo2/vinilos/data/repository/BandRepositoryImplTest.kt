@@ -83,6 +83,37 @@ class BandRepositoryImplTest {
         assertTrue(offline.getMusicianCandidates(101).exceptionOrNull() is DataError.Network)
     }
 
+    @Test
+    fun addMusician_enviaLaBandaYElMusicoEnLaRuta() = runTest {
+        // BackVynils responde la banda con sus integrantes, que la app no necesita leer
+        server.respond(
+            "bands/101/musicians/3",
+            """{"id": 101, "name": "Queen", "creationDate": "1970-01-01T00:00:00.000Z", "musicians": [{"id": 3}]}""",
+        )
+
+        assertTrue(repository.addMusician(101, 3).isSuccess)
+        assertEquals(listOf("bands/101/musicians/3"), server.requests)
+    }
+
+    @Test
+    fun addMusician_siLaBandaOElMusicoNoExisten_devuelveNoEncontrado() = runTest {
+        server.respond(
+            "bands/101/musicians/999",
+            """{"statusCode":404,"message":"The musician with the given id was not found"}""",
+            code = 404,
+        )
+
+        assertTrue(repository.addMusician(101, 999).exceptionOrNull() is DataError.NotFound)
+    }
+
+    @Test
+    fun addMusician_sinServidor_devuelveErrorDeRed() = runTest {
+        val freePort = ServerSocket(0).use { it.localPort }
+        val offline = repositoryFor("http://127.0.0.1:$freePort/")
+
+        assertTrue(offline.addMusician(101, 3).exceptionOrNull() is DataError.Network)
+    }
+
     private companion object {
         // Así responde BackVynils: los músicos no dicen su banda, cada banda trae sus integrantes
         const val MUSICIANS_JSON = """

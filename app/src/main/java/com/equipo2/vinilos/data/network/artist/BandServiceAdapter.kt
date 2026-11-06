@@ -15,4 +15,6 @@ class BandServiceAdapter(apiClient: ApiClient) {
         val bands = async { api.getBands() }
         musicianCandidates(bandId, musicians.await(), bands.await())
     }
+
+    suspend fun addMusician(bandId: Int, musicianId: Int) = api.addMusicianToBand(bandId, musicianId)
 }

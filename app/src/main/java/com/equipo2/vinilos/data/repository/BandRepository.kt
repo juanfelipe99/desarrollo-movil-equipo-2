@@ -8,10 +8,16 @@ interface BandRepository {
 
     /** Músicos que se pueden agregar a la banda, con su estado. Si la banda no existe, falla con [DataError.NotFound]. */
     suspend fun getMusicianCandidates(bandId: Int): Result<List<MusicianCandidate>>
+
+    /** Agrega el músico a la banda, sacándolo de la suya si tenía. Si alguno no existe, falla con [DataError.NotFound]. */
+    suspend fun addMusician(bandId: Int, musicianId: Int): Result<Unit>
 }
 
 class BandRepositoryImpl(private val serviceAdapter: BandServiceAdapter) : BandRepository {
 
     override suspend fun getMusicianCandidates(bandId: Int): Result<List<MusicianCandidate>> =
         resultOf { serviceAdapter.getMusicianCandidates(bandId) }
+
+    override suspend fun addMusician(bandId: Int, musicianId: Int): Result<Unit> =
+        resultOf { serviceAdapter.addMusician(bandId, musicianId) }
 }
