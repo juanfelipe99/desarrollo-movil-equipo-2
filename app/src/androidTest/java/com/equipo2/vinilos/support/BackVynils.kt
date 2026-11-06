@@ -107,6 +107,50 @@ object BackVynils {
         }
     }
 
+    /** Crea una banda de prueba sin integrantes y devuelve su id (HU12). */
+    fun createBand(name: String): Int {
+        val band = JSONObject()
+            .put("name", name)
+            .put("image", "https://ejemplo.com/banda.jpg")
+            .put("description", "Banda creada por una prueba E2E.")
+            .put("creationDate", "2000-01-01")
+        return JSONObject(request("bands", "POST", band.toString())).getInt("id")
+    }
+
+    /** Crea un músico de prueba sin banda y devuelve su id (HU12). */
+    fun createMusician(name: String): Int {
+        val musician = JSONObject()
+            .put("name", name)
+            .put("image", "https://ejemplo.com/musico.jpg")
+            .put("description", "Músico creado por una prueba E2E.")
+            .put("birthDate", "1980-01-01")
+        return JSONObject(request("musicians", "POST", musician.toString())).getInt("id")
+    }
+
+    /** Agrega el músico a la banda; si estaba en otra, la deja. */
+    fun addMusicianToBand(bandId: Int, musicianId: Int) {
+        // Sin cuerpo, pero el servidor publicado exige el Content-Length
+        request("bands/$bandId/musicians/$musicianId", "POST", "")
+    }
+
+    /** Nombres de los integrantes de la banda. */
+    fun bandMemberNames(bandId: Int): List<String> {
+        val members = JSONObject(request("bands/$bandId", "GET")).optJSONArray("musicians") ?: JSONArray()
+        return List(members.length()) { members.getJSONObject(it).getString("name") }
+    }
+
+    /** Borra los músicos y las bandas con este prefijo para no dejar datos de prueba. */
+    fun deleteArtistsStartingWith(prefix: String) {
+        // Primero los músicos, para que ninguna banda se borre con integrantes
+        for (path in listOf("musicians", "bands")) {
+            val items = JSONArray(request(path, "GET"))
+            for (i in 0 until items.length()) {
+                val item = items.getJSONObject(i)
+                if (item.getString("name").startsWith(prefix)) request("$path/${item.getInt("id")}", "DELETE")
+            }
+        }
+    }
+
     private fun request(path: String, method: String, body: String? = null): String {
         val connection = URL(BuildConfig.API_BASE_URL + path).openConnection() as HttpURLConnection
         connection.requestMethod = method
