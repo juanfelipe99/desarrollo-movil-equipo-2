@@ -1,13 +1,17 @@
 package com.equipo2.vinilos.hu12
 
 import android.view.View
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.UiController
+import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.hasSibling
+import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withParent
@@ -19,7 +23,9 @@ import com.equipo2.vinilos.data.repository.BandRepository
 import com.equipo2.vinilos.hu04.openArtist
 import com.equipo2.vinilos.support.enterAs
 import com.equipo2.vinilos.support.scrollToWithBarsHidden
+import com.equipo2.vinilos.support.waitUntil
 import com.equipo2.vinilos.ui.artists.members.MemberCandidateAdapter
+import com.equipo2.vinilos.ui.artists.members.MemberRow
 import kotlinx.coroutines.CompletableDeferred
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
@@ -68,8 +74,11 @@ fun openMemberAdd() {
     onView(withId(R.id.addMemberButton)).perform(scrollToWithBarsHidden(), click())
 }
 
+/** Escribe en el buscador y espera a que la lista muestre solo lo que coincide. */
 fun searchMusician(text: String) {
     onView(withId(R.id.memberSearchInput)).perform(replaceText(text), closeSoftKeyboard())
+    // La lista calcula los cambios en otro hilo, que Espresso no espera
+    waitForCandidates { rows -> rows.all { it.candidate.musician.name.contains(text, ignoreCase = true) } }
 }
 
 /** Nombre de un músico en el listado de Agregar integrante. */
@@ -89,18 +98,56 @@ fun candidateLeavesBand(name: String): Matcher<View> = allOf(withId(R.id.memberL
 fun candidateRadio(name: String): Matcher<View> =
     allOf(withId(R.id.memberRadio), hasSibling(hasDescendant(candidateName(name))))
 
+/** Elige el músico y espera a que su fila se vea elegida. */
 fun chooseMusician(name: String) {
+    tapMusician(name)
+    waitForCandidates { rows -> rows.any { it.selected && it.candidate.musician.name == name } }
+}
+
+/** Toca la fila del músico, desplazando antes la lista para que se vea completa en pantallas pequeñas. */
+fun tapMusician(name: String) {
+    onView(withId(R.id.memberList)).perform(scrollToCandidate(name))
     onView(candidateRow(name)).perform(click())
 }
 
 /** Nombres del listado en el orden en que se muestran, incluidos los que no caben en la pantalla. */
-fun candidateNamesInOrder(): List<String> {
-    var names = emptyList<String>()
+fun candidateNamesInOrder(): List<String> = candidateRows().map { it.candidate.musician.name }
+
+/** Filas que tiene la lista ahora. */
+private fun candidateRows(): List<MemberRow> = candidateListState().first
+
+/** Filas de la lista y si todavía anima filas que entran o salen. */
+private fun candidateListState(): Pair<List<MemberRow>, Boolean> {
+    var state = emptyList<MemberRow>() to false
     onView(withId(R.id.memberList)).check { view, noView ->
-        val adapter = ((view ?: throw noView) as RecyclerView).adapter as MemberCandidateAdapter
-        names = adapter.currentList.map { it.candidate.musician.name }
+        val list = (view ?: throw noView) as RecyclerView
+        state = (list.adapter as MemberCandidateAdapter).currentList to list.isAnimating
     }
-    return names
+    return state
+}
+
+/**
+ * Espera a que la lista termine de actualizarse: calcula los cambios en otro hilo y anima las filas
+ * que salen en los siguientes cuadros, y Espresso no espera ninguna de las dos cosas.
+ */
+fun waitForCandidates(condition: (List<MemberRow>) -> Boolean) = waitUntil {
+    val (rows, animating) = candidateListState()
+    condition(rows) && !animating
+}
+
+private fun scrollToCandidate(name: String) = object : ViewAction {
+    override fun getConstraints(): Matcher<View> = isAssignableFrom(RecyclerView::class.java)
+
+    override fun getDescription() = "desplazar la lista de músicos hasta «$name»"
+
+    override fun perform(uiController: UiController, view: View) {
+        val list = view as RecyclerView
+        val position = (list.adapter as MemberCandidateAdapter).currentList.indexOfFirst { it.candidate.musician.name == name }
+        check(position >= 0) { "La lista no tiene al músico «$name»" }
+        // Arriba de la lista se ve completa; con scrollToPosition puede quedar a medias en una pantalla pequeña
+        (list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, 0)
+        uiController.loopMainThreadUntilIdle()
+    }
 }
 
 /** Fila del detalle de la banda con «Nuevo» junto al integrante. */

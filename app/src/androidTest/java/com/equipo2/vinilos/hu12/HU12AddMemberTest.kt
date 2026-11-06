@@ -122,7 +122,7 @@ class HU12AddMemberTest {
         openMemberAddScreen()
         searchMusician(suffix)
 
-        chooseMusician(currentMember)
+        tapMusician(currentMember)
 
         onView(candidateRadio(currentMember)).check(matches(not(isChecked())))
     }

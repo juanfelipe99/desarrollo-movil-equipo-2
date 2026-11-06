@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.SimpleItemAnimator
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.data.model.Artist
 import com.equipo2.vinilos.data.model.ArtistType
@@ -82,6 +83,8 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
         val adapter = MemberCandidateAdapter { candidate -> select(binding, candidate) }
         binding.memberList.layoutManager = LinearLayoutManager(requireContext())
         binding.memberList.adapter = adapter
+        // Al elegir, la fila cambia en su lugar sin el fundido, que la hacía parpadear y la duplicaba un instante
+        (binding.memberList.itemAnimator as? SimpleItemAnimator)?.supportsChangeAnimations = false
 
         val screen = combine(viewModel.state, viewModel.selected, viewModel.isSubmitting, viewModel.bandMissing, ::ListScreen)
         viewLifecycleOwner.collectWhileVisible(screen) { (state, selected, submitting, bandMissing) ->

@@ -128,6 +128,9 @@ class MainActivity : AppCompatActivity() {
 
             // El aviso es de la pantalla que se deja, y la nueva muestra el suyo después de llegar
             snackbar?.dismiss()
+            // La vista flotante también: la pantalla que se deja puede seguir puesta un instante, y un aviso de la nueva
+            // quedaría pegado a ella y fuera de la pantalla. Si la nueva tiene una, la registra al crear su vista
+            snackbarAnchor = null
             updateBars(screen.id)
         }
 
