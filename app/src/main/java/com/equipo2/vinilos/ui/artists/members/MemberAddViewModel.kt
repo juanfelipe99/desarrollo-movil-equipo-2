@@ -40,7 +40,7 @@ enum class MemberAddFailure {
     SERVER,
 }
 
-/** Lo que la pantalla debe hacer una sola vez tras tocar Agregar o cargar el listado. */
+/** Lo que la pantalla debe hacer una sola vez tras tocar Agregar. */
 sealed interface MemberAddEvent {
 
     /** El músico está en otra banda: hay que confirmar que la dejará antes de enviarlo. */
@@ -50,9 +50,6 @@ sealed interface MemberAddEvent {
 
     /** No se pudo agregar, y la pantalla conserva el músico elegido. */
     data class Failed(val failure: MemberAddFailure) : MemberAddEvent
-
-    /** La banda ya no existe, así que no hay a dónde agregar integrantes. */
-    data object BandNotFound : MemberAddEvent
 }
 
 /**
@@ -68,6 +65,7 @@ class MemberAddViewModel(
     private val candidates = MutableStateFlow<UiState<List<MusicianCandidate>>>(UiState.Loading)
     private val currentSubmitting = MutableStateFlow(false)
     private val currentMissingSelection = MutableStateFlow(false)
+    private val currentBandMissing = MutableStateFlow(false)
     private val pendingEvents = Channel<MemberAddEvent>(Channel.BUFFERED)
 
     private val selectedId: StateFlow<Int?> = savedState.getStateFlow(SELECTED, null)
@@ -93,6 +91,12 @@ class MemberAddViewModel(
 
     /** Se tocó Agregar sin elegir un músico. Se quita al elegir uno. */
     val missingSelection: StateFlow<Boolean> = currentMissingSelection
+
+    /**
+     * La banda ya no existe (404 al pedir el listado). No hay a dónde agregar integrantes ni sirve reintentar,
+     * así que la pantalla lo dice en lugar del error de carga.
+     */
+    val bandMissing: StateFlow<Boolean> = currentBandMissing
 
     val events: Flow<MemberAddEvent> = pendingEvents.receiveAsFlow()
 
@@ -158,12 +162,13 @@ class MemberAddViewModel(
         if (loading?.isActive == true) return
 
         candidates.value = UiState.Loading
+        currentBandMissing.value = false
         loading = viewModelScope.launch {
             repository.getMusicianCandidates(bandId).fold(
                 onSuccess = ::show,
                 onFailure = { error ->
+                    currentBandMissing.value = error.toDataError() is DataError.NotFound
                     candidates.value = UiState.Error(error.toErrorReason())
-                    if (error is DataError.NotFound) pendingEvents.send(MemberAddEvent.BandNotFound)
                 },
             )
         }

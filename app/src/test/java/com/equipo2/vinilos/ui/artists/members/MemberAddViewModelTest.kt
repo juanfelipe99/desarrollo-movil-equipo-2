@@ -77,12 +77,20 @@ class MemberAddViewModelTest {
     }
 
     @Test
-    fun siLaBandaNoExiste_avisaUnaSolaVez() = runTest {
+    fun siLaBandaNoExiste_loIndica_enLugarDelErrorDeCarga() {
         repository.candidates = { Result.failure(DataError.NotFound()) }
         val viewModel = MemberAddViewModel(repository, bandId = 101)
 
-        assertEquals(MemberAddEvent.BandNotFound, viewModel.events.first())
+        assertTrue(viewModel.bandMissing.value)
         assertTrue(viewModel.state.value is UiState.Error)
+    }
+
+    @Test
+    fun unErrorDeConexion_noDiceQueLaBandaNoExista() {
+        repository.candidates = { Result.failure(DataError.Network()) }
+        val viewModel = MemberAddViewModel(repository, bandId = 101)
+
+        assertFalse(viewModel.bandMissing.value)
     }
 
     // Búsqueda
@@ -247,5 +255,20 @@ class MemberAddViewModelTest {
         assertEquals(2, repository.candidateRequests.size)
         assertEquals(UiState.Success(listOf(ruben, freddie)), viewModel.state.value)
         assertNull(viewModel.selected.value)
+        assertFalse(viewModel.bandMissing.value)
+    }
+
+    @Test
+    fun siLaBandaYaNoExisteAlEnviar_avisa_yAlRecargarIndicaQueNoExiste() = runTest {
+        val viewModel = viewModelWith()
+        viewModel.select(celia)
+        viewModel.add()
+
+        repository.candidates = { Result.failure(DataError.NotFound()) }
+        repository.addResponse.complete(Result.failure(DataError.NotFound()))
+
+        assertEquals(MemberAddEvent.Failed(MemberAddFailure.NOT_FOUND), viewModel.events.first())
+        assertTrue(viewModel.bandMissing.value)
+        assertTrue(viewModel.state.value is UiState.Error)
     }
 }

@@ -17,14 +17,25 @@ import com.equipo2.vinilos.data.model.Artist
 import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.model.MusicianCandidate
 import com.equipo2.vinilos.databinding.FragmentMemberAddBinding
+import com.equipo2.vinilos.ui.common.SnackbarAction
 import com.equipo2.vinilos.ui.common.buttonProgress
 import com.equipo2.vinilos.ui.common.collectWhileVisible
+import com.equipo2.vinilos.ui.common.keepSnackbarsAbove
+import com.equipo2.vinilos.ui.common.showSnackbar
 import com.equipo2.vinilos.ui.state.UiState
 import com.equipo2.vinilos.ui.state.showEmpty
 import com.equipo2.vinilos.ui.state.showError
 import com.equipo2.vinilos.ui.state.showLoading
 import kotlinx.coroutines.flow.combine
 import java.time.LocalDate
+
+/** Lo que muestra el listado: los músicos, el elegido, si se está enviando y si la banda ya no existe. */
+private data class ListScreen(
+    val state: UiState<List<MusicianCandidate>>,
+    val selected: MusicianCandidate?,
+    val submitting: Boolean,
+    val bandMissing: Boolean,
+)
 
 /** Elegir el músico que se agrega a una banda (HU12): buscador, lista de selección única y «Elige un músico». */
 class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
@@ -41,7 +52,7 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
         setUpSearch(binding)
         setUpList(binding)
         setUpSubmitting(binding)
-        setUpEvents()
+        setUpEvents(binding)
 
         viewLifecycleOwner.collectWhileVisible(viewModel.missingSelection) { missing ->
             binding.memberRequiredError.isVisible = missing
@@ -63,14 +74,17 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
         }
     }
 
-    /** Filas con el estado de cada músico, el elegido resaltado, y los estados de carga, vacío, sin resultados y error. */
+    /**
+     * Filas con el estado de cada músico, el elegido resaltado, y los estados de carga, vacío, sin resultados y error.
+     * Si la banda ya no existe se dice eso en lugar del error, porque reintentar no lo arregla.
+     */
     private fun setUpList(binding: FragmentMemberAddBinding) {
         val adapter = MemberCandidateAdapter { candidate -> select(binding, candidate) }
         binding.memberList.layoutManager = LinearLayoutManager(requireContext())
         binding.memberList.adapter = adapter
 
-        val screen = combine(viewModel.state, viewModel.selected, viewModel.isSubmitting, ::Triple)
-        viewLifecycleOwner.collectWhileVisible(screen) { (state, selected, submitting) ->
+        val screen = combine(viewModel.state, viewModel.selected, viewModel.isSubmitting, viewModel.bandMissing, ::ListScreen)
+        viewLifecycleOwner.collectWhileVisible(screen) { (state, selected, submitting, bandMissing) ->
             val noResults = state is UiState.Success && state.data.isEmpty()
             when (state) {
                 UiState.Loading ->
@@ -80,8 +94,15 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
                     getString(R.string.member_add_empty_body),
                     R.drawable.ic_groups,
                 )
-                is UiState.Error ->
+                is UiState.Error -> if (bandMissing) {
+                    binding.memberMessage.showEmpty(
+                        getString(R.string.member_add_band_missing_title),
+                        getString(R.string.member_add_band_missing_body),
+                        R.drawable.ic_groups,
+                    )
+                } else {
                     binding.memberMessage.showError(getString(R.string.member_add_object), state.reason) { viewModel.retry() }
+                }
                 is UiState.Success -> {
                     adapter.submitList(state.data.map { MemberRow(it, selected = it == selected, enabled = !submitting) })
                     if (noResults) binding.memberMessage.showEmpty(
@@ -116,9 +137,13 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
         }
     }
 
-    /** Si el músico es de otra banda se pide confirmar el cambio, y al aceptar se envía sin volver a preguntar. */
-    private fun setUpEvents() {
+    /**
+     * Si el músico es de otra banda se pide confirmar el cambio, y al aceptar se envía sin volver a preguntar.
+     * Si falla, el aviso sale encima de los botones y el músico sigue elegido.
+     */
+    private fun setUpEvents(binding: FragmentMemberAddBinding) {
         BandChangeDialog.onBandChangeConfirmed(this) { viewModel.confirmAdd() }
+        keepSnackbarsAbove(binding.memberFooter)
 
         viewLifecycleOwner.collectWhileVisible(viewModel.events) { event ->
             when (event) {
@@ -129,10 +154,21 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
                     newBandName = requireArguments().getString(ARG_BAND_NAME).orEmpty(),
                 )
                 is MemberAddEvent.Added -> returnToBand(event.musician)
-                // Los avisos de error todavía no se muestran
-                is MemberAddEvent.Failed, MemberAddEvent.BandNotFound -> Unit
+                is MemberAddEvent.Failed -> showFailure(event.failure)
             }
         }
+    }
+
+    private fun showFailure(failure: MemberAddFailure) = when (failure) {
+        // Reintentar envía el mismo músico sin volver a pedir la confirmación del cambio de banda
+        MemberAddFailure.CONNECTION -> showSnackbar(
+            getString(R.string.error_member_add_connection),
+            isError = true,
+            action = SnackbarAction(getString(R.string.error_network_retry)) { viewModel.confirmAdd() },
+        )
+        // El ViewModel ya está recargando el listado
+        MemberAddFailure.NOT_FOUND -> showSnackbar(getString(R.string.error_member_add_not_found), isError = true)
+        MemberAddFailure.SERVER -> showSnackbar(getString(R.string.error_member_add_failed), isError = true)
     }
 
     /** Vuelve al detalle con el músico agregado, que lo marca como «Nuevo» y muestra el aviso «Integrante agregado». */

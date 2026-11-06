@@ -26,4 +26,10 @@
     <string name="error_member_required">Elige un músico.</string>
     <string name="member_add_saving">Agregando…</string>
     <string name="snackbar_member_added">Integrante agregado</string>
+
+    <string name="error_member_add_connection">No pudimos agregar el integrante. Revisa tu conexión a internet.</string>
+    <string name="error_member_add_failed">No pudimos agregar el integrante. Inténtalo de nuevo.</string>
+    <string name="error_member_add_not_found">El músico o la banda ya no existen. Actualizamos el listado.</string>
+    <string name="member_add_band_missing_title">Esta banda ya no existe</string>
+    <string name="member_add_band_missing_body">Puede que la hayan eliminado. Cierra esta pantalla para volver.</string>
 </resources>

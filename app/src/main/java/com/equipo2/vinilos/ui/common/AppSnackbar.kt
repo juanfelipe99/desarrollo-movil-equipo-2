@@ -14,14 +14,27 @@ import com.equipo2.vinilos.MainActivity
 import com.equipo2.vinilos.R
 import com.google.android.material.snackbar.Snackbar
 
-/** Aviso de la app: ícono de éxito o de error, el mensaje y una X para cerrarlo. */
+/** Botón del aviso, como «Reintentar». */
+data class SnackbarAction(val label: CharSequence, val onClick: () -> Unit)
+
+/** Aviso de la app: ícono de éxito o de error, el mensaje, un botón si hace falta y una X para cerrarlo. */
 object AppSnackbar {
 
     private const val DURATION_MS = 4000
 
+    // Con un botón dura más, para alcanzar a leerlo y tocarlo
+    private const val DURATION_WITH_ACTION_MS = 8000
+
     /** Muestra el aviso, y con anchor aparece encima de esa vista. */
-    fun show(root: View, message: CharSequence, isError: Boolean = false, anchor: View? = null): Snackbar {
-        val snackbar = Snackbar.make(root, message, DURATION_MS)
+    fun show(
+        root: View,
+        message: CharSequence,
+        isError: Boolean = false,
+        anchor: View? = null,
+        action: SnackbarAction? = null,
+    ): Snackbar {
+        val snackbar = Snackbar.make(root, message, if (action == null) DURATION_MS else DURATION_WITH_ACTION_MS)
+        action?.let { snackbar.setAction(it.label) { _ -> it.onClick() } }
         snackbar.anchorView = anchor
         // Material mide el anchor sin descontar el padding de root, que ya incluye las barras
         if (anchor != null) snackbar.view.updateLayoutParams<ViewGroup.MarginLayoutParams> { bottomMargin -= root.paddingBottom }
@@ -59,8 +72,8 @@ object AppSnackbar {
 }
 
 /** Muestra un aviso desde un fragment, encima del botón registrado o de la barra inferior. */
-fun Fragment.showSnackbar(message: CharSequence, isError: Boolean = false) {
-    (requireActivity() as MainActivity).showSnackbar(message, isError)
+fun Fragment.showSnackbar(message: CharSequence, isError: Boolean = false, action: SnackbarAction? = null) {
+    (requireActivity() as MainActivity).showSnackbar(message, isError, action)
 }
 
 /** Los avisos aparecen encima de esta vista hasta que se destruya la vista del fragment. */
