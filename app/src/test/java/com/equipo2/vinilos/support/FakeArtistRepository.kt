@@ -1,6 +1,7 @@
 package com.equipo2.vinilos.support
 
 import com.equipo2.vinilos.data.model.Artist
+import com.equipo2.vinilos.data.model.ArtistDetail
 import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.repository.ArtistRepository
 import kotlinx.coroutines.CompletableDeferred
@@ -18,6 +19,17 @@ class FakeArtistRepository : ArtistRepository {
     override suspend fun getArtists(): Result<List<Artist>> {
         calls++
         return response.await()
+    }
+
+    /** Artistas pedidos al detalle, con su tipo, en orden. */
+    val detailRequests = mutableListOf<Pair<Int, ArtistType>>()
+
+    /** Respuesta del detalle, que puede esperar un CompletableDeferred para probar la carga. */
+    var detail: suspend () -> Result<ArtistDetail> = { Result.failure(UnsupportedOperationException()) }
+
+    override suspend fun getArtistDetail(id: Int, type: ArtistType): Result<ArtistDetail> {
+        detailRequests += id to type
+        return detail()
     }
 }
 

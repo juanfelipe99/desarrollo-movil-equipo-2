@@ -1,9 +1,320 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Deslizar hacia abajo recarga el artista -->
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/artistRefresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include
-        android:id="@+id/artistSoon"
-        layout="@layout/view_state_message" />
-</FrameLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/artistScroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:id="@+id/artistContent"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/album_detail_padding_bottom"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintWidth_max="528dp">
+
+                    <!-- Cabecera: las iniciales quedan detrás y se ven mientras la foto carga, si falla o si no hay -->
+                    <FrameLayout
+                        android:layout_width="@dimen/artist_photo"
+                        android:layout_height="@dimen/artist_photo"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="20dp"
+                        android:background="@drawable/bg_circle_surface_variant">
+
+                        <TextView
+                            android:id="@+id/artistInitials"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:importantForAccessibility="no"
+                            android:textAppearance="@style/TextAppearance.Vinilos.HeadlineMedium"
+                            android:textColor="@color/md_on_surface_variant"
+                            tools:text="RB" />
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/artistPhoto"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearance.Vinilos.Circle" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/artistName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center_horizontal"
+                        android:paddingHorizontal="16dp"
+                        android:textAppearance="@style/TextAppearance.Vinilos.HeadlineMedium"
+                        tools:text="Rubén Blades Bellido de Luna" />
+
+                    <LinearLayout
+                        android:id="@+id/artistTypeTag"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_artist_type_tag"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="4dp">
+
+                        <ImageView
+                            android:id="@+id/artistTypeIcon"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:importantForAccessibility="no"
+                            app:tint="@color/md_on_surface_variant"
+                            tools:src="@drawable/ic_mic" />
+
+                        <TextView
+                            android:id="@+id/artistTypeLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:textAppearance="@style/TextAppearance.Vinilos.LabelMedium.SemiBold"
+                            android:textColor="@color/md_on_surface"
+                            tools:text="@string/artist_type_musician" />
+                    </LinearLayout>
+
+                    <!-- Fecha y, si es un músico con banda, la banda que abre su detalle -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="16dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <include
+                                android:id="@+id/artistDate"
+                                layout="@layout/item_album_info" />
+
+                            <View
+                                android:id="@+id/artistBandDivider"
+                                style="@style/Widget.Vinilos.Divider" />
+
+                            <FrameLayout
+                                android:id="@+id/artistBandRow"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="?attr/selectableItemBackground"
+                                android:clickable="true"
+                                android:focusable="true">
+
+                                <include
+                                    android:id="@+id/artistBand"
+                                    layout="@layout/item_album_info" />
+                            </FrameLayout>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Descripción -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="16dp"
+                        android:paddingTop="24dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/artist_detail_description_title"
+                            android:textAppearance="@style/TextAppearance.Vinilos.TitleMedium"
+                            android:textColor="@color/md_on_surface" />
+
+                        <TextView
+                            android:id="@+id/artistDescription"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:textAppearance="@style/TextAppearance.Vinilos.BodyLarge"
+                            android:textColor="@color/md_on_surface" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/artistDescriptionToggle"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="0dp"
+                            android:minHeight="48dp"
+                            android:paddingHorizontal="4dp"
+                            android:text="@string/description_expand"
+                            android:textAppearance="@style/TextAppearance.Vinilos.LabelLarge"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <!-- Integrantes, solo en una banda -->
+                    <LinearLayout
+                        android:id="@+id/membersSection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <!-- HU12 agrega aquí el botón «Agregar integrante» para el coleccionista -->
+                        <LinearLayout
+                            android:id="@+id/membersHeader"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="24dp"
+                            android:gravity="center_vertical"
+                            android:minHeight="48dp"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/artist_detail_members_title"
+                                android:textAppearance="@style/TextAppearance.Vinilos.TitleMedium"
+                                android:textColor="@color/md_on_surface" />
+
+                            <TextView
+                                android:id="@+id/membersCount"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:layout_weight="1"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+                                android:textColor="@color/md_on_surface_variant" />
+                        </LinearLayout>
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/membersList"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false"
+                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                            tools:itemCount="2"
+                            tools:listitem="@layout/item_artist_member" />
+
+                        <FrameLayout
+                            android:id="@+id/membersEmpty"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingHorizontal="16dp" />
+                    </LinearLayout>
+
+                    <!-- Álbumes -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:gravity="center_vertical"
+                        android:minHeight="48dp"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/artist_detail_albums_title"
+                            android:textAppearance="@style/TextAppearance.Vinilos.TitleMedium"
+                            android:textColor="@color/md_on_surface" />
+
+                        <TextView
+                            android:id="@+id/albumsCount"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+                            android:textColor="@color/md_on_surface_variant" />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/albumsList"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clipToPadding="false"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="16dp"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        tools:itemCount="3"
+                        tools:listitem="@layout/item_artist_album" />
+
+                    <FrameLayout
+                        android:id="@+id/albumsEmpty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="16dp" />
+
+                    <!-- Premios -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:gravity="center_vertical"
+                        android:minHeight="48dp"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/artist_detail_prizes_title"
+                            android:textAppearance="@style/TextAppearance.Vinilos.TitleMedium"
+                            android:textColor="@color/md_on_surface" />
+
+                        <TextView
+                            android:id="@+id/prizesCount"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+                            android:textColor="@color/md_on_surface_variant" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/prizesList"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="16dp" />
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <include
+            android:id="@+id/artistLoading"
+            layout="@layout/view_loading"
+            android:visibility="gone" />
+
+        <include
+            android:id="@+id/artistError"
+            layout="@layout/view_state_message"
+            android:visibility="gone" />
+    </FrameLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

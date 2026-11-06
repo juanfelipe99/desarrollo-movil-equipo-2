@@ -8,6 +8,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.data.model.Artist
+import com.equipo2.vinilos.data.model.ArtistDetail
 import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.repository.ArtistRepository
 import com.equipo2.vinilos.support.enterAs
@@ -32,6 +33,10 @@ class InMemoryArtistRepository(private val responses: List<Result<List<Artist>>>
         if (neverAnswer) awaitCancellation()
         return responses[minOf(calls++, responses.lastIndex)]
     }
+
+    // Aquí solo se prueba que el detalle se abra; su contenido se prueba en HU04 con otro repositorio
+    override suspend fun getArtistDetail(id: Int, type: ArtistType): Result<ArtistDetail> =
+        Result.failure(UnsupportedOperationException("Estas pruebas no revisan el contenido del detalle"))
 }
 
 fun noConnection(): Result<List<Artist>> = Result.failure(IOException("Sin conexión"))

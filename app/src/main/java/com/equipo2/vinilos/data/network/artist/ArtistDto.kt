@@ -19,6 +19,13 @@ data class BandDto(
     val name: String,
     val image: String = "",
     val creationDate: String,
+    val musicians: List<BandMemberDto> = emptyList(),
+)
+
+/** Integrante dentro de una banda. Solo se lee el id, que basta para saber a qué banda pertenece. */
+@Serializable
+data class BandMemberDto(
+    val id: Int,
 )
 
 internal fun MusicianDto.toArtist() = Artist(
