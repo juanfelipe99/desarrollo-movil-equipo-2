@@ -20,6 +20,10 @@
         <item quantity="many">%d álbumes en su colección</item>
         <item quantity="other">%d álbumes en su colección</item>
     </plurals>
+    <string name="collector_list_loading">Cargando coleccionistas…</string>
+    <string name="collector_list_object">los coleccionistas</string>
+    <string name="collector_list_empty_title">No hay coleccionistas registrados</string>
+    <string name="collector_list_empty_body">Cuando se registren coleccionistas aparecerán aquí.</string>
 
     <string name="coming_soon_title">Muy pronto</string>
 

@@ -10,9 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.databinding.FragmentCollectorListBinding
 import com.equipo2.vinilos.ui.common.ScrollsToTop
+import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.smoothScrollToTop
 import com.equipo2.vinilos.ui.state.UiState
+import com.equipo2.vinilos.ui.state.showEmpty
+import com.equipo2.vinilos.ui.state.showError
+import com.equipo2.vinilos.ui.state.showLoading
 
 /** Lista de coleccionistas (HU05). */
 class CollectorListFragment : Fragment(R.layout.fragment_collector_list), ScrollsToTop {
@@ -28,18 +32,36 @@ class CollectorListFragment : Fragment(R.layout.fragment_collector_list), Scroll
         view?.findViewById<RecyclerView>(R.id.collectorList)?.smoothScrollToTop()
     }
 
-    /** Filas con nombre, álbumes y correo, y el total de coleccionistas encima. */
+    /** Filas con nombre, álbumes y correo, el total encima, los estados de carga, vacío y error, y deslizar para recargar. */
     private fun setUpList(binding: FragmentCollectorListBinding) {
         // La navegación al detalle (HU06) se conecta en la tarea T4
         val adapter = CollectorAdapter { }
         binding.collectorList.layoutManager = LinearLayoutManager(requireContext())
         binding.collectorList.adapter = adapter
+        bindPullToRefresh(binding.collectorsRefresh, viewModel.pullRefresh, binding.collectorList, binding.collectorsMessage.root) {
+            viewModel.refresh()
+        }
 
         viewLifecycleOwner.collectWhileVisible(viewModel.state) { state ->
-            if (state is UiState.Success) adapter.submitList(state.data)
+            when (state) {
+                UiState.Loading ->
+                    binding.collectorsLoading.showLoading(getString(R.string.collector_list_loading), R.layout.view_skeleton_rows)
+                UiState.Empty -> binding.collectorsMessage.showEmpty(
+                    getString(R.string.collector_list_empty_title),
+                    getString(R.string.collector_list_empty_body),
+                    R.drawable.ic_groups,
+                )
+                is UiState.Error ->
+                    binding.collectorsMessage.showError(getString(R.string.collector_list_object), state.reason) { viewModel.retry() }
+                is UiState.Success -> adapter.submitList(state.data)
+            }
 
-            binding.collectorHeader.isVisible = state is UiState.Success
+            // El total se queda en el vacío («0 coleccionistas»)
+            binding.collectorHeader.isVisible = state is UiState.Success || state == UiState.Empty
+            binding.collectorsLoading.root.isVisible = state == UiState.Loading
+            binding.collectorsMessage.root.isVisible = state == UiState.Empty || state is UiState.Error
             binding.collectorList.isVisible = state is UiState.Success
+            binding.collectorsRefresh.isEnabled = state != UiState.Loading
         }
 
         viewLifecycleOwner.collectWhileVisible(viewModel.count) { count ->

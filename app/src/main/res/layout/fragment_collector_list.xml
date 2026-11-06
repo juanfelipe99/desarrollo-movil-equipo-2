@@ -1,45 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Deslizar hacia abajo recarga los coleccionistas -->
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/collectorsRefresh"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <!-- Total de coleccionistas encima de la lista -->
-    <LinearLayout
-        android:id="@+id/collectorHeader"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingHorizontal="16dp"
-        android:visibility="gone"
-        tools:visibility="visible">
-
-        <TextView
-            android:id="@+id/collectorCount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:accessibilityLiveRegion="polite"
-            android:paddingBottom="4dp"
-            android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
-            android:textColor="@color/md_on_surface_variant"
-            tools:text="4 coleccionistas" />
-    </LinearLayout>
+    android:layout_height="match_parent">
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="match_parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/collectorList"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingBottom="@dimen/collector_list_padding_bottom"
-            android:visibility="gone"
-            tools:itemCount="4"
-            tools:listitem="@layout/item_collector"
-            tools:visibility="visible" />
+            android:orientation="vertical">
+
+            <!-- Total de coleccionistas: se ve con coleccionistas y en el vacío, no al cargar ni en el error -->
+            <LinearLayout
+                android:id="@+id/collectorHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <TextView
+                    android:id="@+id/collectorCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:accessibilityLiveRegion="polite"
+                    android:paddingBottom="4dp"
+                    android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+                    android:textColor="@color/md_on_surface_variant"
+                    tools:text="4 coleccionistas" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/collectorList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingBottom="@dimen/collector_list_padding_bottom"
+                    android:visibility="gone"
+                    tools:itemCount="4"
+                    tools:listitem="@layout/item_collector"
+                    tools:visibility="visible" />
+
+                <include
+                    android:id="@+id/collectorsMessage"
+                    layout="@layout/view_state_message"
+                    android:visibility="gone" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <include
+            android:id="@+id/collectorsLoading"
+            layout="@layout/view_loading"
+            android:visibility="gone" />
     </FrameLayout>
-</LinearLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
