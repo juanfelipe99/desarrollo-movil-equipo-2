@@ -151,7 +151,23 @@ object BackVynils {
         }
     }
 
+    /**
+     * El servidor publicado a veces responde 404 o 5xx un momento mientras despierta o se reinicia.
+     * Esas respuestas dicen que no hizo nada, así que se reintenta sin riesgo de crear datos dos veces.
+     */
     private fun request(path: String, method: String, body: String? = null): String {
+        repeat(RETRIES) { attempt ->
+            val (code, text) = send(path, method, body)
+            if (code in 200..299) return text
+            if (code !in RETRYABLE_CODES || attempt == RETRIES - 1) {
+                throw IllegalStateException("$method $path respondió $code: ${text.take(200)}")
+            }
+            Thread.sleep(RETRY_DELAY_MS * (attempt + 1))
+        }
+        error("No se llega aquí")
+    }
+
+    private fun send(path: String, method: String, body: String?): Pair<Int, String> {
         val connection = URL(BuildConfig.API_BASE_URL + path).openConnection() as HttpURLConnection
         connection.requestMethod = method
         connection.connectTimeout = TIMEOUT_MS
@@ -162,9 +178,15 @@ object BackVynils {
             connection.outputStream.use { it.write(body.toByteArray()) }
         }
         return try {
-            connection.inputStream.bufferedReader().use { it.readText() }
+            val code = connection.responseCode
+            val stream = if (code in 200..299) connection.inputStream else connection.errorStream
+            code to (stream?.bufferedReader()?.use { it.readText() } ?: "")
         } finally {
             connection.disconnect()
         }
     }
+
+    private const val RETRIES = 3
+    private const val RETRY_DELAY_MS = 3_000L
+    private val RETRYABLE_CODES = setOf(404, 408, 429, 500, 502, 503, 504)
 }
