@@ -9,6 +9,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.fragment.findNavController
@@ -18,22 +19,30 @@ import com.equipo2.vinilos.data.model.Artist
 import com.equipo2.vinilos.data.model.ArtistDetail
 import com.equipo2.vinilos.data.model.ArtistPrize
 import com.equipo2.vinilos.data.model.ArtistType
+import com.equipo2.vinilos.data.model.Role
 import com.equipo2.vinilos.databinding.FragmentArtistDetailBinding
 import com.equipo2.vinilos.databinding.ItemArtistPrizeBinding
+import com.equipo2.vinilos.ui.artists.members.MemberAddFragment
 import com.equipo2.vinilos.ui.common.bindExpandableText
 import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.initialsOf
 import com.equipo2.vinilos.ui.common.navigateIfPossible
+import com.equipo2.vinilos.ui.common.showSnackbar
 import com.equipo2.vinilos.ui.common.toLongText
+import com.equipo2.vinilos.ui.role.RoleViewModel
 import com.equipo2.vinilos.ui.state.UiState
 import com.equipo2.vinilos.ui.state.addEmptySection
 import com.equipo2.vinilos.ui.state.showError
 import com.equipo2.vinilos.ui.state.showLoading
 
-/** Detalle de un músico o de una banda (HU04). Desde aquí se pasa del músico a su banda y de la banda a sus integrantes. */
+/**
+ * Detalle de un músico o de una banda (HU04). Desde aquí se pasa del músico a su banda y de la banda a sus integrantes,
+ * y el coleccionista agrega integrantes a la banda (HU12).
+ */
 class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
 
+    private val roleViewModel: RoleViewModel by activityViewModels { RoleViewModel.Factory }
     private val viewModel: ArtistDetailViewModel by viewModels {
         val args = requireArguments()
         ArtistDetailViewModel.factory(args.getInt(ARG_ARTIST_ID), ArtistType.valueOf(requireNotNull(args.getString(ARG_ARTIST_TYPE))))
@@ -68,6 +77,29 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
             binding.artistContent.isVisible = state is UiState.Success
             binding.artistRefresh.isEnabled = state != UiState.Loading
         }
+
+        // Solo el coleccionista agrega integrantes, y el vacío de integrantes le dice cómo
+        viewLifecycleOwner.collectWhileVisible(roleViewModel.role) { role ->
+            binding.addMemberButton.isVisible = role == Role.COLLECTOR
+            (viewModel.state.value as? UiState.Success)?.let { showMembers(binding, it.data.members) }
+        }
+        viewLifecycleOwner.collectWhileVisible(viewModel.newMemberIds) {
+            (viewModel.state.value as? UiState.Success)?.let { showMembers(binding, it.data.members) }
+        }
+        showAddedMember()
+    }
+
+    /** Al volver de Agregar integrante, el músico aparece al final de la lista marcado y con el aviso «Integrante agregado». */
+    private fun showAddedMember() {
+        val savedState = ownEntry?.savedStateHandle ?: return
+
+        viewLifecycleOwner.collectWhileVisible(savedState.getStateFlow<Bundle?>(MemberAddFragment.ADDED_MEMBER, null)) { added ->
+            if (added == null) return@collectWhileVisible
+            viewModel.onMemberAdded(MemberAddFragment.memberOf(added))
+            showSnackbar(getString(R.string.snackbar_member_added))
+            // Se quita para que el aviso no se repita al girar
+            savedState.remove<Bundle>(MemberAddFragment.ADDED_MEMBER)
+        }
     }
 
     private fun showArtist(binding: FragmentArtistDetailBinding, detail: ArtistDetail) {
@@ -89,7 +121,10 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         bindExpandableText(binding.artistDescription, binding.artistDescriptionToggle, detail.description)
 
         binding.membersSection.isVisible = !isMusician
-        if (!isMusician) showMembers(binding, detail.members)
+        if (!isMusician) {
+            showMembers(binding, detail.members)
+            binding.addMemberButton.setOnClickListener { openMemberAdd(artist) }
+        }
         showAlbums(binding, detail)
         showPrizes(binding, detail.prizes)
     }
@@ -111,15 +146,21 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
 
     private fun showMembers(binding: FragmentArtistDetailBinding, members: List<Artist>) {
         binding.membersCount.text = resources.getQuantityString(R.plurals.artist_detail_members_count, members.size, members.size)
-        (binding.membersList.adapter as MemberAdapter).submitList(members)
+        val newIds = viewModel.newMemberIds.value
+        (binding.membersList.adapter as MemberAdapter).submitList(members.map { BandMemberRow(it, isNew = it.id in newIds) })
         binding.membersList.isVisible = members.isNotEmpty()
 
         binding.membersEmpty.removeAllViews()
         if (members.isEmpty()) {
+            val body = if (roleViewModel.role.value == Role.COLLECTOR) {
+                R.string.artist_detail_members_empty_body_collector
+            } else {
+                R.string.artist_detail_members_empty_body
+            }
             binding.membersEmpty.addEmptySection(
                 R.drawable.ic_groups,
                 getString(R.string.artist_detail_members_empty_title),
-                getString(R.string.artist_detail_members_empty_body),
+                getString(body),
             )
         }
     }
@@ -169,6 +210,13 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         // Con dos toques seguidos el segundo ya no está en esta pantalla
         if (navController.currentBackStackEntry != ownEntry) return
         navController.navigateIfPossible(R.id.action_artistDetail_to_artistDetail, args(artist))
+    }
+
+    /** Abre Agregar integrante para la banda (HU12). */
+    private fun openMemberAdd(band: Artist) {
+        val navController = findNavController()
+        if (navController.currentBackStackEntry != ownEntry) return
+        navController.navigateIfPossible(R.id.action_artistDetail_to_memberAdd, MemberAddFragment.args(band.id, band.name))
     }
 
     companion object {

@@ -176,7 +176,6 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
 
-                        <!-- HU12 agrega aquí el botón «Agregar integrante» para el coleccionista -->
                         <LinearLayout
                             android:id="@+id/membersHeader"
                             android:layout_width="match_parent"
@@ -204,6 +203,17 @@
                                 android:maxLines="1"
                                 android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
                                 android:textColor="@color/md_on_surface_variant" />
+
+                            <!-- Solo para el coleccionista (HU12) -->
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/addMemberButton"
+                                style="@style/Widget.Vinilos.Button.SectionAction"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:text="@string/artist_detail_add_member"
+                                android:visibility="gone"
+                                tools:visibility="visible" />
                         </LinearLayout>
 
                         <androidx.recyclerview.widget.RecyclerView

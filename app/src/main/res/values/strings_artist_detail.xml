@@ -17,6 +17,8 @@
     </plurals>
     <string name="artist_detail_members_empty_title">Esta banda aún no tiene integrantes</string>
     <string name="artist_detail_members_empty_body">Los integrantes aparecerán aquí cuando se registren.</string>
+    <string name="artist_detail_members_empty_body_collector">Usa «Agregar integrante» para sumar el primer músico.</string>
+    <string name="artist_detail_add_member">Agregar integrante</string>
 
     <string name="artist_detail_albums_title">Álbumes</string>
     <plurals name="artist_detail_albums_count">

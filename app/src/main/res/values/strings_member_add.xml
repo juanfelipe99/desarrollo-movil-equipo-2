@@ -25,4 +25,5 @@
 
     <string name="error_member_required">Elige un músico.</string>
     <string name="member_add_saving">Agregando…</string>
+    <string name="snackbar_member_added">Integrante agregado</string>
 </resources>

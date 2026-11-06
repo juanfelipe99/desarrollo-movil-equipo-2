@@ -64,6 +64,16 @@
             android:textColor="@color/md_on_surface_variant" />
     </LinearLayout>
 
+    <!-- El integrante recién agregado lleva fondo de fila nueva y «Nuevo» (HU12) -->
+    <TextView
+        android:id="@+id/memberNewBadge"
+        style="@style/Widget.Vinilos.BadgeNew"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
     <ImageView
         android:layout_width="24dp"
         android:layout_height="24dp"

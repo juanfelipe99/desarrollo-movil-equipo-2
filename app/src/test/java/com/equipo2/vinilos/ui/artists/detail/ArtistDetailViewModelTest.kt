@@ -1,5 +1,6 @@
 package com.equipo2.vinilos.ui.artists.detail
 
+import androidx.lifecycle.SavedStateHandle
 import com.equipo2.vinilos.data.model.ArtistDetail
 import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.repository.DataError
@@ -118,5 +119,41 @@ class ArtistDetailViewModelTest {
         viewModel.refresh()
 
         assertEquals(UiState.Loading, viewModel.state.value)
+    }
+
+    @Test
+    fun alAgregarUnIntegrante_apareceAlFinal_marcadoComoNuevo_sinVolverAPedirLaBanda() {
+        repository.detail = { Result.success(queen) }
+        val viewModel = viewModel()
+
+        val roger = musician(11, "Roger Taylor")
+        viewModel.onMemberAdded(roger)
+
+        assertEquals(queen.members + roger, (viewModel.state.value as UiState.Success).data.members)
+        assertEquals(listOf(11), viewModel.newMemberIds.value.toList())
+        assertEquals(1, repository.detailRequests.size)
+    }
+
+    @Test
+    fun siElIntegranteYaEstaEnLaLista_noSeRepite_peroSeMarcaComoNuevo() {
+        repository.detail = { Result.success(queen) }
+        val viewModel = viewModel()
+
+        viewModel.onMemberAdded(musician(10, "Brian May"))
+        viewModel.onMemberAdded(musician(10, "Brian May"))
+
+        assertEquals(queen.members, (viewModel.state.value as UiState.Success).data.members)
+        assertEquals(listOf(10), viewModel.newMemberIds.value.toList())
+    }
+
+    @Test
+    fun losIntegrantesNuevos_seConservanSiSeRecreaLaPantalla() {
+        repository.detail = { Result.success(queen) }
+        val savedState = SavedStateHandle()
+        ArtistDetailViewModel(repository, 101, ArtistType.BAND, savedState).onMemberAdded(musician(11, "Roger Taylor"))
+
+        val recreated = ArtistDetailViewModel(repository, 101, ArtistType.BAND, savedState)
+
+        assertEquals(listOf(11), recreated.newMemberIds.value.toList())
     }
 }

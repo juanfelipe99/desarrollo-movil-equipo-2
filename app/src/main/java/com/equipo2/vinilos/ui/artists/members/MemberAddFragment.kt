@@ -13,6 +13,8 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.equipo2.vinilos.R
+import com.equipo2.vinilos.data.model.Artist
+import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.model.MusicianCandidate
 import com.equipo2.vinilos.databinding.FragmentMemberAddBinding
 import com.equipo2.vinilos.ui.common.buttonProgress
@@ -22,6 +24,7 @@ import com.equipo2.vinilos.ui.state.showEmpty
 import com.equipo2.vinilos.ui.state.showError
 import com.equipo2.vinilos.ui.state.showLoading
 import kotlinx.coroutines.flow.combine
+import java.time.LocalDate
 
 /** Elegir el músico que se agrega a una banda (HU12): buscador, lista de selección única y «Elige un músico». */
 class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
@@ -125,10 +128,18 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
                     currentBandName = event.currentBandName,
                     newBandName = requireArguments().getString(ARG_BAND_NAME).orEmpty(),
                 )
-                // El regreso al detalle y los avisos de error todavía no se muestran
-                is MemberAddEvent.Added, is MemberAddEvent.Failed, MemberAddEvent.BandNotFound -> Unit
+                is MemberAddEvent.Added -> returnToBand(event.musician)
+                // Los avisos de error todavía no se muestran
+                is MemberAddEvent.Failed, MemberAddEvent.BandNotFound -> Unit
             }
         }
+    }
+
+    /** Vuelve al detalle con el músico agregado, que lo marca como «Nuevo» y muestra el aviso «Integrante agregado». */
+    private fun returnToBand(musician: Artist) {
+        val navController = findNavController()
+        navController.previousBackStackEntry?.savedStateHandle?.set(ADDED_MEMBER, musician.toResult())
+        navController.navigateUp()
     }
 
     private fun select(binding: FragmentMemberAddBinding, candidate: MusicianCandidate) {
@@ -144,9 +155,30 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
     }
 
     companion object {
+        /** Clave con la que el detalle de la banda recibe el músico agregado. */
+        const val ADDED_MEMBER = "addedMember"
+
+        /** Deben coincidir con los argumentos de memberAddFragment en nav_graph.xml. */
         const val ARG_BAND_ID = "bandId"
         const val ARG_BAND_NAME = "bandName"
 
+        private const val MUSICIAN_ID = "id"
+        private const val MUSICIAN_NAME = "name"
+        private const val MUSICIAN_IMAGE = "image"
+        private const val MUSICIAN_BIRTH_DATE = "birthDate"
+
         fun args(bandId: Int, bandName: String) = bundleOf(ARG_BAND_ID to bandId, ARG_BAND_NAME to bandName)
+
+        /** El músico recién agregado que llegó en [ADDED_MEMBER]. */
+        fun memberOf(result: Bundle) = Artist(
+            id = result.getInt(MUSICIAN_ID),
+            name = result.getString(MUSICIAN_NAME).orEmpty(),
+            image = result.getString(MUSICIAN_IMAGE).orEmpty(),
+            type = ArtistType.MUSICIAN,
+            date = LocalDate.parse(result.getString(MUSICIAN_BIRTH_DATE)),
+        )
+
+        private fun Artist.toResult(): Bundle =
+            bundleOf(MUSICIAN_ID to id, MUSICIAN_NAME to name, MUSICIAN_IMAGE to image, MUSICIAN_BIRTH_DATE to date.toString())
     }
 }
