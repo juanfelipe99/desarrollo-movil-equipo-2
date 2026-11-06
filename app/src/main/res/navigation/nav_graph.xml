@@ -102,6 +102,21 @@
         <fragment
             android:id="@+id/collectorListFragment"
             android:name="com.equipo2.vinilos.ui.collectors.list.CollectorListFragment"
-            android:label="@string/collector_list_title" />
+            android:label="@string/collector_list_title">
+
+            <action
+                android:id="@+id/action_collectorList_to_collectorDetail"
+                app:destination="@id/collectorDetailFragment" />
+        </fragment>
+
+        <fragment
+            android:id="@+id/collectorDetailFragment"
+            android:name="com.equipo2.vinilos.ui.collectors.detail.CollectorDetailFragment"
+            android:label="@string/collector_detail_title">
+
+            <argument
+                android:name="collectorId"
+                app:argType="integer" />
+        </fragment>
     </navigation>
 </navigation>

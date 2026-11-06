@@ -5,13 +5,16 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.databinding.FragmentCollectorListBinding
+import com.equipo2.vinilos.ui.collectors.detail.CollectorDetailFragment
 import com.equipo2.vinilos.ui.common.ScrollsToTop
 import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectWhileVisible
+import com.equipo2.vinilos.ui.common.navigateIfPossible
 import com.equipo2.vinilos.ui.common.smoothScrollToTop
 import com.equipo2.vinilos.ui.state.UiState
 import com.equipo2.vinilos.ui.state.showEmpty
@@ -34,8 +37,9 @@ class CollectorListFragment : Fragment(R.layout.fragment_collector_list), Scroll
 
     /** Filas con nombre, álbumes y correo, el total encima, los estados de carga, vacío y error, y deslizar para recargar. */
     private fun setUpList(binding: FragmentCollectorListBinding) {
-        // La navegación al detalle (HU06) se conecta en la tarea T4
-        val adapter = CollectorAdapter { }
+        val adapter = CollectorAdapter { collector ->
+            findNavController().navigateIfPossible(R.id.action_collectorList_to_collectorDetail, CollectorDetailFragment.args(collector))
+        }
         binding.collectorList.layoutManager = LinearLayoutManager(requireContext())
         binding.collectorList.adapter = adapter
         bindPullToRefresh(binding.collectorsRefresh, viewModel.pullRefresh, binding.collectorList, binding.collectorsMessage.root) {
