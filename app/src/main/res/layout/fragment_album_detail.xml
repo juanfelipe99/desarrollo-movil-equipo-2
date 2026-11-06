@@ -149,7 +149,7 @@
                             android:minWidth="0dp"
                             android:minHeight="48dp"
                             android:paddingHorizontal="4dp"
-                            android:text="@string/album_detail_expand"
+                            android:text="@string/description_expand"
                             android:textAppearance="@style/TextAppearance.Vinilos.LabelLarge"
                             android:visibility="gone" />
                     </LinearLayout>

@@ -12,6 +12,15 @@ interface ArtistApi {
     @GET("bands")
     suspend fun getBands(): List<BandDto>
 
+    @GET("musicians/{id}")
+    suspend fun getMusician(@Path("id") id: Int): MusicianDetailDto
+
+    @GET("bands/{id}")
+    suspend fun getBand(@Path("id") id: Int): BandDetailDto
+
+    @GET("prizes")
+    suspend fun getPrizes(): List<PrizeDto>
+
     // Si el músico estaba en otra banda, la API lo cambia a esta. La respuesta es la banda, que no se usa
     @POST("bands/{bandId}/musicians/{musicianId}")
     suspend fun addMusicianToBand(@Path("bandId") bandId: Int, @Path("musicianId") musicianId: Int)

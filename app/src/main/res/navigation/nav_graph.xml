@@ -93,6 +93,11 @@
                 android:name="artistType"
                 app:argType="string" />
 
+            <!-- Del músico a su banda y de la banda a un integrante (HU04) -->
+            <action
+                android:id="@+id/action_artistDetail_to_artistDetail"
+                app:destination="@id/artistDetailFragment" />
+
             <action
                 android:id="@+id/action_artistDetail_to_memberAdd"
                 app:destination="@id/memberAddFragment" />

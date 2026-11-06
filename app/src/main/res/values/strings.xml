@@ -8,12 +8,15 @@
     <string name="album_list_title">Álbumes</string>
     <string name="artist_list_title">Artistas</string>
     <string name="collector_list_title">Coleccionistas</string>
-    <!-- Avisos de las pantallas que llegan en el sprint 2 (HU04 y HU05). -->
+    <!-- Aviso de la pantalla que llega con HU05. -->
     <string name="collector_list_soon_body">La lista de coleccionistas llegará en la próxima versión de la app.</string>
 
     <string name="coming_soon_title">Muy pronto</string>
 
     <string name="loading_default">Cargando…</string>
+
+    <string name="description_expand">Ver más</string>
+    <string name="description_collapse">Ver menos</string>
 
     <string name="error_load_title">No pudimos cargar %1$s</string>
     <string name="error_network_body">Revisa tu conexión a internet e inténtalo de nuevo.</string>

@@ -21,5 +21,4 @@
     <string name="artist_list_empty_body">Cuando se registren músicos o bandas aparecerán aquí.</string>
 
     <string name="artist_detail_title">Artista</string>
-    <string name="artist_detail_soon_body">El detalle de los artistas llegará en la próxima versión de la app.</string>
 </resources>
