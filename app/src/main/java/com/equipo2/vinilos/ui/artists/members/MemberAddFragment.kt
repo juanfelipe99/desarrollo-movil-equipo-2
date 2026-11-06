@@ -38,6 +38,7 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
         setUpSearch(binding)
         setUpList(binding)
         setUpSubmitting(binding)
+        setUpEvents()
 
         viewLifecycleOwner.collectWhileVisible(viewModel.missingSelection) { missing ->
             binding.memberRequiredError.isVisible = missing
@@ -109,6 +110,24 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
             binding.memberAddButton.isEnabled = !submitting
             binding.memberAddButton.icon = progress.takeIf { submitting }
             binding.memberAddButton.setText(if (submitting) R.string.member_add_saving else R.string.action_add)
+        }
+    }
+
+    /** Si el músico es de otra banda se pide confirmar el cambio, y al aceptar se envía sin volver a preguntar. */
+    private fun setUpEvents() {
+        BandChangeDialog.onBandChangeConfirmed(this) { viewModel.confirmAdd() }
+
+        viewLifecycleOwner.collectWhileVisible(viewModel.events) { event ->
+            when (event) {
+                is MemberAddEvent.ConfirmBandChange -> BandChangeDialog.show(
+                    host = this,
+                    musicianName = event.musician.name,
+                    currentBandName = event.currentBandName,
+                    newBandName = requireArguments().getString(ARG_BAND_NAME).orEmpty(),
+                )
+                // El regreso al detalle y los avisos de error todavía no se muestran
+                is MemberAddEvent.Added, is MemberAddEvent.Failed, MemberAddEvent.BandNotFound -> Unit
+            }
         }
     }
 

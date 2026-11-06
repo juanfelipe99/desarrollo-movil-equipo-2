@@ -19,6 +19,10 @@
     <string name="member_add_no_results_title">Sin resultados</string>
     <string name="member_add_no_results_body">No encontramos músicos con «%1$s».</string>
 
+    <string name="band_change_title">¿Cambiar de banda?</string>
+    <string name="band_change_body">%1$s es integrante de %2$s. Si lo agregas a %3$s, dejará de ser integrante de %2$s.</string>
+    <string name="band_change_confirm">Cambiar de banda</string>
+
     <string name="error_member_required">Elige un músico.</string>
     <string name="member_add_saving">Agregando…</string>
 </resources>
