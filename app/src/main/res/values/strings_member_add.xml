@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="es">
+    <string name="member_add_title">Agregar integrante</string>
+    <string name="member_add_subtitle">Elige el músico que quieres agregar a %1$s.</string>
+    <string name="member_add_search_hint">Buscar músico</string>
+    <string name="cd_member_add_search_clear">Borrar búsqueda</string>
+
+    <string name="member_status_no_band">Sin banda</string>
+    <string name="member_status_in_band">Integrante de %1$s</string>
+    <string name="member_status_member">Ya es integrante</string>
+    <string name="member_leaves_band">Al agregarlo dejará %1$s</string>
+    <string name="cd_member_selected">Elegido</string>
+    <string name="cd_member_not_selected">No elegido</string>
+
+    <string name="member_add_loading">Cargando músicos…</string>
+    <string name="member_add_object">los músicos</string>
+    <string name="member_add_empty_title">No hay músicos disponibles</string>
+    <string name="member_add_empty_body">Cuando se registren músicos podrás agregarlos a la banda.</string>
+    <string name="member_add_no_results_title">Sin resultados</string>
+    <string name="member_add_no_results_body">No encontramos músicos con «%1$s».</string>
+
+    <string name="error_member_required">Elige un músico.</string>
+    <string name="member_add_saving">Agregando…</string>
+</resources>

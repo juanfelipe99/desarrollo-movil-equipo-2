@@ -154,21 +154,22 @@ class MainActivity : AppCompatActivity() {
     /** Oculta las barras que no lleva cada pantalla y muestra las que se habían escondido al bajar. */
     private fun updateBars(@IdRes destinationId: Int) {
         val roleSelect = destinationId == R.id.roleSelectFragment
-        val albumCreate = destinationId == R.id.albumCreateFragment
+        // Crear álbum y Agregar integrante ocupan la pantalla y se cierran con una X
+        val form = destinationId == R.id.albumCreateFragment || destinationId == R.id.memberAddFragment
 
         // Se ocultan la barra y la línea, no el AppBarLayout, porque sin él la pantalla quedaría debajo de la barra de estado
         binding.toolbar.isVisible = !roleSelect
         binding.toolbarDivider.isVisible = !roleSelect
-        binding.roleChipSlot.isVisible = !albumCreate
+        binding.roleChipSlot.isVisible = !form
         // En el formulario la X para cerrar debe estar siempre a mano
-        setToolbarHidesOnScroll(barsHideOnScroll && !albumCreate)
+        setToolbarHidesOnScroll(barsHideOnScroll && !form)
 
-        binding.navBar.isVisible = !roleSelect && !albumCreate
+        binding.navBar.isVisible = !roleSelect && !form
         binding.navDivider.isVisible = binding.navBar.isVisible
         showBars(animate = false)
 
-        // Crear álbum lleva una X en lugar de la flecha de volver
-        if (albumCreate) {
+        // Los formularios llevan una X en lugar de la flecha de volver
+        if (form) {
             binding.toolbar.setNavigationIcon(R.drawable.ic_close)
             binding.toolbar.setNavigationContentDescription(R.string.cd_close_without_saving)
         }
