@@ -163,12 +163,15 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
         }
     }
 
-    private fun showFailure(failure: MemberAddFailure) = when (failure) {
-        // Sin botón en el aviso, como en el prototipo. La selección se conserva y se reintenta con Agregar
-        MemberAddFailure.CONNECTION -> showSnackbar(getString(R.string.error_member_add_connection), isError = true)
-        // El ViewModel ya está recargando el listado
-        MemberAddFailure.NOT_FOUND -> showSnackbar(getString(R.string.error_member_add_not_found), isError = true)
-        MemberAddFailure.SERVER -> showSnackbar(getString(R.string.error_member_add_failed), isError = true)
+    /** El aviso no lleva botón, como en el prototipo. La selección se conserva para volver a tocar Agregar. */
+    private fun showFailure(failure: MemberAddFailure) {
+        val message = when (failure) {
+            MemberAddFailure.CONNECTION -> R.string.error_member_add_connection
+            // El ViewModel ya está recargando el listado
+            MemberAddFailure.NOT_FOUND -> R.string.error_member_add_not_found
+            MemberAddFailure.SERVER -> R.string.error_member_add_failed
+        }
+        showSnackbar(getString(message), isError = true)
     }
 
     /** Vuelve al detalle con el músico agregado, que lo marca como «Nuevo» y muestra el aviso «Integrante agregado». */

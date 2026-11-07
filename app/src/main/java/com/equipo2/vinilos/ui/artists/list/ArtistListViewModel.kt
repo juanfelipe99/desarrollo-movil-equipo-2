@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.equipo2.vinilos.VinilosApplication
 import com.equipo2.vinilos.data.model.Artist
 import com.equipo2.vinilos.data.model.ArtistType
+import com.equipo2.vinilos.data.model.byName
 import com.equipo2.vinilos.data.repository.ArtistRepository
 import com.equipo2.vinilos.ui.state.PullRefresh
 import com.equipo2.vinilos.ui.state.UiState
@@ -20,8 +21,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.text.Collator
-import java.util.Locale
 
 enum class ArtistFilter(private val type: ArtistType?) {
     ALL(null),
@@ -83,13 +82,7 @@ class ArtistListViewModel(
     }
 
     private fun artistsOf(artists: List<Artist>): UiState<List<Artist>> =
-        if (artists.isEmpty()) UiState.Empty else UiState.Success(sortedByName(artists))
-
-    // En orden alfabético sin importar tildes ni mayúsculas, así «Ángela» queda junto a «Ana»
-    private fun sortedByName(artists: List<Artist>): List<Artist> {
-        val collator = Collator.getInstance(Locale.forLanguageTag("es")).apply { strength = Collator.PRIMARY }
-        return artists.sortedWith(compareBy(collator) { it.name })
-    }
+        if (artists.isEmpty()) UiState.Empty else UiState.Success(artists.sortedWith(byName { it.name }))
 
     companion object {
         private const val FILTER = "filter"

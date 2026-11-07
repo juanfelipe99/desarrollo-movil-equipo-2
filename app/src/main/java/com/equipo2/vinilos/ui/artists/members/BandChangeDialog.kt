@@ -13,7 +13,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 /**
  * Pide confirmar que el músico dejará su banda actual para unirse a esta (HU12).
- * Es un DialogFragment para que siga abierto al girar; la confirmación llega con [onBandChangeConfirmed].
+ * Es un DialogFragment para que siga abierto al girar. La confirmación llega con [onBandChangeConfirmed].
  */
 class BandChangeDialog : DialogFragment() {
 

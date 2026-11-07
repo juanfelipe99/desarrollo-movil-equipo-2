@@ -64,7 +64,7 @@ class MemberCandidateAdapter(
             binding.memberRadio.isChecked = row.selected
             binding.root.isSelected = row.selected
 
-            // Los integrantes actuales se ven atenuados y no responden; durante el envío nadie responde
+            // Los integrantes actuales se ven atenuados y no responden, y durante el envío no responde ninguna fila
             val selectable = row.candidate.selectable
             binding.root.isEnabled = selectable && row.enabled
             binding.memberRowContent.alpha = if (selectable) 1f else DISABLED_ALPHA

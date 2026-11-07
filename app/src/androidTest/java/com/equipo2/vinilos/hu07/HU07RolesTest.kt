@@ -23,7 +23,6 @@ import com.equipo2.vinilos.support.enterAs
 import com.equipo2.vinilos.support.toolbarTitle
 import com.equipo2.vinilos.support.waitForNightMode
 import com.equipo2.vinilos.support.waitUntil
-import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
