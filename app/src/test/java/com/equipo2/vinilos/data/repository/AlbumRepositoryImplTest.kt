@@ -201,6 +201,30 @@ class AlbumRepositoryImplTest {
         assertEquals(2, server.requests.count { it == "albums" })
     }
 
+    @Test
+    fun abrirOtroAlbum_noVuelveAPedirLosAutoresDeLosComentarios() = runTest {
+        server.respond("albums/100", ALBUM_WITH_COMMENT_JSON)
+        server.respond("albums/101", ALBUM_WITH_COMMENT_JSON)
+        server.respond("collectors", "[]")
+
+        repository.getAlbumById(100)
+        repository.getAlbumById(101)
+
+        assertEquals(1, server.requests.count { it == "collectors" })
+    }
+
+    @Test
+    fun siFallanLosAutores_elSiguienteAlbumVuelveAPedirlos() = runTest {
+        server.respond("albums/100", ALBUM_WITH_COMMENT_JSON)
+        server.respond("albums/101", ALBUM_WITH_COMMENT_JSON)
+        server.respond("collectors", """{"message":"Internal error"}""", code = 500)
+
+        repository.getAlbumById(100)
+        repository.getAlbumById(101)
+
+        assertEquals(2, server.requests.count { it == "collectors" })
+    }
+
     private companion object {
         // Así responde BackVynils: el track con su id y el álbum al que quedó asociado
         const val TRACK_CREATED_JSON = """

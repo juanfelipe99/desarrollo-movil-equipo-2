@@ -36,6 +36,7 @@ class VinilosRule : ExternalResource() {
         // Cada prueba parte sin datos guardados de la anterior
         originalContainer.albumRepository.clearCache()
         originalContainer.artistRepository.clearCache()
+        originalContainer.collectorRepository.clearCache()
     }
 
     override fun after() {

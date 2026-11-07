@@ -44,6 +44,8 @@ class CollectorListViewModel(private val repository: CollectorRepository) : View
 
     /** Recarga al deslizar hacia abajo. Los coleccionistas siguen a la vista mientras llegan los nuevos. */
     fun refresh() {
+        // Recargar siempre va a la API
+        repository.clearCache()
         if (collectors.value !is UiState.Success) return load()
         if (loading?.isActive == true) return
         loading = pullRefresh.launch({ repository.getCollectors() }) { collectors -> this.collectors.value = collectorsOf(collectors) }

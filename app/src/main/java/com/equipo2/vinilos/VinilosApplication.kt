@@ -65,6 +65,7 @@ class VinilosApplication : Application(), SingletonImageLoader.Factory {
         if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW && level != ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
             container.albumRepository.clearCache()
             container.artistRepository.clearCache()
+            container.collectorRepository.clearCache()
         }
     }
 

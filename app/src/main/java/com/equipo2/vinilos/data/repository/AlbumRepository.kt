@@ -45,6 +45,7 @@ class AlbumRepositoryImpl(private val serviceAdapter: AlbumServiceAdapter) : Alb
     override fun clearCache() {
         catalog = null
         details.evictAll()
+        serviceAdapter.clearCache()
     }
 
     private companion object {
