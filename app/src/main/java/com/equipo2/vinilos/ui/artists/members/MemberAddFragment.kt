@@ -18,7 +18,6 @@ import com.equipo2.vinilos.data.model.Artist
 import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.model.MusicianCandidate
 import com.equipo2.vinilos.databinding.FragmentMemberAddBinding
-import com.equipo2.vinilos.ui.common.SnackbarAction
 import com.equipo2.vinilos.ui.common.buttonProgress
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.keepSnackbarsAbove
@@ -165,12 +164,8 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
     }
 
     private fun showFailure(failure: MemberAddFailure) = when (failure) {
-        // Reintentar envía el mismo músico sin volver a pedir la confirmación del cambio de banda
-        MemberAddFailure.CONNECTION -> showSnackbar(
-            getString(R.string.error_member_add_connection),
-            isError = true,
-            action = SnackbarAction(getString(R.string.error_network_retry)) { viewModel.confirmAdd() },
-        )
+        // Sin botón en el aviso, como en el prototipo. La selección se conserva y se reintenta con Agregar
+        MemberAddFailure.CONNECTION -> showSnackbar(getString(R.string.error_member_add_connection), isError = true)
         // El ViewModel ya está recargando el listado
         MemberAddFailure.NOT_FOUND -> showSnackbar(getString(R.string.error_member_add_not_found), isError = true)
         MemberAddFailure.SERVER -> showSnackbar(getString(R.string.error_member_add_failed), isError = true)

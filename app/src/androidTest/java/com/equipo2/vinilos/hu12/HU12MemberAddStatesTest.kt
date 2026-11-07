@@ -141,7 +141,7 @@ class HU12MemberAddStatesTest {
     // Errores al agregar
 
     @Test
-    fun sinConexionAlAgregar_avisaConReintentar_conservaLaSeleccion_yReintentarLoAgrega() {
+    fun sinConexionAlAgregar_avisaSinBoton_conservaLaSeleccion_yAgregarOtraVezLoAgrega() {
         val bands = InMemoryBandRepository(all)
         bands.addResponses = listOf(Result.failure(DataError.Network()), Result.success(Unit))
         openWith(bands)
@@ -153,7 +153,9 @@ class HU12MemberAddStatesTest {
         onView(candidateRadio(brian.name)).check(matches(isChecked()))
         onView(withId(R.id.memberAddSubtitle)).check(matches(isDisplayed()))
 
-        onView(withId(SNACKBAR_ACTION)).check(matches(withText(R.string.error_network_retry))).perform(click())
+        // Como en el prototipo, el aviso no tiene botón y se reintenta con el mismo Agregar
+        onView(withId(SNACKBAR_ACTION)).check(matches(not(isDisplayed())))
+        tapAdd()
 
         checkSnackbar(R.string.snackbar_member_added)
         onView(newMemberBadge(brian.name)).perform(scrollToWithBarsHidden()).check(matches(isDisplayed()))
@@ -161,7 +163,7 @@ class HU12MemberAddStatesTest {
     }
 
     @Test
-    fun sinConexionAlCambiarDeBanda_reintentarNoVuelveAPedirLaConfirmacion() {
+    fun sinConexionAlCambiarDeBanda_agregarOtraVezPideConfirmar_yLoAgrega() {
         val bands = InMemoryBandRepository(all)
         bands.addResponses = listOf(Result.failure(DataError.Network()), Result.success(Unit))
         openWith(bands)
@@ -171,9 +173,9 @@ class HU12MemberAddStatesTest {
         onView(withText(R.string.band_change_confirm)).inRoot(isDialog()).perform(click())
         checkSnackbar(R.string.error_member_add_connection)
 
-        onView(withId(SNACKBAR_ACTION)).perform(click())
+        tapAdd()
+        onView(withText(R.string.band_change_confirm)).inRoot(isDialog()).perform(click())
 
-        onView(withText(R.string.band_change_title)).check(doesNotExist())
         checkSnackbar(R.string.snackbar_member_added)
         assertEquals(2, bands.added.size)
     }
