@@ -61,16 +61,22 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
 
         binding.memberCancelButton.setOnClickListener { findNavController().navigateUp() }
         binding.memberAddButton.setOnClickListener {
-            hideKeyboard(binding)
+            hideKeyboard(binding.memberSearchInput)
             viewModel.add()
         }
     }
 
-    /** Filtra mientras se escribe. El campo recuerda lo escrito al girar, y al volver a escribirlo el ViewModel ya lo tiene. */
+    /**
+     * Filtra mientras se escribe. El campo recuerda lo escrito al girar, y al volver a escribirlo el ViewModel ya lo tiene.
+     *
+     * Los listeners del campo no deben guardar el fragment. Android puede quedarse con el texto del campo después de cerrar
+     * la pantalla, por ejemplo con un servicio de accesibilidad activo, y por el texto llega a ellos y al fragment.
+     */
     private fun setUpSearch(binding: FragmentMemberAddBinding) {
+        val viewModel = viewModel
         binding.memberSearchInput.doAfterTextChanged { text -> viewModel.search(text.toString()) }
-        binding.memberSearchInput.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) hideKeyboard(binding)
+        binding.memberSearchInput.setOnEditorActionListener { input, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) hideKeyboard(input)
             actionId == EditorInfo.IME_ACTION_SEARCH
         }
     }
@@ -182,18 +188,18 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
     }
 
     private fun select(binding: FragmentMemberAddBinding, candidate: MusicianCandidate) {
-        hideKeyboard(binding)
+        hideKeyboard(binding.memberSearchInput)
         viewModel.select(candidate)
     }
 
-    // Al elegir o agregar se baja el teclado para que se vean la lista y los botones
-    private fun hideKeyboard(binding: FragmentMemberAddBinding) {
-        binding.memberSearchInput.clearFocus()
-        val keyboard = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        keyboard.hideSoftInputFromWindow(binding.memberSearchInput.windowToken, 0)
-    }
-
     companion object {
+        // Al elegir o agregar se baja el teclado para que se vean la lista y los botones
+        private fun hideKeyboard(input: View) {
+            input.clearFocus()
+            val keyboard = input.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            keyboard.hideSoftInputFromWindow(input.windowToken, 0)
+        }
+
         /** Clave con la que el detalle de la banda recibe el músico agregado. */
         const val ADDED_MEMBER = "addedMember"
 

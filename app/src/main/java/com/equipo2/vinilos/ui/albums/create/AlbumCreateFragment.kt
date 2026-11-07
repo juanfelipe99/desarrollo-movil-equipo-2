@@ -48,6 +48,8 @@ class AlbumCreateFragment : Fragment(R.layout.fragment_album_create) {
     }
 
     private fun setUpTextFields(binding: FragmentAlbumCreateBinding) {
+        // Los listeners de los campos guardan solo el ViewModel, no el fragment, por si Android retiene el campo al cerrar la pantalla
+        val viewModel = viewModel
         binding.nameInput.doAfterTextChanged { text -> viewModel.update { copy(name = text.toString()) } }
         binding.coverInput.doAfterTextChanged { text -> viewModel.update { copy(cover = text.toString()) } }
         binding.descriptionInput.doAfterTextChanged { text -> viewModel.update { copy(description = text.toString()) } }

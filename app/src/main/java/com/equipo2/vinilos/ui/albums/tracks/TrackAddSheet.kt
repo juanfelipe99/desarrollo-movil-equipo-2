@@ -31,6 +31,8 @@ class TrackAddSheet : BottomSheetDialogFragment(R.layout.sheet_track_add) {
         val binding = SheetTrackAddBinding.bind(view)
         binding.trackAddSubtitle.text = getString(R.string.track_add_subtitle, requireArguments().getString(ARG_ALBUM_NAME))
 
+        // Los listeners de los campos guardan solo el ViewModel, no el fragment, por si Android retiene el campo al cerrar la pantalla
+        val viewModel = viewModel
         binding.trackNameInput.doAfterTextChanged { text -> viewModel.update { copy(name = text.toString()) } }
         binding.trackDurationInput.doAfterTextChanged { text -> viewModel.update { copy(duration = text.toString()) } }
         viewLifecycleOwner.collectWhileVisible(viewModel.errors) { errors ->
