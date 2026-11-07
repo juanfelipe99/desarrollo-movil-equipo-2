@@ -33,6 +33,9 @@ class VinilosRule : ExternalResource() {
         IdlingPolicies.setMasterPolicyTimeout(2, TimeUnit.MINUTES)
         IdlingRegistry.getInstance().register(apiIdling)
         BackVynils.wakeUp()
+        // Cada prueba parte sin datos guardados de la anterior
+        originalContainer.albumRepository.clearCache()
+        originalContainer.artistRepository.clearCache()
     }
 
     override fun after() {

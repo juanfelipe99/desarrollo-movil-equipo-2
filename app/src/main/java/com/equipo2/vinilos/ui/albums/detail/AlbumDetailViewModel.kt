@@ -51,6 +51,8 @@ class AlbumDetailViewModel(
 
     /** Recarga al deslizar hacia abajo. El álbum sigue a la vista mientras llegan sus datos nuevos. */
     fun refresh() {
+        // Recargar siempre va a la API
+        repository.clearCache()
         if (_state.value !is UiState.Success) return load()
         if (loading?.isActive == true) return
         loading = pullRefresh.launch({ repository.getAlbumById(albumId) }) { album -> _state.value = UiState.Success(album) }
