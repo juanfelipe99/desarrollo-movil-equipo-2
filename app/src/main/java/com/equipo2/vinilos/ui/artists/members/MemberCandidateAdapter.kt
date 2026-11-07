@@ -68,7 +68,9 @@ class MemberCandidateAdapter(
             val selectable = row.candidate.selectable
             binding.root.isEnabled = selectable && row.enabled
             binding.memberRowContent.alpha = if (selectable) 1f else DISABLED_ALPHA
-            binding.memberRadio.isEnabled = selectable
+            // Los que ya son integrantes llevan un check en lugar del radio
+            binding.memberRadio.isVisible = selectable
+            binding.memberAlreadyMember.isVisible = !selectable
 
             // El radio no recibe el foco, así que la fila le dice a TalkBack si está elegido
             ViewCompat.setStateDescription(

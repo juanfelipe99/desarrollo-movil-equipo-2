@@ -36,6 +36,7 @@ private data class ListScreen(
     val selected: MusicianCandidate?,
     val submitting: Boolean,
     val bandMissing: Boolean,
+    val query: String,
 )
 
 /** Elegir el músico que se agrega a una banda (HU12): buscador, lista de selección única y «Elige un músico». */
@@ -86,8 +87,9 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
         // Al elegir, la fila cambia en su lugar sin el fundido, que la hacía parpadear y la duplicaba un instante
         (binding.memberList.itemAnimator as? SimpleItemAnimator)?.supportsChangeAnimations = false
 
-        val screen = combine(viewModel.state, viewModel.selected, viewModel.isSubmitting, viewModel.bandMissing, ::ListScreen)
-        viewLifecycleOwner.collectWhileVisible(screen) { (state, selected, submitting, bandMissing) ->
+        // La búsqueda va aparte porque dos búsquedas sin resultados dan la misma lista vacía y el mensaje debe mostrar la última
+        val screen = combine(viewModel.state, viewModel.selected, viewModel.isSubmitting, viewModel.bandMissing, viewModel.query, ::ListScreen)
+        viewLifecycleOwner.collectWhileVisible(screen) { (state, selected, submitting, bandMissing, query) ->
             val noResults = state is UiState.Success && state.data.isEmpty()
             when (state) {
                 UiState.Loading ->
@@ -110,7 +112,7 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
                     adapter.submitList(state.data.map { MemberRow(it, selected = it == selected, enabled = !submitting) })
                     if (noResults) binding.memberMessage.showEmpty(
                         getString(R.string.member_add_no_results_title),
-                        getString(R.string.member_add_no_results_body, viewModel.query.value.trim()),
+                        getString(R.string.member_add_no_results_body, query.trim()),
                         R.drawable.ic_search,
                     )
                 }

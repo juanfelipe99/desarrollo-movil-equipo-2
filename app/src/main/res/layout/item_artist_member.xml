@@ -46,15 +46,42 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/memberName"
+        <!-- «Nuevo» va justo después del nombre, como en el prototipo -->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textAppearance="@style/TextAppearance.Vinilos.BodyLarge.SemiBold"
-            android:textColor="@color/md_on_surface"
-            tools:text="Rubén Blades Bellido de Luna" />
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/memberName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textAppearance="@style/TextAppearance.Vinilos.BodyLarge.SemiBold"
+                android:textColor="@color/md_on_surface"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/memberNewBadge"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Rubén Blades Bellido de Luna" />
+
+            <!-- El integrante recién agregado lleva fondo de fila nueva y «Nuevo» (HU12) -->
+            <TextView
+                android:id="@+id/memberNewBadge"
+                style="@style/Widget.Vinilos.BadgeNew"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/memberName"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView
             android:layout_width="wrap_content"
@@ -63,16 +90,6 @@
             android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
             android:textColor="@color/md_on_surface_variant" />
     </LinearLayout>
-
-    <!-- El integrante recién agregado lleva fondo de fila nueva y «Nuevo» (HU12) -->
-    <TextView
-        android:id="@+id/memberNewBadge"
-        style="@style/Widget.Vinilos.BadgeNew"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:visibility="gone"
-        tools:visibility="visible" />
 
     <ImageView
         android:layout_width="24dp"
