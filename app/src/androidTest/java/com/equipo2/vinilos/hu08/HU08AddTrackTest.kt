@@ -17,6 +17,7 @@ import com.equipo2.vinilos.R
 import com.equipo2.vinilos.VinilosApplication
 import com.equipo2.vinilos.hu01.openAlbum
 import com.equipo2.vinilos.support.BackVynils
+import com.equipo2.vinilos.support.RUN_TAG
 import com.equipo2.vinilos.support.VinilosRule
 import com.equipo2.vinilos.support.enterAs
 import com.equipo2.vinilos.support.hasFieldError
@@ -182,7 +183,7 @@ class HU08AddTrackTest {
 
     private companion object {
         /** Prefijo de los álbumes de prueba, que se borran al terminar junto con sus tracks. */
-        const val TEST_ALBUM_PREFIX = "E2E HU08"
+        val TEST_ALBUM_PREFIX = "E2E HU08 $RUN_TAG"
         const val TRACK_NAME = "Todos vuelven"
     }
 }

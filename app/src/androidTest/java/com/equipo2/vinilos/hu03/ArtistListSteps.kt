@@ -1,9 +1,15 @@
 package com.equipo2.vinilos.hu03
 
 import android.view.View
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.UiController
+import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.equipo2.vinilos.R
@@ -12,13 +18,12 @@ import com.equipo2.vinilos.data.model.ArtistDetail
 import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.repository.ArtistRepository
 import com.equipo2.vinilos.support.enterAs
+import com.equipo2.vinilos.ui.artists.list.ArtistAdapter
 import kotlinx.coroutines.awaitCancellation
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
 import java.io.IOException
-import java.text.Collator
 import java.time.LocalDate
-import java.util.Locale
 
 /** Repositorio en memoria que da sus respuestas en orden y repite la última, o que nunca responde. */
 class InMemoryArtistRepository(private val responses: List<Result<List<Artist>>>) : ArtistRepository {
@@ -56,8 +61,50 @@ fun openArtists() {
 /** Nombre de una fila del listado, sin confundirlo con otros textos de la pantalla. */
 fun artistRowName(name: String): Matcher<View> = allOf(withId(R.id.artistName), withText(name), isDescendantOfA(withId(R.id.artistList)))
 
-/** Orden en que la app muestra los artistas: alfabético sin importar tildes ni mayúsculas. */
-fun sortedLikeTheApp(names: List<String>): List<String> {
-    val collator = Collator.getInstance(Locale.forLanguageTag("es")).apply { strength = Collator.PRIMARY }
-    return names.sortedWith(collator)
+/** Artistas que muestra el listado con el filtro actual. */
+fun shownArtists(): List<Artist> {
+    var items = emptyList<Artist>()
+    onView(withId(R.id.artistList)).check { view, noView ->
+        items = ((view ?: throw noView) as RecyclerView).artistAdapter.currentList
+    }
+    return items
 }
+
+/** Desplaza el listado hasta el artista, que debe estar a la vista para revisarlo o tocarlo. */
+fun showArtistRow(name: String) {
+    onView(withId(R.id.artistList)).perform(object : ViewAction {
+        override fun getConstraints(): Matcher<View> = isAssignableFrom(RecyclerView::class.java)
+
+        override fun getDescription() = "desplazar el listado hasta «$name»"
+
+        override fun perform(uiController: UiController, view: View) {
+            val list = view as RecyclerView
+            val position = list.artistAdapter.currentList.indexOfFirst { it.name == name }
+            check(position >= 0) { "El listado no tiene el artista «$name»" }
+            list.scrollToPosition(position)
+            uiController.loopMainThreadUntilIdle()
+        }
+    })
+    onView(artistRowName(name)).check(matches(isDisplayed()))
+}
+
+/** Toca la primera fila del listado, sea cual sea el artista. */
+fun openFirstArtist() {
+    onView(withId(R.id.artistList)).perform(object : ViewAction {
+        override fun getConstraints(): Matcher<View> = isAssignableFrom(RecyclerView::class.java)
+
+        override fun getDescription() = "tocar la primera fila del listado"
+
+        override fun perform(uiController: UiController, view: View) {
+            val list = view as RecyclerView
+            list.scrollToPosition(0)
+            uiController.loopMainThreadUntilIdle()
+            list.findViewHolderForAdapterPosition(0)!!.itemView.performClick()
+            uiController.loopMainThreadUntilIdle()
+        }
+    })
+}
+
+private val RecyclerView.artistAdapter: ArtistAdapter
+    get() = adapter as ArtistAdapter
+
