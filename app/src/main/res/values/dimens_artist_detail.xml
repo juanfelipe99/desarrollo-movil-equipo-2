@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="artist_photo">104dp</dimen>
+    <dimen name="artist_album_width">132dp</dimen>
+    <dimen name="artist_album_gap">12dp</dimen>
+</resources>

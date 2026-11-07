@@ -9,8 +9,6 @@
     <string name="album_detail_record_label_label">Sello discográfico</string>
 
     <string name="album_detail_description_title">Descripción</string>
-    <string name="album_detail_expand">Ver más</string>
-    <string name="album_detail_collapse">Ver menos</string>
 
     <string name="album_detail_tracks_title">Tracks</string>
     <plurals name="album_detail_tracks_count">

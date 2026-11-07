@@ -92,6 +92,29 @@
             <argument
                 android:name="artistType"
                 app:argType="string" />
+
+            <!-- Del músico a su banda y de la banda a un integrante (HU04) -->
+            <action
+                android:id="@+id/action_artistDetail_to_artistDetail"
+                app:destination="@id/artistDetailFragment" />
+
+            <action
+                android:id="@+id/action_artistDetail_to_memberAdd"
+                app:destination="@id/memberAddFragment" />
+        </fragment>
+
+        <fragment
+            android:id="@+id/memberAddFragment"
+            android:name="com.equipo2.vinilos.ui.artists.members.MemberAddFragment"
+            android:label="@string/member_add_title">
+
+            <argument
+                android:name="bandId"
+                app:argType="integer" />
+
+            <argument
+                android:name="bandName"
+                app:argType="string" />
         </fragment>
     </navigation>
 

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="es">
+    <string name="artist_photo_description">Foto de %1$s</string>
+
+    <string name="artist_detail_birth_date_label">Fecha de nacimiento</string>
+    <string name="artist_detail_creation_date_label">Fecha de creación</string>
+    <string name="artist_detail_band_label">Banda</string>
+    <string name="cd_artist_detail_band">Banda: %1$s. Toca para ver su detalle</string>
+
+    <string name="artist_detail_description_title">Descripción</string>
+
+    <string name="artist_detail_members_title">Integrantes</string>
+    <plurals name="artist_detail_members_count">
+        <item quantity="one">· %d integrante</item>
+        <item quantity="many">· %d integrantes</item>
+        <item quantity="other">· %d integrantes</item>
+    </plurals>
+    <string name="artist_detail_members_empty_title">Esta banda aún no tiene integrantes</string>
+    <string name="artist_detail_members_empty_body">Los integrantes aparecerán aquí cuando se registren.</string>
+    <string name="artist_detail_members_empty_body_collector">Usa «Agregar integrante» para sumar el primer músico.</string>
+    <string name="artist_detail_add_member">Agregar integrante</string>
+
+    <string name="artist_detail_albums_title">Álbumes</string>
+    <plurals name="artist_detail_albums_count">
+        <item quantity="one">· %d álbum</item>
+        <item quantity="many">· %d álbumes</item>
+        <item quantity="other">· %d álbumes</item>
+    </plurals>
+    <string name="artist_detail_albums_empty_title">Sin álbumes</string>
+    <string name="artist_detail_albums_empty_body">Este artista aún no tiene álbumes registrados.</string>
+
+    <string name="artist_detail_prizes_title">Premios</string>
+    <plurals name="artist_detail_prizes_count">
+        <item quantity="one">· %d premio</item>
+        <item quantity="many">· %d premios</item>
+        <item quantity="other">· %d premios</item>
+    </plurals>
+    <string name="artist_detail_prizes_empty_title">Sin premios</string>
+    <string name="artist_detail_prizes_empty_body">Este artista no tiene premios registrados.</string>
+
+    <string name="artist_detail_loading">Cargando artista…</string>
+    <string name="artist_detail_object">el artista</string>
+</resources>

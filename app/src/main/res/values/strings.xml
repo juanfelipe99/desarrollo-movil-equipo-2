@@ -32,6 +32,9 @@
 
     <string name="loading_default">Cargando…</string>
 
+    <string name="description_expand">Ver más</string>
+    <string name="description_collapse">Ver menos</string>
+
     <string name="error_load_title">No pudimos cargar %1$s</string>
     <string name="error_network_body">Revisa tu conexión a internet e inténtalo de nuevo.</string>
     <string name="error_server_body">El servidor no está disponible en este momento. Inténtalo más tarde.</string>
