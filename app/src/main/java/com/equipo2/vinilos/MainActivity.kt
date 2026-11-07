@@ -20,6 +20,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.equipo2.vinilos.databinding.ActivityMainBinding
 import com.equipo2.vinilos.ui.common.AppSnackbar
 import com.equipo2.vinilos.ui.common.ScrollsToTop
+import com.equipo2.vinilos.ui.common.SnackbarAction
 import com.equipo2.vinilos.ui.common.applySystemBarsPadding
 import com.equipo2.vinilos.ui.role.changedMessageRes
 import com.equipo2.vinilos.ui.role.chip.RoleChip
@@ -76,12 +77,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** Muestra un aviso encima de snackbarAnchor o de la barra inferior, el primero visible. */
-    fun showSnackbar(message: CharSequence, isError: Boolean = false) {
+    fun showSnackbar(message: CharSequence, isError: Boolean = false, action: SnackbarAction? = null) {
         // Sin la barra inferior a la vista, por el riel o porque se escondió, el aviso va abajo del todo
         val bottomNav = binding.navBar.takeIf { binding.bottomBar != null && !bottomBarHidden }
         val target = listOf(snackbarAnchor, bottomNav).firstOrNull { it?.isShown == true }
         // En horizontal el aviso va en el área del contenido, sin tapar el riel
-        snackbar = AppSnackbar.show(binding.snackbarParent ?: binding.root, message, isError, target)
+        snackbar = AppSnackbar.show(binding.snackbarParent ?: binding.root, message, isError, target, action)
     }
 
     private fun setUpBars() {
@@ -127,6 +128,9 @@ class MainActivity : AppCompatActivity() {
 
             // El aviso es de la pantalla que se deja, y la nueva muestra el suyo después de llegar
             snackbar?.dismiss()
+            // La vista flotante también: la pantalla que se deja puede seguir puesta un instante, y un aviso de la nueva
+            // quedaría pegado a ella y fuera de la pantalla. Si la nueva tiene una, la registra al crear su vista
+            snackbarAnchor = null
             updateBars(screen.id)
         }
 
@@ -154,21 +158,22 @@ class MainActivity : AppCompatActivity() {
     /** Oculta las barras que no lleva cada pantalla y muestra las que se habían escondido al bajar. */
     private fun updateBars(@IdRes destinationId: Int) {
         val roleSelect = destinationId == R.id.roleSelectFragment
-        val albumCreate = destinationId == R.id.albumCreateFragment
+        // Crear álbum y Agregar integrante ocupan la pantalla y se cierran con una X
+        val form = destinationId == R.id.albumCreateFragment || destinationId == R.id.memberAddFragment
 
         // Se ocultan la barra y la línea, no el AppBarLayout, porque sin él la pantalla quedaría debajo de la barra de estado
         binding.toolbar.isVisible = !roleSelect
         binding.toolbarDivider.isVisible = !roleSelect
-        binding.roleChipSlot.isVisible = !albumCreate
+        binding.roleChipSlot.isVisible = !form
         // En el formulario la X para cerrar debe estar siempre a mano
-        setToolbarHidesOnScroll(barsHideOnScroll && !albumCreate)
+        setToolbarHidesOnScroll(barsHideOnScroll && !form)
 
-        binding.navBar.isVisible = !roleSelect && !albumCreate
+        binding.navBar.isVisible = !roleSelect && !form
         binding.navDivider.isVisible = binding.navBar.isVisible
         showBars(animate = false)
 
-        // Crear álbum lleva una X en lugar de la flecha de volver
-        if (albumCreate) {
+        // Los formularios llevan una X en lugar de la flecha de volver
+        if (form) {
             binding.toolbar.setNavigationIcon(R.drawable.ic_close)
             binding.toolbar.setNavigationContentDescription(R.string.cd_close_without_saving)
         }

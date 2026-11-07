@@ -13,11 +13,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Vinilos">
+        <!-- stateHidden: al girar, el teclado no se abre solo y no tapa la lista ni los botones; se abre al tocar un campo -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Vinilos.Starting"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize|stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
