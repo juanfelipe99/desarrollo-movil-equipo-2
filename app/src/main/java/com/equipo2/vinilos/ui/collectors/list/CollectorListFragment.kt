@@ -53,7 +53,6 @@ class CollectorListFragment : Fragment(R.layout.fragment_collector_list), Scroll
                 UiState.Empty -> binding.collectorsMessage.showEmpty(
                     getString(R.string.collector_list_empty_title),
                     getString(R.string.collector_list_empty_body),
-                    R.drawable.ic_groups,
                 )
                 is UiState.Error ->
                     binding.collectorsMessage.showError(getString(R.string.collector_list_object), state.reason) { viewModel.retry() }
