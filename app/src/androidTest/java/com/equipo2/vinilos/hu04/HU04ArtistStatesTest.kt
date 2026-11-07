@@ -149,11 +149,11 @@ class HU04ArtistStatesTest {
     }
 
     @Test
-    fun musicoSinBanda_noMuestraLaFilaDeBanda() {
+    fun musicoSinBanda_diceQueNoPerteneceAUnaBanda() {
         openWith(InMemoryArtistDetailRepository(listOf(rubenDetail.copy(band = null))), ruben.name)
 
         checkShowingArtist(ruben.name)
-        onView(withId(R.id.artistBandRow)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        onView(withText(R.string.artist_detail_no_band)).check(matches(isDisplayed()))
     }
 
     @Test

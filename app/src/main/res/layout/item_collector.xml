@@ -23,11 +23,11 @@
             android:id="@+id/collectorInitials"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:background="@drawable/bg_circle_surface_variant"
+            android:background="@drawable/bg_circle_primary_container"
             android:gravity="center"
             android:importantForAccessibility="no"
             android:textAppearance="@style/TextAppearance.Vinilos.BodyLarge.Bold"
-            android:textColor="@color/md_on_surface_variant"
+            android:textColor="@color/md_on_primary_container"
             tools:text="MB" />
 
         <LinearLayout

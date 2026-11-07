@@ -29,7 +29,7 @@ class ArtistServiceAdapter(apiClient: ApiClient) {
         ArtistType.BAND -> getBandDetail(id)
     }
 
-    // La API no dice en el músico a qué banda pertenece; solo aparece en los integrantes de cada banda
+    // La API no dice en el músico a qué banda pertenece, eso solo aparece en los integrantes de cada banda
     private suspend fun getMusicianDetail(id: Int): ArtistDetail = coroutineScope {
         val musician = async { api.getMusician(id) }
         val bands = async { api.getBands() }

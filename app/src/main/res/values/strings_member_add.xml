@@ -14,7 +14,7 @@
 
     <string name="member_add_loading">Cargando músicos…</string>
     <string name="member_add_object">los músicos</string>
-    <string name="member_add_empty_title">No hay músicos disponibles</string>
+    <string name="member_add_empty_title">No hay músicos registrados</string>
     <string name="member_add_empty_body">Cuando se registren músicos podrás agregarlos a la banda.</string>
     <string name="member_add_no_results_title">Sin resultados</string>
     <string name="member_add_no_results_body">No encontramos músicos con «%1$s».</string>

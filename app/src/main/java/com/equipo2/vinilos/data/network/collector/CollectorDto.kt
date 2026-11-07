@@ -11,7 +11,7 @@ data class CollectorDto(
     val collectorAlbums: List<CollectorAlbumDto> = emptyList(),
 )
 
-// Del álbum en la colección solo se necesita contarlo; precio y estado se ignoran
+// Del álbum en la colección solo se necesita contarlo, así que precio y estado se ignoran
 @Serializable
 data class CollectorAlbumDto(val id: Int)
 

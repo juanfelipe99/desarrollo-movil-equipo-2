@@ -18,7 +18,6 @@ import com.equipo2.vinilos.data.model.Artist
 import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.model.MusicianCandidate
 import com.equipo2.vinilos.databinding.FragmentMemberAddBinding
-import com.equipo2.vinilos.ui.common.SnackbarAction
 import com.equipo2.vinilos.ui.common.buttonProgress
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.keepSnackbarsAbove
@@ -36,6 +35,7 @@ private data class ListScreen(
     val selected: MusicianCandidate?,
     val submitting: Boolean,
     val bandMissing: Boolean,
+    val query: String,
 )
 
 /** Elegir el músico que se agrega a una banda (HU12): buscador, lista de selección única y «Elige un músico». */
@@ -86,8 +86,9 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
         // Al elegir, la fila cambia en su lugar sin el fundido, que la hacía parpadear y la duplicaba un instante
         (binding.memberList.itemAnimator as? SimpleItemAnimator)?.supportsChangeAnimations = false
 
-        val screen = combine(viewModel.state, viewModel.selected, viewModel.isSubmitting, viewModel.bandMissing, ::ListScreen)
-        viewLifecycleOwner.collectWhileVisible(screen) { (state, selected, submitting, bandMissing) ->
+        // La búsqueda va aparte porque dos búsquedas sin resultados dan la misma lista vacía y el mensaje debe mostrar la última
+        val screen = combine(viewModel.state, viewModel.selected, viewModel.isSubmitting, viewModel.bandMissing, viewModel.query, ::ListScreen)
+        viewLifecycleOwner.collectWhileVisible(screen) { (state, selected, submitting, bandMissing, query) ->
             val noResults = state is UiState.Success && state.data.isEmpty()
             when (state) {
                 UiState.Loading ->
@@ -110,7 +111,7 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
                     adapter.submitList(state.data.map { MemberRow(it, selected = it == selected, enabled = !submitting) })
                     if (noResults) binding.memberMessage.showEmpty(
                         getString(R.string.member_add_no_results_title),
-                        getString(R.string.member_add_no_results_body, viewModel.query.value.trim()),
+                        getString(R.string.member_add_no_results_body, query.trim()),
                         R.drawable.ic_search,
                     )
                 }
@@ -162,16 +163,15 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
         }
     }
 
-    private fun showFailure(failure: MemberAddFailure) = when (failure) {
-        // Reintentar envía el mismo músico sin volver a pedir la confirmación del cambio de banda
-        MemberAddFailure.CONNECTION -> showSnackbar(
-            getString(R.string.error_member_add_connection),
-            isError = true,
-            action = SnackbarAction(getString(R.string.error_network_retry)) { viewModel.confirmAdd() },
-        )
-        // El ViewModel ya está recargando el listado
-        MemberAddFailure.NOT_FOUND -> showSnackbar(getString(R.string.error_member_add_not_found), isError = true)
-        MemberAddFailure.SERVER -> showSnackbar(getString(R.string.error_member_add_failed), isError = true)
+    /** El aviso no lleva botón, como en el prototipo. La selección se conserva para volver a tocar Agregar. */
+    private fun showFailure(failure: MemberAddFailure) {
+        val message = when (failure) {
+            MemberAddFailure.CONNECTION -> R.string.error_member_add_connection
+            // El ViewModel ya está recargando el listado
+            MemberAddFailure.NOT_FOUND -> R.string.error_member_add_not_found
+            MemberAddFailure.SERVER -> R.string.error_member_add_failed
+        }
+        showSnackbar(getString(message), isError = true)
     }
 
     /** Vuelve al detalle con el músico agregado, que lo marca como «Nuevo» y muestra el aviso «Integrante agregado». */
