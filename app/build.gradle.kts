@@ -53,6 +53,17 @@ android {
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
             }
         }
+        // Igual a release pero perfilable, para medir el desempeño de la versión que se entrega con el Profiler
+        create("perfil") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += "release"
+        }
+        // Con -PidSufijo=antes o =despues las dos versiones conviven en el teléfono y se comparan sin reinstalar
+        providers.gradleProperty("idSufijo").orNull?.let { suffix ->
+            getByName("perfil").applicationIdSuffix = ".$suffix"
+            getByName("debug").applicationIdSuffix = ".$suffix.debug"
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
