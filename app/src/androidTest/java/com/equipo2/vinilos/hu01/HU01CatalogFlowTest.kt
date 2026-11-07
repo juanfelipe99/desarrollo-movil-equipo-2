@@ -8,6 +8,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.hu07.fillAlbumForm
 import com.equipo2.vinilos.hu07.openCreateAlbum
@@ -31,6 +32,8 @@ class HU01CatalogFlowTest {
     @get:Rule
     val app = VinilosRule()
 
+    private val resources = InstrumentationRegistry.getInstrumentation().targetContext.resources
+
     @After
     fun deleteTestAlbums() {
         BackVynils.deleteAlbumsStartingWith(HU01_ALBUM_PREFIX)
@@ -38,15 +41,17 @@ class HU01CatalogFlowTest {
 
     @Test
     fun visitante_veElCatalogoDeLaApi_yAbreElDetalleDeUnAlbum() {
-        val apiNames = BackVynils.albumNames()
-        assertTrue("BackVynils no tiene álbumes para mostrar", apiNames.isNotEmpty())
-        // Uno con nombre único, para no confundir su tarjeta con otra
-        val name = apiNames.first { candidate -> apiNames.count { it == candidate } == 1 }
+        // Un álbum propio de esta ejecución: el resto del catálogo puede cambiar mientras corre la prueba
+        val name = "$HU01_ALBUM_PREFIX ${System.currentTimeMillis()}"
+        BackVynils.createAlbum(name)
         app.launch()
 
         enterAs(collector = false)
 
-        assertEquals(apiNames, shownAlbums().map { it.album.name })
+        val shown = shownAlbums()
+        assertTrue("El catálogo no muestra el álbum creado en la API", shown.any { it.album.name == name })
+        val count = resources.getQuantityString(R.plurals.album_list_count, shown.size, shown.size)
+        onView(withText(count)).check(matches(isDisplayed()))
 
         openAlbum(name)
 

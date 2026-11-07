@@ -14,6 +14,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.data.model.Album
+import com.equipo2.vinilos.support.RUN_TAG
 import com.equipo2.vinilos.ui.albums.list.AlbumAdapter
 import com.equipo2.vinilos.ui.albums.list.AlbumItem
 import com.google.android.material.card.MaterialCardView
@@ -22,7 +23,7 @@ import org.hamcrest.Matchers.allOf
 import java.time.LocalDate
 
 /** Prefijo de los álbumes que crean las pruebas de HU01, que se borran al terminar. */
-const val HU01_ALBUM_PREFIX = "E2E HU01"
+val HU01_ALBUM_PREFIX = "E2E HU01 $RUN_TAG"
 
 fun testAlbum(id: Int, name: String, year: Int, genre: String) = Album(
     id = id,

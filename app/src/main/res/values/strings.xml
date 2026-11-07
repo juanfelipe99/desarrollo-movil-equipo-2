@@ -23,7 +23,7 @@
     <string name="collector_list_loading">Cargando coleccionistas…</string>
     <string name="collector_list_object">los coleccionistas</string>
     <string name="collector_list_empty_title">No hay coleccionistas registrados</string>
-    <string name="collector_list_empty_body">Cuando se registren coleccionistas aparecerán aquí.</string>
+    <string name="collector_list_empty_body">Cuando alguien registre su colección aparecerá aquí.</string>
 
     <string name="collector_detail_title">Coleccionista</string>
     <string name="collector_detail_soon_body">El detalle de los coleccionistas llegará en la próxima versión de la app.</string>

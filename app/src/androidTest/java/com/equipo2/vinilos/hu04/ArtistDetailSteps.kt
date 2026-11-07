@@ -4,7 +4,6 @@ import android.view.View
 import android.widget.ImageButton
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.children
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
@@ -24,7 +23,7 @@ import com.equipo2.vinilos.data.model.ArtistDetail
 import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.repository.ArtistRepository
 import com.equipo2.vinilos.hu03.artistRowName
-import com.equipo2.vinilos.ui.artists.list.ArtistAdapter
+import com.equipo2.vinilos.hu03.showArtistRow
 import com.equipo2.vinilos.support.scrollToWithBarsHidden
 import kotlinx.coroutines.awaitCancellation
 import org.hamcrest.Matcher
@@ -71,7 +70,7 @@ fun testAlbum(id: Int, name: String, year: Int, genre: String) = Album(
 
 /** Desplaza el listado de artistas hasta el artista y lo toca. */
 fun openArtist(name: String) {
-    onView(withId(R.id.artistList)).perform(scrollToArtist(name))
+    showArtistRow(name)
     onView(artistRowName(name)).perform(click())
 }
 
@@ -113,18 +112,4 @@ fun pressToolbarUp() {
             uiController.loopMainThreadUntilIdle()
         }
     })
-}
-
-private fun scrollToArtist(name: String) = object : ViewAction {
-    override fun getConstraints(): Matcher<View> = isAssignableFrom(RecyclerView::class.java)
-
-    override fun getDescription() = "desplazar el listado hasta «$name»"
-
-    override fun perform(uiController: UiController, view: View) {
-        val list = view as RecyclerView
-        val position = (list.adapter as ArtistAdapter).currentList.indexOfFirst { it.name == name }
-        check(position >= 0) { "El listado no tiene el artista «$name»" }
-        list.scrollToPosition(position)
-        uiController.loopMainThreadUntilIdle()
-    }
 }

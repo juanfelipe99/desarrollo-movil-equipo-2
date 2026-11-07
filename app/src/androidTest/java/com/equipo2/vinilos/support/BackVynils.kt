@@ -21,66 +21,16 @@ object BackVynils {
         return List(albums.length()) { albums.getJSONObject(it).getString("name") }
     }
 
-    /** Álbumes con una descripción más larga que length, que en el detalle se corta con «Ver más». */
-    fun albumNamesWithDescriptionLongerThan(length: Int): List<String> {
-        val albums = JSONArray(request("albums", "GET"))
-        return List(albums.length()) { albums.getJSONObject(it) }
-            .filter { it.getString("description").length > length }
-            .map { it.getString("name") }
-    }
-
-    /** Lo que el detalle de un artista (HU04) muestra en sus contadores. */
-    data class ArtistSummary(val name: String, val description: String, val albums: Int, val prizes: Int)
-
-    /** Bandas con al menos un integrante, con los nombres de sus integrantes. */
-    fun bandMembers(): Map<ArtistSummary, List<String>> {
-        val bands = JSONArray(request("bands", "GET"))
-        return List(bands.length()) { bands.getJSONObject(it) }
-            .associate { band ->
-                val members = band.optJSONArray("musicians") ?: JSONArray()
-                band.toSummary() to List(members.length()) { members.getJSONObject(it).getString("name") }
-            }
-            .filterValues { it.isNotEmpty() }
-    }
-
-    /** Músicos que no pertenecen a ninguna banda. */
-    fun musiciansWithoutBand(): List<ArtistSummary> {
-        val inBand = bandMembers().values.flatten().toSet()
-        return summaries("musicians").filter { it.name !in inBand }
-    }
-
-    /** Músicos y bandas cuya descripción se corta con «Ver más». */
-    fun artistsWithDescriptionLongerThan(length: Int): List<ArtistSummary> =
-        (summaries("musicians") + summaries("bands")).filter { it.description.length > length }
-
-    private fun summaries(path: String): List<ArtistSummary> {
-        val items = JSONArray(request(path, "GET"))
-        return List(items.length()) { items.getJSONObject(it).toSummary() }
-    }
-
-    private fun JSONObject.toSummary() = ArtistSummary(
-        name = getString("name"),
-        description = optString("description"),
-        albums = optJSONArray("albums")?.length() ?: 0,
-        prizes = optJSONArray("performerPrizes")?.length() ?: 0,
-    )
-
-    fun musicianNames(): List<String> = names("musicians")
-
-    fun bandNames(): List<String> = names("bands")
-
-    private fun names(path: String): List<String> {
-        val items = JSONArray(request(path, "GET"))
-        return List(items.length()) { items.getJSONObject(it).getString("name") }
-    }
+    /** Descripción de los álbumes y artistas que crean las pruebas. */
+    const val TEST_DESCRIPTION = "Creado por una prueba E2E."
 
     /** Crea un álbum de prueba sin tracks y devuelve su id. */
-    fun createAlbum(name: String): Int {
+    fun createAlbum(name: String, description: String = TEST_DESCRIPTION): Int {
         val album = JSONObject()
             .put("name", name)
             .put("cover", "https://ejemplo.com/portada.jpg")
             .put("releaseDate", "2020-01-01")
-            .put("description", "Álbum creado por una prueba E2E.")
+            .put("description", description)
             .put("genre", "Rock")
             .put("recordLabel", "EMI")
         return JSONObject(request("albums", "POST", album.toString())).getInt("id")
@@ -92,22 +42,32 @@ object BackVynils {
         return List(tracks.length()) { tracks.getJSONObject(it).getString("name") }
     }
 
-    /** Borra los álbumes con este prefijo para no dejar datos de prueba. */
+    /**
+     * Borra los álbumes con este prefijo, para los que se crean desde la app y no se conoce su id.
+     * El prefijo debe llevar [RUN_TAG], así no se borran los de otra ejecución que esté corriendo al mismo tiempo.
+     */
     fun deleteAlbumsStartingWith(prefix: String) {
         val albums = JSONArray(request("albums", "GET"))
         for (i in 0 until albums.length()) {
             val album = albums.getJSONObject(i)
-            if (!album.getString("name").startsWith(prefix)) continue
-
-            // La API no borra un álbum que tenga tracks, así que primero se borran ellos
-            val id = album.getInt("id")
-            val tracks = album.getJSONArray("tracks")
-            for (t in 0 until tracks.length()) request("albums/$id/tracks/${tracks.getJSONObject(t).getInt("id")}", "DELETE")
-            request("albums/$id", "DELETE")
+            if (album.getString("name").startsWith(prefix)) deleteAlbum(album.getInt("id"))
         }
     }
 
-    /** Crea una banda de prueba sin integrantes y devuelve su id (HU12). */
+    /** Borra el álbum, primero sus tracks, porque la API no borra un álbum que los tenga. */
+    fun deleteAlbum(id: Int) {
+        val tracks = JSONObject(request("albums/$id", "GET")).optJSONArray("tracks") ?: JSONArray()
+        for (t in 0 until tracks.length()) request("albums/$id/tracks/${tracks.getJSONObject(t).getInt("id")}", "DELETE")
+        request("albums/$id", "DELETE")
+    }
+
+    /** Asocia el álbum al músico, que queda como su intérprete. */
+    fun addAlbumToMusician(musicianId: Int, albumId: Int) {
+        // Sin cuerpo, pero el servidor publicado exige el Content-Length
+        request("musicians/$musicianId/albums/$albumId", "POST", "")
+    }
+
+    /** Crea una banda de prueba sin integrantes y devuelve su id. */
     fun createBand(name: String): Int {
         val band = JSONObject()
             .put("name", name)
@@ -117,12 +77,12 @@ object BackVynils {
         return JSONObject(request("bands", "POST", band.toString())).getInt("id")
     }
 
-    /** Crea un músico de prueba sin banda y devuelve su id (HU12). */
-    fun createMusician(name: String): Int {
+    /** Crea un músico de prueba sin banda y devuelve su id. */
+    fun createMusician(name: String, description: String = TEST_DESCRIPTION): Int {
         val musician = JSONObject()
             .put("name", name)
             .put("image", "https://ejemplo.com/musico.jpg")
-            .put("description", "Músico creado por una prueba E2E.")
+            .put("description", description)
             .put("birthDate", "1980-01-01")
         return JSONObject(request("musicians", "POST", musician.toString())).getInt("id")
     }
@@ -143,18 +103,6 @@ object BackVynils {
     fun deleteArtists(musicianIds: List<Int>, bandIds: List<Int>) {
         musicianIds.forEach { request("musicians/$it", "DELETE") }
         bandIds.forEach { request("bands/$it", "DELETE") }
-    }
-
-    /** Borra los músicos y las bandas con este prefijo para no dejar datos de prueba. */
-    fun deleteArtistsStartingWith(prefix: String) {
-        // Primero los músicos, para que ninguna banda se borre con integrantes
-        for (path in listOf("musicians", "bands")) {
-            val items = JSONArray(request(path, "GET"))
-            for (i in 0 until items.length()) {
-                val item = items.getJSONObject(i)
-                if (item.getString("name").startsWith(prefix)) request("$path/${item.getInt("id")}", "DELETE")
-            }
-        }
     }
 
     /**

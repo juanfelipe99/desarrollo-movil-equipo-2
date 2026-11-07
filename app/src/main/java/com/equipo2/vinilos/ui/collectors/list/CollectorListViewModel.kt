@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.equipo2.vinilos.VinilosApplication
 import com.equipo2.vinilos.data.model.Collector
+import com.equipo2.vinilos.data.model.byName
 import com.equipo2.vinilos.data.repository.CollectorRepository
 import com.equipo2.vinilos.ui.state.PullRefresh
 import com.equipo2.vinilos.ui.state.UiState
@@ -18,8 +19,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.text.Collator
-import java.util.Locale
 
 /** Listado de coleccionistas (HU05): carga, éxito, vacío o error, y se conserva al girar. */
 class CollectorListViewModel(private val repository: CollectorRepository) : ViewModel() {
@@ -64,13 +63,7 @@ class CollectorListViewModel(private val repository: CollectorRepository) : View
     }
 
     private fun collectorsOf(collectors: List<Collector>): UiState<List<Collector>> =
-        if (collectors.isEmpty()) UiState.Empty else UiState.Success(sortedByName(collectors))
-
-    // En orden alfabético sin importar tildes ni mayúsculas
-    private fun sortedByName(collectors: List<Collector>): List<Collector> {
-        val collator = Collator.getInstance(Locale.forLanguageTag("es")).apply { strength = Collator.PRIMARY }
-        return collectors.sortedWith(compareBy(collator) { it.name })
-    }
+        if (collectors.isEmpty()) UiState.Empty else UiState.Success(collectors.sortedWith(byName { it.name }))
 
     companion object {
         val Factory = viewModelFactory {

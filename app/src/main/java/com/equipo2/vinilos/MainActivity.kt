@@ -20,7 +20,6 @@ import androidx.navigation.ui.setupWithNavController
 import com.equipo2.vinilos.databinding.ActivityMainBinding
 import com.equipo2.vinilos.ui.common.AppSnackbar
 import com.equipo2.vinilos.ui.common.ScrollsToTop
-import com.equipo2.vinilos.ui.common.SnackbarAction
 import com.equipo2.vinilos.ui.common.applySystemBarsPadding
 import com.equipo2.vinilos.ui.role.changedMessageRes
 import com.equipo2.vinilos.ui.role.chip.RoleChip
@@ -77,12 +76,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** Muestra un aviso encima de snackbarAnchor o de la barra inferior, el primero visible. */
-    fun showSnackbar(message: CharSequence, isError: Boolean = false, action: SnackbarAction? = null) {
+    fun showSnackbar(message: CharSequence, isError: Boolean = false) {
         // Sin la barra inferior a la vista, por el riel o porque se escondió, el aviso va abajo del todo
         val bottomNav = binding.navBar.takeIf { binding.bottomBar != null && !bottomBarHidden }
         val target = listOf(snackbarAnchor, bottomNav).firstOrNull { it?.isShown == true }
         // En horizontal el aviso va en el área del contenido, sin tapar el riel
-        snackbar = AppSnackbar.show(binding.snackbarParent ?: binding.root, message, isError, target, action)
+        snackbar = AppSnackbar.show(binding.snackbarParent ?: binding.root, message, isError, target)
     }
 
     private fun setUpBars() {
@@ -159,7 +158,7 @@ class MainActivity : AppCompatActivity() {
     private fun updateBars(@IdRes destinationId: Int) {
         val roleSelect = destinationId == R.id.roleSelectFragment
         // Crear álbum y Agregar integrante ocupan la pantalla y se cierran con una X
-        val form = destinationId == R.id.albumCreateFragment || destinationId == R.id.memberAddFragment
+        val form = destinationId in FORM_DESTINATIONS
 
         // Se ocultan la barra y la línea, no el AppBarLayout, porque sin él la pantalla quedaría debajo de la barra de estado
         binding.toolbar.isVisible = !roleSelect
@@ -197,5 +196,10 @@ class MainActivity : AppCompatActivity() {
         listOf(binding.toolbar, binding.toolbarDivider).forEach { bar ->
             bar.updateLayoutParams<AppBarLayout.LayoutParams> { scrollFlags = flags }
         }
+    }
+
+    private companion object {
+        // Pantallas que ocupan todo y se cierran con una X. Agregar integrante está en las pestañas Artistas y Álbumes
+        val FORM_DESTINATIONS = setOf(R.id.albumCreateFragment, R.id.memberAddFragment, R.id.albumMemberAddFragment)
     }
 }

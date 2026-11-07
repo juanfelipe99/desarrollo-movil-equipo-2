@@ -15,10 +15,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.hu01.openAlbum
 import com.equipo2.vinilos.hu01.shownAlbums
-import com.equipo2.vinilos.hu03.artistRowName
 import com.equipo2.vinilos.hu03.openArtists
-import com.equipo2.vinilos.hu03.sortedLikeTheApp
-import com.equipo2.vinilos.support.BackVynils
+import com.equipo2.vinilos.hu03.openFirstArtist
 import com.equipo2.vinilos.support.VinilosRule
 import com.equipo2.vinilos.support.enterAs
 import com.equipo2.vinilos.support.toolbarTitle
@@ -79,8 +77,7 @@ class HU07NavigationTest {
     fun irAAlbumesDesdeElDetalleDeUnArtista_yVolver_marcaArtistasYSigueEnElDetalle() {
         app.launch()
         openArtists()
-        val firstArtist = sortedLikeTheApp(BackVynils.musicianNames() + BackVynils.bandNames()).first()
-        onView(artistRowName(firstArtist)).perform(click())
+        openFirstArtist()
 
         onView(withId(R.id.albumsGraph)).perform(click())
         onView(withId(R.id.artistsGraph)).perform(click())

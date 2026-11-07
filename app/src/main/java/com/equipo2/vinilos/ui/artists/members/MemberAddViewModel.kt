@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -30,7 +31,7 @@ import java.text.Normalizer
 
 /** Por qué no se pudo agregar el integrante, que decide qué le ofrece la pantalla al usuario. */
 enum class MemberAddFailure {
-    /** Sin conexión o sin respuesta a tiempo. Se ofrece Reintentar y se conserva la selección. */
+    /** Sin conexión o sin respuesta a tiempo. Se conserva la selección para volver a tocar Agregar. */
     CONNECTION,
 
     /** La banda o el músico ya no existen. Se avisa y se recarga el listado. */
@@ -74,7 +75,7 @@ class MemberAddViewModel(
 
     /**
      * Músicos que coinciden con la búsqueda, con los integrantes actuales al final.
-     * Es [UiState.Empty] si no hay ningún músico que se pueda agregar; si solo la búsqueda
+     * Es [UiState.Empty] si no hay ningún músico que se pueda agregar. Si solo la búsqueda
      * no encuentra a nadie, es un [UiState.Success] con la lista vacía.
      */
     val state: StateFlow<UiState<List<MusicianCandidate>>> = combine(candidates, query) { candidates, query ->
@@ -87,16 +88,16 @@ class MemberAddViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     /** Mientras se envía, la pantalla muestra la carga y no deja elegir ni volver a tocar Agregar. */
-    val isSubmitting: StateFlow<Boolean> = currentSubmitting
+    val isSubmitting: StateFlow<Boolean> = currentSubmitting.asStateFlow()
 
     /** Se tocó Agregar sin elegir un músico. Se quita al elegir uno. */
-    val missingSelection: StateFlow<Boolean> = currentMissingSelection
+    val missingSelection: StateFlow<Boolean> = currentMissingSelection.asStateFlow()
 
     /**
      * La banda ya no existe (404 al pedir el listado). No hay a dónde agregar integrantes ni sirve reintentar,
      * así que la pantalla lo dice en lugar del error de carga.
      */
-    val bandMissing: StateFlow<Boolean> = currentBandMissing
+    val bandMissing: StateFlow<Boolean> = currentBandMissing.asStateFlow()
 
     val events: Flow<MemberAddEvent> = pendingEvents.receiveAsFlow()
 
@@ -134,7 +135,7 @@ class MemberAddViewModel(
         }
     }
 
-    /** Agrega el músico elegido sin volver a preguntar: tras confirmar el cambio de banda o al tocar Reintentar. */
+    /** Agrega el músico elegido sin volver a preguntar, después de confirmar el cambio de banda. */
     fun confirmAdd() {
         if (currentSubmitting.value) return
         currentSelection()?.let(::submit)
@@ -208,5 +209,6 @@ private fun Throwable.toMemberAddFailure(): MemberAddFailure = when {
 private fun String.containsIgnoringAccents(query: String): Boolean =
     query.isBlank() || withoutAccents().contains(query.trim().withoutAccents(), ignoreCase = true)
 
-private fun String.withoutAccents(): String =
-    Normalizer.normalize(this, Normalizer.Form.NFD).replace(Regex("\\p{Mn}+"), "")
+private val ACCENTS = Regex("\\p{Mn}+")
+
+private fun String.withoutAccents(): String = Normalizer.normalize(this, Normalizer.Form.NFD).replace(ACCENTS, "")

@@ -13,7 +13,7 @@ data class ArtistPrize(
 /**
  * Detalle de un músico o de una banda (HU04).
  *
- * Un músico puede tener [band] y una banda tiene [members]; lo del otro tipo queda vacío.
+ * Un músico puede tener [band] y una banda tiene [members]. Lo del otro tipo queda vacío.
  */
 data class ArtistDetail(
     val artist: Artist,

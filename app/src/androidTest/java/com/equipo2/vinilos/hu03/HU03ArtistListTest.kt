@@ -10,14 +10,21 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.equipo2.vinilos.R
-import com.equipo2.vinilos.support.BackVynils
+import com.equipo2.vinilos.data.model.ArtistType
+import com.equipo2.vinilos.support.OwnData
 import com.equipo2.vinilos.support.VinilosRule
 import com.equipo2.vinilos.support.toolbarTitle
+import org.junit.After
+import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** E2E de HU03 con la API real: el listado trae todos los músicos y bandas, y los filtros los separan. */
+/**
+ * E2E de HU03 con la API real: el listado trae los músicos y bandas, y los filtros los separan.
+ * Se revisan un músico y una banda que crea la prueba, porque el resto de la API puede cambiar mientras corre.
+ */
 @RunWith(AndroidJUnit4::class)
 class HU03ArtistListTest {
 
@@ -25,56 +32,58 @@ class HU03ArtistListTest {
     val app = VinilosRule()
 
     private val resources = InstrumentationRegistry.getInstrumentation().targetContext.resources
+    private val data = OwnData()
+    private val musician = data.name("HU03 Músico")
+    private val band = data.name("HU03 Banda")
+
+    @Before
+    fun createArtists() {
+        data.musician(musician)
+        data.band(band)
+    }
+
+    @After
+    fun deleteArtists() = data.deleteAll()
 
     @Test
-    fun todos_muestraMusicosYBandas_conElContadorDeLaApi() {
-        val musicians = BackVynils.musicianNames()
-        val bands = BackVynils.bandNames()
+    fun todos_muestraMusicosYBandas_conElContadorDeLaLista() {
         app.launch()
 
         openArtists()
 
         onView(toolbarTitle(R.string.artist_list_title)).check(matches(isDisplayed()))
-        onView(withText(countText(musicians.size + bands.size))).check(matches(isDisplayed()))
-        firstUniqueName(musicians + bands)?.let { onView(artistRowName(it)).check(matches(isDisplayed())) }
+        showArtistRow(musician)
+        showArtistRow(band)
+        onView(withText(countText(shownArtists().size))).check(matches(isDisplayed()))
     }
 
     @Test
-    fun musicos_muestraSoloLosMusicosDeLaApi() {
-        val musicians = BackVynils.musicianNames()
-        val bands = BackVynils.bandNames()
+    fun musicos_muestraSoloMusicos() {
         app.launch()
         openArtists()
 
         onView(withId(R.id.filterMusicians)).perform(click())
 
-        onView(withText(countText(musicians.size))).check(matches(isDisplayed()))
-        firstUniqueName(musicians)?.let { onView(artistRowName(it)).check(matches(isDisplayed())) }
-        bands.filter { it !in musicians }.forEach { onView(artistRowName(it)).check(doesNotExist()) }
+        val shown = shownArtists()
+        assertTrue("El filtro Músicos muestra bandas", shown.all { it.type == ArtistType.MUSICIAN })
+        showArtistRow(musician)
+        onView(artistRowName(band)).check(doesNotExist())
+        onView(withText(countText(shown.size))).check(matches(isDisplayed()))
     }
 
     @Test
-    fun bandas_muestraSoloLasBandasDeLaApi() {
-        val musicians = BackVynils.musicianNames()
-        val bands = BackVynils.bandNames()
+    fun bandas_muestraSoloBandas() {
         app.launch()
         openArtists()
 
         onView(withId(R.id.filterBands)).perform(click())
 
-        onView(withText(countText(bands.size))).check(matches(isDisplayed()))
-        firstUniqueName(bands)?.let { onView(artistRowName(it)).check(matches(isDisplayed())) }
-        musicians.filter { it !in bands }.forEach { onView(artistRowName(it)).check(doesNotExist()) }
+        val shown = shownArtists()
+        assertTrue("El filtro Bandas muestra músicos", shown.all { it.type == ArtistType.BAND })
+        showArtistRow(band)
+        onView(artistRowName(musician)).check(doesNotExist())
+        onView(withText(countText(shown.size))).check(matches(isDisplayed()))
     }
 
     private fun countText(count: Int) = resources.getQuantityString(R.plurals.artist_list_count, count, count)
-
-    // El primero del listado que no se repite, para que Espresso no encuentre dos filas iguales
-    private fun firstUniqueName(names: List<String>): String? =
-        sortedLikeTheApp(names).take(VISIBLE_ROWS).firstOrNull { name -> names.count { it == name } == 1 }
-
-    private companion object {
-        /** Filas que caben sin desplazar incluso en un teléfono pequeño. */
-        const val VISIBLE_ROWS = 3
-    }
 }
