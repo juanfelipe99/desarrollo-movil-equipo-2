@@ -114,6 +114,28 @@ class BandRepositoryImplTest {
         assertTrue(offline.addMusician(101, 3).exceptionOrNull() is DataError.Network)
     }
 
+    @Test
+    fun addMusician_alAgregarlo_avisaQueLaBandaCambio() = runTest {
+        var changes = 0
+        val repository = BandRepositoryImpl(BandServiceAdapter(ApiClient(server.baseUrl))) { changes++ }
+        server.respond("bands/101/musicians/3", """{"id": 101, "name": "Queen", "creationDate": "1970-01-01T00:00:00.000Z"}""")
+
+        repository.addMusician(101, 3)
+
+        assertEquals(1, changes)
+    }
+
+    @Test
+    fun addMusician_siFalla_noAvisaNingunCambio() = runTest {
+        var changes = 0
+        val repository = BandRepositoryImpl(BandServiceAdapter(ApiClient(server.baseUrl))) { changes++ }
+        server.respond("bands/101/musicians/3", """{"message":"Internal error"}""", code = 500)
+
+        repository.addMusician(101, 3)
+
+        assertEquals(0, changes)
+    }
+
     private companion object {
         // Así responde BackVynils: los músicos no dicen su banda, cada banda trae sus integrantes
         const val MUSICIANS_JSON = """

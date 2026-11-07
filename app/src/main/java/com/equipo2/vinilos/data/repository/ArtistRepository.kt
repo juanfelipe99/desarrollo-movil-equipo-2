@@ -38,6 +38,7 @@ class ArtistRepositoryImpl(private val serviceAdapter: ArtistServiceAdapter) : A
     override fun clearCache() {
         artists = null
         details.evictAll()
+        serviceAdapter.clearCache()
     }
 
     private companion object {

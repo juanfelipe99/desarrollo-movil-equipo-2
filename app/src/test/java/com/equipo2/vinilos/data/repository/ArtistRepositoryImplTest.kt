@@ -161,6 +161,69 @@ class ArtistRepositoryImplTest {
         assertTrue(offline.getArtistDetail(101, ArtistType.BAND).exceptionOrNull() is DataError.Network)
     }
 
+    @Test
+    fun abrirOtraVezUnArtista_usaLoGuardadoSinVolverALaApi() = runTest {
+        server.respond("bands/101", QUEEN_JSON)
+        server.respond("prizes", PRIZES_JSON)
+
+        val first = repository.getArtistDetail(101, ArtistType.BAND).getOrThrow()
+        val second = repository.getArtistDetail(101, ArtistType.BAND).getOrThrow()
+
+        assertEquals(first, second)
+        assertEquals(listOf("bands/101", "prizes"), server.requests.sorted())
+    }
+
+    @Test
+    fun deUnaBandaAUnIntegrante_noVuelveAPedirLosPremios() = runTest {
+        server.respond("bands/101", QUEEN_JSON)
+        server.respond("musicians/10", BRIAN_MAY_JSON)
+        server.respond("bands", BANDS_JSON)
+        server.respond("prizes", PRIZES_JSON)
+
+        repository.getArtistDetail(101, ArtistType.BAND).getOrThrow()
+        repository.getArtistDetail(10, ArtistType.MUSICIAN).getOrThrow()
+
+        assertEquals(1, server.requests.count { it == "prizes" })
+    }
+
+    @Test
+    fun despuesDelListado_elDetalleDeUnMusicoNoVuelveAPedirLasBandas() = runTest {
+        server.respond("musicians", "[]")
+        server.respond("bands", BANDS_JSON)
+        server.respond("musicians/10", BRIAN_MAY_JSON)
+        server.respond("prizes", PRIZES_JSON)
+
+        repository.getArtists().getOrThrow()
+        val detail = repository.getArtistDetail(10, ArtistType.MUSICIAN).getOrThrow()
+
+        assertEquals(1, server.requests.count { it == "bands" })
+        assertEquals("Queen", detail.band?.name)
+    }
+
+    @Test
+    fun despuesDeClearCache_elDetalleVuelveAPedirTodoALaApi() = runTest {
+        server.respond("musicians/10", BRIAN_MAY_JSON)
+        server.respond("bands", BANDS_JSON)
+        server.respond("prizes", PRIZES_JSON)
+
+        repository.getArtistDetail(10, ArtistType.MUSICIAN).getOrThrow()
+        repository.clearCache()
+        repository.getArtistDetail(10, ArtistType.MUSICIAN).getOrThrow()
+
+        assertEquals(listOf("bands", "bands", "musicians/10", "musicians/10", "prizes", "prizes"), server.requests.sorted())
+    }
+
+    @Test
+    fun siFallanLosPremios_laSiguienteVezVuelveAPedirlos() = runTest {
+        server.respond("bands/101", QUEEN_JSON)
+        server.respond("prizes", """{"message":"Internal error"}""", code = 500)
+        repository.getArtistDetail(101, ArtistType.BAND)
+        server.respond("prizes", PRIZES_JSON)
+
+        assertTrue(repository.getArtistDetail(101, ArtistType.BAND).isSuccess)
+        assertEquals(2, server.requests.count { it == "prizes" })
+    }
+
     private companion object {
         // Así responde BackVynils, con campos que la app no usa
         const val BRIAN_MAY_JSON = """

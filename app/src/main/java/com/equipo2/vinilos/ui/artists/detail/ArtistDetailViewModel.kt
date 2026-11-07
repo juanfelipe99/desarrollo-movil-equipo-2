@@ -55,6 +55,8 @@ class ArtistDetailViewModel(
 
     /** Recarga al deslizar hacia abajo. El artista sigue a la vista mientras llegan sus datos nuevos. */
     fun refresh() {
+        // Recargar siempre va a la API
+        repository.clearCache()
         if (_state.value !is UiState.Success) return load()
         if (loading?.isActive == true) return
         loading = pullRefresh.launch({ repository.getArtistDetail(artistId, artistType) }) { detail ->

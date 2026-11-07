@@ -13,11 +13,17 @@ interface BandRepository {
     suspend fun addMusician(bandId: Int, musicianId: Int): Result<Unit>
 }
 
-class BandRepositoryImpl(private val serviceAdapter: BandServiceAdapter) : BandRepository {
+/**
+ * [onMembersChanged] avisa que una banda cambió de integrantes, para que quien guarde detalles de artistas los olvide.
+ */
+class BandRepositoryImpl(
+    private val serviceAdapter: BandServiceAdapter,
+    private val onMembersChanged: () -> Unit = {},
+) : BandRepository {
 
     override suspend fun getMusicianCandidates(bandId: Int): Result<List<MusicianCandidate>> =
         resultOf { serviceAdapter.getMusicianCandidates(bandId) }
 
     override suspend fun addMusician(bandId: Int, musicianId: Int): Result<Unit> =
-        resultOf { serviceAdapter.addMusician(bandId, musicianId) }
+        resultOf { serviceAdapter.addMusician(bandId, musicianId) }.onSuccess { onMembersChanged() }
 }
