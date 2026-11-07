@@ -139,6 +139,12 @@ object BackVynils {
         return List(members.length()) { members.getJSONObject(it).getString("name") }
     }
 
+    /** Borra los músicos y luego las bandas indicados, para que ninguna banda se borre con integrantes. */
+    fun deleteArtists(musicianIds: List<Int>, bandIds: List<Int>) {
+        musicianIds.forEach { request("musicians/$it", "DELETE") }
+        bandIds.forEach { request("bands/$it", "DELETE") }
+    }
+
     /** Borra los músicos y las bandas con este prefijo para no dejar datos de prueba. */
     fun deleteArtistsStartingWith(prefix: String) {
         // Primero los músicos, para que ninguna banda se borre con integrantes
@@ -159,6 +165,8 @@ object BackVynils {
         repeat(RETRIES) { attempt ->
             val (code, text) = send(path, method, body)
             if (code in 200..299) return text
+            // Al limpiar, si ya no existe es porque otra ejecución contra la misma API lo borró antes
+            if (method == "DELETE" && code == 404) return text
             if (code !in RETRYABLE_CODES || attempt == RETRIES - 1) {
                 throw IllegalStateException("$method $path respondió $code: ${text.take(200)}")
             }

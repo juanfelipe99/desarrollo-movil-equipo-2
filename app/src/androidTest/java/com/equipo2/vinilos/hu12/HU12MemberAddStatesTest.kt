@@ -121,7 +121,7 @@ class HU12MemberAddStatesTest {
         assertEquals(1, bands.added.size)
 
         gate.complete(Unit)
-        onView(withText(R.string.snackbar_member_added)).check(matches(isDisplayed()))
+        checkSnackbar(R.string.snackbar_member_added)
         assertEquals(listOf(queen.id to brian.id), bands.added.toList())
     }
 
@@ -132,7 +132,7 @@ class HU12MemberAddStatesTest {
         chooseMusician(brian.name)
         tapAdd()
 
-        onView(withText(R.string.snackbar_member_added)).check(matches(isDisplayed()))
+        checkSnackbar(R.string.snackbar_member_added)
         onView(newMemberBadge(brian.name)).perform(scrollToWithBarsHidden()).check(matches(isDisplayed()))
         // El integrante que ya estaba no se marca
         onView(newMemberBadge(freddie.name)).check(matches(withEffectiveVisibility(Visibility.GONE)))
@@ -149,13 +149,13 @@ class HU12MemberAddStatesTest {
         chooseMusician(brian.name)
         tapAdd()
 
-        onView(withText(R.string.error_member_add_connection)).check(matches(isDisplayed()))
+        checkSnackbar(R.string.error_member_add_connection)
         onView(candidateRadio(brian.name)).check(matches(isChecked()))
         onView(withId(R.id.memberAddSubtitle)).check(matches(isDisplayed()))
 
         onView(withId(SNACKBAR_ACTION)).check(matches(withText(R.string.error_network_retry))).perform(click())
 
-        onView(withText(R.string.snackbar_member_added)).check(matches(isDisplayed()))
+        checkSnackbar(R.string.snackbar_member_added)
         onView(newMemberBadge(brian.name)).perform(scrollToWithBarsHidden()).check(matches(isDisplayed()))
         assertEquals(listOf(queen.id to brian.id, queen.id to brian.id), bands.added.toList())
     }
@@ -169,12 +169,12 @@ class HU12MemberAddStatesTest {
         chooseMusician(ruben.name)
         tapAdd()
         onView(withText(R.string.band_change_confirm)).inRoot(isDialog()).perform(click())
-        onView(withText(R.string.error_member_add_connection)).check(matches(isDisplayed()))
+        checkSnackbar(R.string.error_member_add_connection)
 
         onView(withId(SNACKBAR_ACTION)).perform(click())
 
         onView(withText(R.string.band_change_title)).check(doesNotExist())
-        onView(withText(R.string.snackbar_member_added)).check(matches(isDisplayed()))
+        checkSnackbar(R.string.snackbar_member_added)
         assertEquals(2, bands.added.size)
     }
 
@@ -187,7 +187,7 @@ class HU12MemberAddStatesTest {
         chooseMusician(brian.name)
         tapAdd()
 
-        onView(withText(R.string.error_member_add_failed)).check(matches(isDisplayed()))
+        checkSnackbar(R.string.error_member_add_failed)
         onView(candidateRadio(brian.name)).check(matches(isChecked()))
         onView(withId(R.id.memberAddButton)).check(matches(isEnabled()))
     }
@@ -202,7 +202,7 @@ class HU12MemberAddStatesTest {
         chooseMusician(brian.name)
         tapAdd()
 
-        onView(withText(R.string.error_member_add_not_found)).check(matches(isDisplayed()))
+        checkSnackbar(R.string.error_member_add_not_found)
         onView(candidateName(brian.name)).check(doesNotExist())
         onView(candidateName(ruben.name)).check(matches(isDisplayed()))
         assertEquals(2, bands.candidateRequests.size)

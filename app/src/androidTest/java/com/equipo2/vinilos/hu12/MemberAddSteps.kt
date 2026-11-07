@@ -1,6 +1,7 @@
 package com.equipo2.vinilos.hu12
 
 import android.view.View
+import androidx.annotation.StringRes
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
@@ -9,10 +10,12 @@ import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.action.ViewActions.replaceText
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.hasSibling
 import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withParent
 import androidx.test.espresso.matcher.ViewMatchers.withText
@@ -153,5 +156,13 @@ private fun scrollToCandidate(name: String) = object : ViewAction {
 /** Fila del detalle de la banda con «Nuevo» junto al integrante. */
 fun newMemberBadge(name: String): Matcher<View> =
     allOf(withId(R.id.memberNewBadge), withParent(hasDescendant(allOf(withId(R.id.memberName), withText(name)))))
+
+/**
+ * Revisa que se vea el aviso. Puede tardar un instante: si otro aviso se está cerrando, el nuevo espera su turno
+ * y Espresso no espera esa cola.
+ */
+fun checkSnackbar(@StringRes text: Int) {
+    waitUntil { runCatching { onView(withText(text)).check(matches(isDisplayed())) }.isSuccess }
+}
 
 fun string(id: Int, vararg args: Any): String = InstrumentationRegistry.getInstrumentation().targetContext.getString(id, *args)

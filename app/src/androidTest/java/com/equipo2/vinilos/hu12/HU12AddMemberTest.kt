@@ -53,19 +53,27 @@ class HU12AddMemberTest {
     private var bandId = 0
     private var otherBandId = 0
 
+    /** Lo que crea esta prueba. Se borra solo eso, para no borrar los datos de otra ejecución contra la misma API. */
+    private val createdMusicians = mutableListOf<Int>()
+    private val createdBands = mutableListOf<Int>()
+
     @Before
     fun createTestArtists() {
-        bandId = BackVynils.createBand(bandName)
-        otherBandId = BackVynils.createBand(otherBandName)
-        BackVynils.createMusician(freeMusician)
-        BackVynils.addMusicianToBand(otherBandId, BackVynils.createMusician(otherBandMusician))
-        BackVynils.addMusicianToBand(bandId, BackVynils.createMusician(currentMember))
+        bandId = createBand(bandName)
+        otherBandId = createBand(otherBandName)
+        createMusician(freeMusician)
+        BackVynils.addMusicianToBand(otherBandId, createMusician(otherBandMusician))
+        BackVynils.addMusicianToBand(bandId, createMusician(currentMember))
     }
 
     @After
     fun deleteTestArtists() {
-        BackVynils.deleteArtistsStartingWith(PREFIX)
+        BackVynils.deleteArtists(createdMusicians, createdBands)
     }
+
+    private fun createBand(name: String) = BackVynils.createBand(name).also { createdBands += it }
+
+    private fun createMusician(name: String) = BackVynils.createMusician(name).also { createdMusicians += it }
 
     // Botón según el rol
 
@@ -81,7 +89,7 @@ class HU12AddMemberTest {
     @Test
     fun coleccionista_veAgregarIntegrante_yElVacioLeDiceComoAgregarElPrimero() {
         val emptyBand = "$PREFIX Vacia $suffix"
-        BackVynils.createBand(emptyBand)
+        createBand(emptyBand)
         app.launch()
         openBand(emptyBand)
 
@@ -149,7 +157,7 @@ class HU12AddMemberTest {
         onView(withId(R.id.memberAddButton)).perform(click())
 
         // El aviso dura unos segundos, así que se revisa antes que lo demás
-        onView(withText(R.string.snackbar_member_added)).check(matches(isDisplayed()))
+        checkSnackbar(R.string.snackbar_member_added)
         checkShowingArtist(bandName)
         onView(withId(R.id.membersCount)).check(matches(withText(countText(R.plurals.artist_detail_members_count, 2))))
         onView(newMemberBadge(freeMusician)).perform(scrollToWithBarsHidden()).check(matches(isDisplayed()))
@@ -168,7 +176,7 @@ class HU12AddMemberTest {
         onView(withText(R.string.band_change_title)).inRoot(isDialog()).check(matches(isDisplayed()))
         onView(withText(R.string.band_change_confirm)).inRoot(isDialog()).perform(click())
 
-        onView(withText(R.string.snackbar_member_added)).check(matches(isDisplayed()))
+        checkSnackbar(R.string.snackbar_member_added)
         onView(newMemberBadge(otherBandMusician)).perform(scrollToWithBarsHidden()).check(matches(isDisplayed()))
         assertEquals(setOf(currentMember, otherBandMusician), BackVynils.bandMemberNames(bandId).toSet())
         assertEquals(emptyList<String>(), BackVynils.bandMemberNames(otherBandId))
@@ -214,7 +222,7 @@ class HU12AddMemberTest {
         onView(candidateRadio(freeMusician)).check(matches(isChecked()))
         onView(withId(R.id.memberAddButton)).perform(click())
 
-        onView(withText(R.string.snackbar_member_added)).check(matches(isDisplayed()))
+        checkSnackbar(R.string.snackbar_member_added)
         assertEquals(setOf(currentMember, freeMusician), BackVynils.bandMemberNames(bandId).toSet())
     }
 
@@ -226,7 +234,7 @@ class HU12AddMemberTest {
     }
 
     private companion object {
-        /** Prefijo de los músicos y bandas de prueba, que se borran al terminar. */
+        /** Prefijo de los músicos y bandas de prueba, para reconocerlos en la API. */
         const val PREFIX = "E2E HU12"
     }
 }
