@@ -76,6 +76,20 @@ class HU02AlbumDetailTest {
     }
 
     @Test
+    fun alTocarUnInterprete_abreElDetalleDelArtista_yAtrasVuelveAlAlbum() {
+        val albums = BackVynils.albumNames()
+        val (album, artist) = BackVynils.albumPerformers().first { (album, _) -> albums.count { it == album } == 1 }
+        openAlbumAsVisitor(listOf(album))
+
+        onView(allOf(withId(R.id.performerName), withText(artist))).perform(scrollToWithBarsHidden(), click())
+
+        onView(toolbarTitle(R.string.artist_detail_title)).check(matches(isDisplayed()))
+        onView(allOf(withId(R.id.artistName), withText(artist))).check(matches(isDisplayed()))
+        pressBack()
+        onView(allOf(withId(R.id.albumName), withText(album))).check(matches(isDisplayed()))
+    }
+
+    @Test
     fun visitante_puedeRegresarAlCatalogoDesdeElDetalle() {
         val albumName = openAlbumAsVisitor()
 

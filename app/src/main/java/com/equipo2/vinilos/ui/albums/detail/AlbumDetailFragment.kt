@@ -12,6 +12,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.DialogFragmentNavigator
 import androidx.navigation.fragment.findNavController
 import coil3.load
 import com.equipo2.vinilos.R
@@ -26,6 +27,7 @@ import com.equipo2.vinilos.databinding.ItemAlbumInfoBinding
 import com.equipo2.vinilos.databinding.ItemTrackBinding
 import com.equipo2.vinilos.databinding.ViewPerformerChipBinding
 import com.equipo2.vinilos.ui.albums.tracks.TrackAddSheet
+import com.equipo2.vinilos.ui.artists.detail.ArtistDetailFragment
 import com.equipo2.vinilos.ui.common.bindExpandableText
 import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectWhileVisible
@@ -80,8 +82,12 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
 
     /** Al cerrarse la hoja con un track nuevo, aparece al final de la lista marcado y con el aviso «Track agregado». */
     private fun showAddedTrack() {
-        // La entrada del detalle y no la de arriba, que al girar con la hoja abierta es la de la hoja
-        val savedState = findNavController().getBackStackEntry(R.id.albumDetailFragment).savedStateHandle
+        // La entrada del detalle y no la de arriba, que al girar con la hoja abierta es la de la hoja.
+        // El detalle existe en las pestañas Álbumes y Artistas, así que se busca por tipo y no por id
+        val navController = findNavController()
+        val ownEntry = navController.currentBackStackEntry?.takeIf { it.destination !is DialogFragmentNavigator.Destination }
+            ?: navController.previousBackStackEntry ?: return
+        val savedState = ownEntry.savedStateHandle
 
         viewLifecycleOwner.collectWhileVisible(savedState.getStateFlow<Bundle?>(TrackAddSheet.ADDED_TRACK, null)) { added ->
             if (added == null) return@collectWhileVisible
@@ -126,6 +132,13 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
             chip.performerInitials.text = initialsOf(performer.name)
             chip.performerName.text = performer.name
             chip.performerPhoto.load(performer.image)
+            chip.root.contentDescription = getString(R.string.cd_album_detail_performer, performer.name)
+            chip.root.setOnClickListener {
+                findNavController().navigateIfPossible(
+                    R.id.action_albumDetail_to_artistDetail,
+                    ArtistDetailFragment.args(performer.id, performer.type),
+                )
+            }
         }
     }
 

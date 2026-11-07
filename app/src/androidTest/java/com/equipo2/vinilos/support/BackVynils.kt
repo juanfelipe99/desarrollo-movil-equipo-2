@@ -29,6 +29,16 @@ object BackVynils {
             .map { it.getString("name") }
     }
 
+    /** Álbumes con su primer intérprete, para ir del álbum al artista y del artista al álbum. */
+    fun albumPerformers(): List<Pair<String, String>> {
+        val albums = JSONArray(request("albums", "GET"))
+        return List(albums.length()) { albums.getJSONObject(it) }.mapNotNull { album ->
+            val performers = album.optJSONArray("performers") ?: return@mapNotNull null
+            if (performers.length() == 0) return@mapNotNull null
+            album.getString("name") to performers.getJSONObject(0).getString("name")
+        }
+    }
+
     /** Lo que el detalle de un artista (HU04) muestra en sus contadores. */
     data class ArtistSummary(val name: String, val description: String, val albums: Int, val prizes: Int)
 

@@ -159,7 +159,7 @@ class MainActivity : AppCompatActivity() {
     private fun updateBars(@IdRes destinationId: Int) {
         val roleSelect = destinationId == R.id.roleSelectFragment
         // Crear álbum y Agregar integrante ocupan la pantalla y se cierran con una X
-        val form = destinationId == R.id.albumCreateFragment || destinationId == R.id.memberAddFragment
+        val form = destinationId in FORM_DESTINATIONS
 
         // Se ocultan la barra y la línea, no el AppBarLayout, porque sin él la pantalla quedaría debajo de la barra de estado
         binding.toolbar.isVisible = !roleSelect
@@ -197,5 +197,10 @@ class MainActivity : AppCompatActivity() {
         listOf(binding.toolbar, binding.toolbarDivider).forEach { bar ->
             bar.updateLayoutParams<AppBarLayout.LayoutParams> { scrollFlags = flags }
         }
+    }
+
+    private companion object {
+        // Pantallas que ocupan todo y se cierran con una X. Agregar integrante está en las pestañas Artistas y Álbumes
+        val FORM_DESTINATIONS = setOf(R.id.albumCreateFragment, R.id.memberAddFragment, R.id.albumMemberAddFragment)
     }
 }

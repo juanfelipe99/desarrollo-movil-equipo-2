@@ -4,6 +4,7 @@
     <string name="album_cover_description">Portada del álbum</string>
 
     <string name="album_detail_no_performers">Sin intérpretes asociados</string>
+    <string name="cd_album_detail_performer">%1$s. Toca para ver su detalle</string>
     <string name="album_detail_release_date_label">Fecha de lanzamiento</string>
     <string name="album_detail_genre_label">Género</string>
     <string name="album_detail_record_label_label">Sello discográfico</string>

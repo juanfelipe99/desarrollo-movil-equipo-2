@@ -16,6 +16,7 @@ import com.equipo2.vinilos.support.BackVynils
 import com.equipo2.vinilos.support.VinilosRule
 import com.equipo2.vinilos.support.scrollToWithBarsHidden
 import com.equipo2.vinilos.support.toolbarTitle
+import org.hamcrest.Matchers.allOf
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -92,14 +93,29 @@ class HU04ArtistDetailTest {
     }
 
     @Test
-    fun musicoSinBanda_noMuestraBandaNiIntegrantes() {
+    fun alTocarUnAlbumDelCarrusel_abreSuDetalle_yAtrasVuelveAlArtista() {
+        val albums = BackVynils.albumNames()
+        val (album, artist) = BackVynils.albumPerformers()
+            .first { (album, artist) -> albums.count { it == album } == 1 && artist in uniqueNames }
+        openAsVisitor(artist)
+
+        onView(allOf(withId(R.id.artistAlbumName), withText(album))).perform(scrollToWithBarsHidden(), click())
+
+        onView(toolbarTitle(R.string.album_detail_title)).check(matches(isDisplayed()))
+        onView(allOf(withId(R.id.albumName), withText(album))).check(matches(isDisplayed()))
+        pressBack()
+        checkShowingArtist(artist)
+    }
+
+    @Test
+    fun musicoSinBanda_diceQueNoPerteneceAUnaBanda_yNoMuestraIntegrantes() {
         val musician = BackVynils.musiciansWithoutBand().firstOrNull { it.name in uniqueNames }
         assertTrue("BackVynils no tiene músicos sin banda", musician != null)
 
         openAsVisitor(musician!!.name)
 
         checkShowingArtist(musician.name)
-        onView(withId(R.id.artistBandRow)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        onView(withText(R.string.artist_detail_no_band)).check(matches(isDisplayed()))
         onView(withId(R.id.membersSection)).check(matches(withEffectiveVisibility(Visibility.GONE)))
         onView(withId(R.id.albumsCount)).perform(scrollToWithBarsHidden())
             .check(matches(withText(countText(R.plurals.artist_detail_albums_count, musician.albums))))

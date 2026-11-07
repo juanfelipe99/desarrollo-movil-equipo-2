@@ -15,6 +15,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.fragment.findNavController
 import coil3.load
 import com.equipo2.vinilos.R
+import com.equipo2.vinilos.data.model.Album
 import com.equipo2.vinilos.data.model.Artist
 import com.equipo2.vinilos.data.model.ArtistDetail
 import com.equipo2.vinilos.data.model.ArtistPrize
@@ -22,6 +23,7 @@ import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.model.Role
 import com.equipo2.vinilos.databinding.FragmentArtistDetailBinding
 import com.equipo2.vinilos.databinding.ItemArtistPrizeBinding
+import com.equipo2.vinilos.ui.albums.detail.AlbumDetailFragment
 import com.equipo2.vinilos.ui.artists.members.MemberAddFragment
 import com.equipo2.vinilos.ui.common.bindExpandableText
 import com.equipo2.vinilos.ui.common.bindPullToRefresh
@@ -32,6 +34,7 @@ import com.equipo2.vinilos.ui.common.showSnackbar
 import com.equipo2.vinilos.ui.common.toLongText
 import com.equipo2.vinilos.ui.role.RoleViewModel
 import com.equipo2.vinilos.ui.state.UiState
+import com.equipo2.vinilos.ui.state.addEmptyNote
 import com.equipo2.vinilos.ui.state.addEmptySection
 import com.equipo2.vinilos.ui.state.showError
 import com.equipo2.vinilos.ui.state.showLoading
@@ -57,7 +60,7 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         ownEntry = findNavController().currentBackStackEntry
         val binding = FragmentArtistDetailBinding.bind(view)
         binding.membersList.adapter = MemberAdapter(::openArtist)
-        binding.albumsList.adapter = ArtistAlbumAdapter()
+        binding.albumsList.adapter = ArtistAlbumAdapter { album -> openAlbum(album) }
 
         bindPullToRefresh(binding.artistRefresh, viewModel.pullRefresh, binding.artistScroll, binding.artistError.root) {
             viewModel.refresh()
@@ -116,7 +119,7 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         binding.artistDate.infoIcon.setImageResource(R.drawable.ic_calendar_today)
         binding.artistDate.infoLabel.setText(if (isMusician) R.string.artist_detail_birth_date_label else R.string.artist_detail_creation_date_label)
         binding.artistDate.infoValue.text = artist.date.toLongText()
-        showBand(binding, detail.band)
+        showBand(binding, detail.band, isMusician)
 
         bindExpandableText(binding.artistDescription, binding.artistDescriptionToggle, detail.description)
 
@@ -129,17 +132,27 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         showPrizes(binding, detail.prizes)
     }
 
-    /** La banda del músico, subrayada como un enlace que abre su detalle. Un músico sin banda no muestra la fila. */
-    private fun showBand(binding: FragmentArtistDetailBinding, band: Artist?) {
-        binding.artistBandDivider.isVisible = band != null
-        binding.artistBandRow.isVisible = band != null
-        if (band == null) return
+    /** La banda del músico, subrayada como un enlace que abre su detalle, o «No pertenece a una banda». */
+    private fun showBand(binding: FragmentArtistDetailBinding, band: Artist?, isMusician: Boolean) {
+        binding.artistBandDivider.isVisible = isMusician
+        binding.artistBandRow.isVisible = isMusician
+        if (!isMusician) return
 
         binding.artistBand.infoIcon.setImageResource(R.drawable.ic_groups)
         binding.artistBand.infoLabel.setText(R.string.artist_detail_band_label)
-        binding.artistBand.infoValue.text = band.name
-        binding.artistBand.infoValue.setTextColor(ContextCompat.getColor(requireContext(), R.color.md_primary))
-        binding.artistBand.infoValue.paintFlags = binding.artistBand.infoValue.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+        val value = binding.artistBand.infoValue
+        if (band == null) {
+            value.setText(R.string.artist_detail_no_band)
+            value.setTextColor(ContextCompat.getColor(requireContext(), R.color.md_on_surface))
+            value.paintFlags = value.paintFlags and Paint.UNDERLINE_TEXT_FLAG.inv()
+            binding.artistBandRow.contentDescription = null
+            binding.artistBandRow.setOnClickListener(null)
+            binding.artistBandRow.isClickable = false
+            return
+        }
+        value.text = band.name
+        value.setTextColor(ContextCompat.getColor(requireContext(), R.color.md_primary))
+        value.paintFlags = value.paintFlags or Paint.UNDERLINE_TEXT_FLAG
         binding.artistBandRow.contentDescription = getString(R.string.cd_artist_detail_band, band.name)
         binding.artistBandRow.setOnClickListener { openArtist(band) }
     }
@@ -173,11 +186,7 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
 
         binding.albumsEmpty.removeAllViews()
         if (albums.isEmpty()) {
-            binding.albumsEmpty.addEmptySection(
-                R.drawable.ic_album,
-                getString(R.string.artist_detail_albums_empty_title),
-                getString(R.string.artist_detail_albums_empty_body),
-            )
+            binding.albumsEmpty.addEmptyNote(getString(R.string.artist_detail_albums_empty_body))
         }
     }
 
@@ -186,11 +195,7 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         binding.prizesList.removeAllViews()
 
         if (prizes.isEmpty()) {
-            binding.prizesList.addEmptySection(
-                R.drawable.ic_trophy,
-                getString(R.string.artist_detail_prizes_empty_title),
-                getString(R.string.artist_detail_prizes_empty_body),
-            )
+            binding.prizesList.addEmptyNote(getString(R.string.artist_detail_prizes_empty_body))
             return
         }
 
@@ -202,6 +207,14 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
             card.prizeDate.text = prize.date.toLongText()
             if (index > 0) card.root.updateLayoutParams<LinearLayout.LayoutParams> { topMargin = gap }
         }
+    }
+
+    /** Abre el detalle de un álbum del carrusel. */
+    private fun openAlbum(album: Album) {
+        val navController = findNavController()
+        // Con dos toques seguidos el segundo ya no está en esta pantalla
+        if (navController.currentBackStackEntry != ownEntry) return
+        navController.navigateIfPossible(R.id.action_artistDetail_to_albumDetail, AlbumDetailFragment.args(album.id))
     }
 
     /** Abre el detalle de la banda del músico o de un integrante de la banda. */
@@ -226,6 +239,8 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         // Músicos y bandas se consultan en rutas distintas de la API, por eso viaja también el tipo
         const val ARG_ARTIST_TYPE = "artistType"
 
-        fun args(artist: Artist) = bundleOf(ARG_ARTIST_ID to artist.id, ARG_ARTIST_TYPE to artist.type.name)
+        fun args(artist: Artist) = args(artist.id, artist.type)
+
+        fun args(artistId: Int, type: ArtistType) = bundleOf(ARG_ARTIST_ID to artistId, ARG_ARTIST_TYPE to type.name)
     }
 }

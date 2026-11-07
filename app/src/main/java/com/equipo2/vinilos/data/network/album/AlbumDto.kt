@@ -4,6 +4,7 @@ import com.equipo2.vinilos.data.model.Album
 import com.equipo2.vinilos.data.model.AlbumComment
 import com.equipo2.vinilos.data.model.NewAlbum
 import com.equipo2.vinilos.data.model.NewTrack
+import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.model.Performer
 import com.equipo2.vinilos.data.model.Track
 import com.equipo2.vinilos.data.network.fromApiDate
@@ -52,6 +53,8 @@ data class PerformerDto(
     val id: Int,
     val name: String,
     val image: String,
+    // Solo los músicos traen fecha de nacimiento, las bandas traen fecha de creación
+    val birthDate: String? = null,
 )
 
 @Serializable
@@ -97,6 +100,7 @@ internal fun AlbumDto.toAlbum(commentAuthors: Map<Int, String> = emptyMap()) = A
             id = performer.id,
             name = performer.name,
             image = performer.image,
+            type = if (performer.birthDate != null) ArtistType.MUSICIAN else ArtistType.BAND,
         )
     },
     comments = comments.map { comment ->
