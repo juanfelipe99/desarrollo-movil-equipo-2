@@ -52,9 +52,7 @@ class VinilosApplication : Application(), SingletonImageLoader.Factory {
         val lowRam = getSystemService<ActivityManager>()?.isLowRamDevice == true
         return ImageLoader.Builder(context)
             .components { add(OkHttpNetworkFetcherFactory(callFactory = { client })) }
-            // En el perfilamiento las portadas ocupaban la mayor parte de la memoria del catálogo. Con el 15 % caben unas tres
-            // pantallas de portadas, y las que salen se vuelven a leer del disco sin descargarlas otra vez
-            .memoryCache { MemoryCache.Builder().maxSizePercent(context, if (lowRam) 0.1 else 0.15).build() }
+            .memoryCache { MemoryCache.Builder().maxSizePercent(context, if (lowRam) 0.15 else 0.25).build() }
             .diskCache { DiskCache.Builder().directory(cacheDir.resolve("portadas")).maxSizeBytes(IMAGE_DISK_CACHE_BYTES).build() }
             .allowRgb565(lowRam)
             .build()
