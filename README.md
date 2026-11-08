@@ -1,6 +1,6 @@
 # Vinilos · Equipo 2
 
-Aplicación Android nativa en Kotlin para consultar álbumes, artistas y coleccionistas de música en vinilo, y para que los coleccionistas registren álbumes nuevos. Proyecto del curso Ingeniería de Software para Aplicaciones Móviles (MISO, Universidad de los Andes). Funciona desde Android 5.0 (API 21).
+Aplicación Android nativa en Kotlin para consultar álbumes, artistas y coleccionistas de música en vinilo, y para que los coleccionistas registren álbumes nuevos, les agreguen tracks y sumen músicos a las bandas. Proyecto del curso Ingeniería de Software para Aplicaciones Móviles (MISO, Universidad de los Andes). Funciona desde Android 5.0 (API 21).
 
 ## API
 
@@ -17,7 +17,7 @@ Para usar otra API, cambiar `publishedApiBaseUrl` en `app/build.gradle.kts` y vo
 El APK de cada versión está en [Releases](https://github.com/juanfelipe99/desarrollo-movil-equipo-2/releases). Se descarga en el teléfono y se abre, o se instala con el dispositivo conectado por USB:
 
 ```
-adb install vinilos-v1.0.0.apk
+adb install vinilos-v2.0.0.apk
 ```
 
 ## Construir la app
@@ -36,6 +36,16 @@ Por línea de comandos, desde la carpeta del proyecto (en Windows, `gradlew.bat`
 ```
 
 El APK queda en `app/build/outputs/apk/debug/app-debug.apk`, y `./gradlew installDebug` lo instala en el dispositivo conectado.
+
+## Compilación para perfilar
+
+La variante `perfil` es la versión release, con R8 activado, marcada como perfilable para que el Profiler de Android Studio pueda conectarse sin modo de depuración. Se usa para medir el desempeño en teléfonos físicos.
+
+```
+./gradlew assemblePerfil
+```
+
+El APK queda en `app/build/outputs/apk/perfil/app-perfil.apk`.
 
 ## Pruebas
 
@@ -59,7 +69,7 @@ Están en `app/src/test/java/com/equipo2/vinilos` y no necesitan emulador ni API
 
 ## Documentación
 
-La [wiki](https://github.com/juanfelipe99/desarrollo-movil-equipo-2/wiki) tiene la estrategia de pruebas, el diseño arquitectónico, las actas de reuniones y las retrospectivas.
+La [wiki](https://github.com/juanfelipe99/desarrollo-movil-equipo-2/wiki) tiene la estrategia y los resultados de pruebas, el diseño arquitectónico, el perfilamiento y las micro-optimizaciones, las actas de reuniones y las retrospectivas de cada sprint.
 
 ## Integrantes
 
