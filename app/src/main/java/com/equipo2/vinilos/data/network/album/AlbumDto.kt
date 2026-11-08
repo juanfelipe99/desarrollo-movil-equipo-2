@@ -3,6 +3,8 @@ package com.equipo2.vinilos.data.network.album
 import com.equipo2.vinilos.data.model.Album
 import com.equipo2.vinilos.data.model.AlbumComment
 import com.equipo2.vinilos.data.model.NewAlbum
+import com.equipo2.vinilos.data.model.NewTrack
+import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.model.Performer
 import com.equipo2.vinilos.data.model.Track
 import com.equipo2.vinilos.data.network.fromApiDate
@@ -32,6 +34,13 @@ data class CreateAlbumRequest(
     val genre: String,
     val recordLabel: String,
 )
+
+@Serializable
+data class AddTrackRequest(
+    val name: String,
+    val duration: String,
+)
+
 @Serializable
 data class TrackDto(
     val id: Int,
@@ -44,6 +53,8 @@ data class PerformerDto(
     val id: Int,
     val name: String,
     val image: String,
+    // Solo los músicos traen fecha de nacimiento, las bandas traen fecha de creación
+    val birthDate: String? = null,
 )
 
 @Serializable
@@ -62,7 +73,6 @@ data class CommentAuthorDto(
 @Serializable
 data class CommentIdDto(val id: Int)
 
-
 internal fun NewAlbum.toRequest() = CreateAlbumRequest(
     name = name,
     cover = cover,
@@ -72,6 +82,9 @@ internal fun NewAlbum.toRequest() = CreateAlbumRequest(
     recordLabel = recordLabel,
 )
 
+internal fun NewTrack.toRequest() = AddTrackRequest(name = name, duration = duration)
+
+internal fun TrackDto.toTrack() = Track(id = id, name = name, duration = duration)
 
 internal fun AlbumDto.toAlbum(commentAuthors: Map<Int, String> = emptyMap()) = Album(
     id = id,
@@ -81,18 +94,13 @@ internal fun AlbumDto.toAlbum(commentAuthors: Map<Int, String> = emptyMap()) = A
     description = description,
     genre = genre,
     recordLabel = recordLabel,
-    tracks = tracks.map { track ->
-        Track(
-            id = track.id,
-            name = track.name,
-            duration = track.duration,
-        )
-    },
+    tracks = tracks.map { it.toTrack() },
     performers = performers.map { performer ->
         Performer(
             id = performer.id,
             name = performer.name,
             image = performer.image,
+            type = if (performer.birthDate != null) ArtistType.MUSICIAN else ArtistType.BAND,
         )
     },
     comments = comments.map { comment ->

@@ -29,8 +29,8 @@ android {
         applicationId = "com.equipo2.vinilos"
         minSdk = 21
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "API_BASE_URL", "\"$publishedApiBaseUrl\"")
@@ -52,6 +52,17 @@ android {
                 enable = true
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
             }
+        }
+        // Igual a release pero perfilable, para medir el desempeño de la versión que se entrega con el Profiler
+        create("perfil") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += "release"
+        }
+        // Con -PidSufijo=antes o =despues las dos versiones conviven en el teléfono y se comparan sin reinstalar
+        providers.gradleProperty("idSufijo").orNull?.let { suffix ->
+            getByName("perfil").applicationIdSuffix = ".$suffix"
+            getByName("debug").applicationIdSuffix = ".$suffix.debug"
         }
     }
     compileOptions {
@@ -84,9 +95,11 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.material)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

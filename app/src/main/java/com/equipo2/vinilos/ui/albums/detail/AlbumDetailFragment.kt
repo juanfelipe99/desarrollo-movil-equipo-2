@@ -10,29 +10,41 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.DialogFragmentNavigator
+import androidx.navigation.fragment.findNavController
 import coil3.load
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.data.model.Album
 import com.equipo2.vinilos.data.model.AlbumComment
 import com.equipo2.vinilos.data.model.Performer
+import com.equipo2.vinilos.data.model.Role
 import com.equipo2.vinilos.data.model.Track
 import com.equipo2.vinilos.databinding.FragmentAlbumDetailBinding
 import com.equipo2.vinilos.databinding.ItemAlbumCommentBinding
 import com.equipo2.vinilos.databinding.ItemAlbumInfoBinding
 import com.equipo2.vinilos.databinding.ItemTrackBinding
 import com.equipo2.vinilos.databinding.ViewPerformerChipBinding
+import com.equipo2.vinilos.ui.albums.tracks.TrackAddSheet
+import com.equipo2.vinilos.ui.artists.detail.ArtistDetailFragment
+import com.equipo2.vinilos.ui.common.bindExpandableText
+import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.initialsOf
+import com.equipo2.vinilos.ui.common.navigateIfPossible
+import com.equipo2.vinilos.ui.common.showSnackbar
 import com.equipo2.vinilos.ui.common.toLongText
+import com.equipo2.vinilos.ui.role.RoleViewModel
 import com.equipo2.vinilos.ui.state.UiState
 import com.equipo2.vinilos.ui.state.addEmptySection
 import com.equipo2.vinilos.ui.state.showError
 import com.equipo2.vinilos.ui.state.showLoading
 
-/** Detalle de álbum (HU02). */
+/** Detalle de álbum (HU02), donde el coleccionista también agrega tracks (HU08). */
 class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
 
+    private val roleViewModel: RoleViewModel by activityViewModels { RoleViewModel.Factory }
     private val viewModel: AlbumDetailViewModel by viewModels {
         AlbumDetailViewModel.factory(requireArguments().getInt(ARG_ALBUM_ID))
     }
@@ -41,6 +53,9 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
         super.onViewCreated(view, savedInstanceState)
 
         val binding = FragmentAlbumDetailBinding.bind(view)
+        bindPullToRefresh(binding.albumRefresh, viewModel.pullRefresh, binding.albumScroll, binding.albumError.root) {
+            viewModel.refresh()
+        }
 
         viewLifecycleOwner.collectWhileVisible(viewModel.state) { state ->
             when (state) {
@@ -54,6 +69,32 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
             binding.albumLoading.root.isVisible = state == UiState.Loading
             binding.albumError.root.isVisible = state is UiState.Error
             binding.albumContent.isVisible = state is UiState.Success
+            binding.albumRefresh.isEnabled = state != UiState.Loading
+        }
+
+        // Solo el coleccionista agrega tracks, y el vacío de tracks le dice cómo
+        viewLifecycleOwner.collectWhileVisible(roleViewModel.role) { role ->
+            binding.addTrackButton.isVisible = role == Role.COLLECTOR
+            (viewModel.state.value as? UiState.Success)?.let { showTracks(binding, it.data.tracks) }
+        }
+        showAddedTrack()
+    }
+
+    /** Al cerrarse la hoja con un track nuevo, aparece al final de la lista marcado y con el aviso «Track agregado». */
+    private fun showAddedTrack() {
+        // La entrada del detalle y no la de arriba, que al girar con la hoja abierta es la de la hoja.
+        // El detalle existe en las pestañas Álbumes y Artistas, así que se busca por tipo y no por id
+        val navController = findNavController()
+        val ownEntry = navController.currentBackStackEntry?.takeIf { it.destination !is DialogFragmentNavigator.Destination }
+            ?: navController.previousBackStackEntry ?: return
+        val savedState = ownEntry.savedStateHandle
+
+        viewLifecycleOwner.collectWhileVisible(savedState.getStateFlow<Bundle?>(TrackAddSheet.ADDED_TRACK, null)) { added ->
+            if (added == null) return@collectWhileVisible
+            viewModel.onTrackAdded(TrackAddSheet.trackOf(added))
+            showSnackbar(getString(R.string.snackbar_track_added))
+            // Se quita para que el aviso no se repita al girar
+            savedState.remove<Bundle>(TrackAddSheet.ADDED_TRACK)
         }
     }
 
@@ -67,8 +108,11 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
         binding.albumGenre.show(R.drawable.ic_music_note, R.string.album_detail_genre_label, album.genre)
         binding.albumRecordLabel.show(R.drawable.ic_sell, R.string.album_detail_record_label_label, album.recordLabel)
 
-        showDescription(binding, album.description)
+        bindExpandableText(binding.albumDescription, binding.albumDescriptionToggle, album.description)
         showTracks(binding, album.tracks)
+        binding.addTrackButton.setOnClickListener {
+            findNavController().navigateIfPossible(R.id.action_albumDetail_to_trackAdd, TrackAddSheet.args(album.id, album.name))
+        }
         showComments(binding, album.comments)
     }
 
@@ -88,26 +132,14 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
             chip.performerInitials.text = initialsOf(performer.name)
             chip.performerName.text = performer.name
             chip.performerPhoto.load(performer.image)
+            chip.root.contentDescription = getString(R.string.cd_album_detail_performer, performer.name)
+            chip.root.setOnClickListener {
+                findNavController().navigateIfPossible(
+                    R.id.action_albumDetail_to_artistDetail,
+                    ArtistDetailFragment.args(performer.id, performer.type),
+                )
+            }
         }
-    }
-
-    /** Los textos largos se cortan en la última palabra antes de 170 caracteres, y «Ver más» los muestra completos. */
-    private fun showDescription(binding: FragmentAlbumDetailBinding, description: String) {
-        val isLong = description.length > DESCRIPTION_PREVIEW_LENGTH
-        val preview = description.take(DESCRIPTION_PREVIEW_LENGTH).substringBeforeLast(' ').trimEnd() + "…"
-        var expanded = false
-
-        fun render() {
-            binding.albumDescription.text = if (expanded || !isLong) description else preview
-            binding.albumDescriptionToggle.setText(if (expanded) R.string.album_detail_collapse else R.string.album_detail_expand)
-        }
-
-        binding.albumDescriptionToggle.isVisible = isLong
-        binding.albumDescriptionToggle.setOnClickListener {
-            expanded = !expanded
-            render()
-        }
-        render()
     }
 
     private fun showTracks(binding: FragmentAlbumDetailBinding, tracks: List<Track>) {
@@ -117,19 +149,29 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
         binding.tracksListEnd.isVisible = tracks.isNotEmpty()
 
         if (tracks.isEmpty()) {
+            val body = if (roleViewModel.role.value == Role.COLLECTOR) {
+                R.string.album_detail_tracks_empty_body_collector
+            } else {
+                R.string.album_detail_tracks_empty_body
+            }
             binding.tracksEmpty.addEmptySection(
                 R.drawable.ic_music_note,
                 getString(R.string.album_detail_tracks_empty_title),
-                getString(R.string.album_detail_tracks_empty_body),
+                getString(body),
             )
             return
         }
 
+        val newIds = viewModel.newTrackIds.value
         tracks.forEachIndexed { index, track ->
             val row = ItemTrackBinding.inflate(layoutInflater, binding.tracksList, true)
             row.trackNumber.text = getString(R.string.album_detail_track_number, index + 1)
             row.trackName.text = track.name
             row.trackDuration.text = track.duration
+
+            val isNew = track.id in newIds
+            row.trackNewBadge.isVisible = isNew
+            if (isNew) row.trackRow.setBackgroundResource(R.color.new_row)
         }
     }
 
@@ -183,7 +225,6 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
 
         fun args(albumId: Int): Bundle = bundleOf(ARG_ALBUM_ID to albumId)
 
-        private const val DESCRIPTION_PREVIEW_LENGTH = 170
         private const val MAX_RATING = 5
     }
 }

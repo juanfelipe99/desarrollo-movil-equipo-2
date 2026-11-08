@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FrameLayout porque es el único que acepta foreground antes de Android 6, y así el toque se ve sobre el resaltado -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_member_row"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
+
+    <LinearLayout
+        android:id="@+id/memberRowContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="72dp"
+        android:orientation="horizontal"
+        android:paddingVertical="12dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp">
+
+        <!-- Las iniciales quedan detrás y se ven mientras la foto carga, si falla o si no hay -->
+        <FrameLayout
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_circle_surface_variant">
+
+            <TextView
+                android:id="@+id/memberInitials"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:importantForAccessibility="no"
+                android:textAppearance="@style/TextAppearance.Vinilos.LabelLarge"
+                android:textColor="@color/md_on_surface_variant"
+                tools:text="RB" />
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/memberPhoto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Vinilos.Circle" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/memberName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textAppearance="@style/TextAppearance.Vinilos.BodyLarge.SemiBold"
+                android:textColor="@color/md_on_surface"
+                tools:text="Rubén Blades Bellido de Luna" />
+
+            <TextView
+                android:id="@+id/memberStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+                android:textColor="@color/md_on_surface_variant"
+                tools:text="Integrante de Seis del Solar" />
+
+            <!-- Solo en el músico elegido que pertenece a otra banda -->
+            <TextView
+                android:id="@+id/memberLeavesBand"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:drawablePadding="6dp"
+                android:gravity="center_vertical"
+                android:textAppearance="@style/TextAppearance.Vinilos.LabelMedium.SemiBold"
+                android:textColor="@color/md_on_surface"
+                android:visibility="gone"
+                app:drawableStartCompat="@drawable/ic_warning"
+                app:drawableTint="@color/md_on_surface"
+                tools:text="Al agregarlo dejará Seis del Solar"
+                tools:visibility="visible" />
+        </LinearLayout>
+
+        <!-- La fila entera elige al músico, así que el radio solo muestra el estado -->
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/memberRadio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:clickable="false"
+            android:focusable="false"
+            android:importantForAccessibility="no"
+            app:buttonTint="@color/selection_radio" />
+
+        <ImageView
+            android:id="@+id/memberAlreadyMember"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="14dp"
+            android:importantForAccessibility="no"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_check"
+            app:tint="@color/md_primary" />
+    </LinearLayout>
+
+    <View
+        style="@style/Widget.Vinilos.Divider"
+        android:layout_gravity="bottom" />
+</FrameLayout>

@@ -41,16 +41,11 @@
 
             <TextView
                 android:id="@+id/albumNewBadge"
+                style="@style/Widget.Vinilos.BadgeNew"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|start"
                 android:layout_margin="8dp"
-                android:background="@drawable/bg_badge_new"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="2dp"
-                android:text="@string/album_list_new_badge"
-                android:textAppearance="@style/TextAppearance.Vinilos.LabelMedium.Bold"
-                android:textColor="@color/md_on_primary"
                 android:visibility="gone"
                 tools:visibility="visible" />
         </FrameLayout>

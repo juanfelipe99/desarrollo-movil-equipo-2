@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- La píldora va debajo de los íconos y se mueve con translationX. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:layout_width="132dp"
+    tools:layout_height="48dp"
+    tools:parentTag="android.widget.FrameLayout">
+
+    <View
+        android:id="@+id/themeThumb"
+        android:layout_width="40dp"
+        android:layout_height="28dp"
+        android:layout_gravity="center_vertical|start"
+        android:background="@drawable/bg_theme_mode_thumb" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:paddingHorizontal="4dp">
+
+        <ImageView
+            android:id="@+id/themeLight"
+            style="@style/Widget.Vinilos.ThemeModeSlot"
+            android:contentDescription="@string/cd_theme_mode_light"
+            android:src="@drawable/ic_light_mode" />
+
+        <ImageView
+            android:id="@+id/themeSystem"
+            style="@style/Widget.Vinilos.ThemeModeSlot"
+            android:contentDescription="@string/cd_theme_mode_system"
+            android:src="@drawable/ic_contrast" />
+
+        <ImageView
+            android:id="@+id/themeDark"
+            style="@style/Widget.Vinilos.ThemeModeSlot"
+            android:contentDescription="@string/cd_theme_mode_dark"
+            android:src="@drawable/ic_dark_mode" />
+    </LinearLayout>
+</merge>

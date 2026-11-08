@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Álbum del carrusel horizontal del detalle de artista -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/artist_album_width"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="@dimen/artist_album_gap"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="vertical">
+
+    <!-- El marcador queda detrás y se ve mientras la portada carga o si falla -->
+    <FrameLayout
+        android:layout_width="@dimen/artist_album_width"
+        android:layout_height="@dimen/artist_album_width"
+        android:background="@drawable/bg_album_cover">
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            app:srcCompat="@drawable/ic_album"
+            app:tint="@color/placeholder_icon" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/artistAlbumCover"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Vinilos.AlbumCover" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/artistAlbumName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+        android:textColor="@color/md_on_surface"
+        tools:text="Buscando América" />
+
+    <TextView
+        android:id="@+id/artistAlbumSubtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.Vinilos.LabelMedium"
+        android:textColor="@color/md_on_surface_variant"
+        tools:text="1984 · Salsa" />
+</LinearLayout>

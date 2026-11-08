@@ -10,6 +10,7 @@ import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.equipo2.vinilos.R
+import com.equipo2.vinilos.support.RUN_TAG
 import com.equipo2.vinilos.support.enterAs
 import com.equipo2.vinilos.support.pickOption
 import com.equipo2.vinilos.support.waitUntil
@@ -18,7 +19,7 @@ import com.equipo2.vinilos.support.waitUntil
 const val TEST_COVER_URL = "https://www.gstatic.com/webp/gallery/1.jpg"
 
 /** Prefijo de los álbumes de prueba, que se borran al terminar. */
-const val TEST_ALBUM_PREFIX = "E2E HU07"
+val TEST_ALBUM_PREFIX = "E2E HU07 $RUN_TAG"
 
 /** Entra como coleccionista y abre Crear álbum. */
 fun openCreateAlbum() {

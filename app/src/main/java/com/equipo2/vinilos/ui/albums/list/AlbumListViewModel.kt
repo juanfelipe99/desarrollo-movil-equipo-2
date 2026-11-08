@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.equipo2.vinilos.VinilosApplication
 import com.equipo2.vinilos.data.model.Album
 import com.equipo2.vinilos.data.repository.AlbumRepository
+import com.equipo2.vinilos.ui.state.PullRefresh
 import com.equipo2.vinilos.ui.state.UiState
 import com.equipo2.vinilos.ui.state.toErrorReason
 import kotlinx.coroutines.Job
@@ -45,11 +46,22 @@ class AlbumListViewModel(
 
     private var loading: Job? = null
 
+    val pullRefresh = PullRefresh(viewModelScope)
+
     init {
         load()
     }
 
     fun retry() = load()
+
+    /** Recarga al deslizar hacia abajo. Los álbumes siguen a la vista mientras llegan los nuevos. */
+    fun refresh() {
+        // Recargar siempre va a la API
+        repository.clearCache()
+        if (catalog.value !is UiState.Success) return load(force = true)
+        if (loading?.isActive == true) return
+        loading = pullRefresh.launch({ repository.getAlbums() }) { albums -> catalog.value = catalogOf(albums) }
+    }
 
     /** Marca el álbum recién creado como «Nuevo» y recarga para que aparezca. */
     fun onAlbumCreated(albumId: Int) {
@@ -65,11 +77,13 @@ class AlbumListViewModel(
         catalog.value = UiState.Loading
         loading = viewModelScope.launch {
             catalog.value = repository.getAlbums().fold(
-                onSuccess = { albums -> if (albums.isEmpty()) UiState.Empty else UiState.Success(albums) },
+                onSuccess = ::catalogOf,
                 onFailure = { UiState.Error(it.toErrorReason()) },
             )
         }
     }
+
+    private fun catalogOf(albums: List<Album>): UiState<List<Album>> = if (albums.isEmpty()) UiState.Empty else UiState.Success(albums)
 
     private fun itemsOf(albums: List<Album>, newIds: IntArray): List<AlbumItem> {
         val (fresh, rest) = albums.partition { it.id in newIds }

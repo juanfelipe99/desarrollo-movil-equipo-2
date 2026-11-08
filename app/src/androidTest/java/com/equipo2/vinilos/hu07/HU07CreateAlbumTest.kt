@@ -14,6 +14,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.support.BackVynils
 import com.equipo2.vinilos.support.VinilosRule
+import com.equipo2.vinilos.support.checkSnackbar
 import com.equipo2.vinilos.support.hasFieldError
 import com.equipo2.vinilos.support.pickOption
 import com.equipo2.vinilos.support.toolbarTitle
@@ -117,7 +118,7 @@ class HU07CreateAlbumTest {
         tapSave()
 
         onView(toolbarTitle(R.string.album_list_title)).check(matches(isDisplayed()))
-        onView(withText(R.string.snackbar_album_created)).check(matches(isDisplayed()))
+        checkSnackbar(R.string.snackbar_album_created)
         assertTrue("El álbum $name no está en la API", name in BackVynils.albumNames())
     }
 

@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Cada pestaña de la barra es un subgrafo con sus pantallas, así la barra sabe qué pestaña marcar
+     aunque al volver a ella se restaure un detalle y no la lista. -->
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/albumListFragment">
+    app:startDestination="@id/albumsGraph">
 
     <action
         android:id="@+id/action_global_roleSelect"
@@ -13,61 +15,214 @@
         android:id="@+id/roleSelectFragment"
         android:name="com.equipo2.vinilos.ui.role.select.RoleSelectFragment" />
 
-    <fragment
-        android:id="@+id/albumListFragment"
-        android:name="com.equipo2.vinilos.ui.albums.list.AlbumListFragment"
-        android:label="@string/album_list_title">
+    <navigation
+        android:id="@+id/albumsGraph"
+        app:startDestination="@id/albumListFragment">
 
-        <action
-            android:id="@+id/action_albumList_to_albumCreate"
-            app:destination="@id/albumCreateFragment" />
+        <fragment
+            android:id="@+id/albumListFragment"
+            android:name="com.equipo2.vinilos.ui.albums.list.AlbumListFragment"
+            android:label="@string/album_list_title">
 
-        <action
-            android:id="@+id/action_albumList_to_albumDetail"
-            app:destination="@id/albumDetailFragment" />
-    </fragment>
+            <action
+                android:id="@+id/action_albumList_to_albumCreate"
+                app:destination="@id/albumCreateFragment" />
 
-    <fragment
-        android:id="@+id/albumCreateFragment"
-        android:name="com.equipo2.vinilos.ui.albums.create.AlbumCreateFragment"
-        android:label="@string/album_create_title" />
+            <action
+                android:id="@+id/action_albumList_to_albumDetail"
+                app:destination="@id/albumDetailFragment" />
+        </fragment>
 
-    <fragment
-        android:id="@+id/albumDetailFragment"
-        android:name="com.equipo2.vinilos.ui.albums.detail.AlbumDetailFragment"
-        android:label="@string/album_detail_title">
+        <fragment
+            android:id="@+id/albumCreateFragment"
+            android:name="com.equipo2.vinilos.ui.albums.create.AlbumCreateFragment"
+            android:label="@string/album_create_title" />
 
-        <argument
-            android:name="albumId"
-            app:argType="integer" />
-    </fragment>
+        <fragment
+            android:id="@+id/albumDetailFragment"
+            android:name="com.equipo2.vinilos.ui.albums.detail.AlbumDetailFragment"
+            android:label="@string/album_detail_title">
 
-    <fragment
-        android:id="@+id/artistListFragment"
-        android:name="com.equipo2.vinilos.ui.artists.list.ArtistListFragment"
-        android:label="@string/artist_list_title">
+            <argument
+                android:name="albumId"
+                app:argType="integer" />
 
-        <action
-            android:id="@+id/action_artistList_to_artistDetail"
-            app:destination="@id/artistDetailFragment" />
-    </fragment>
+            <action
+                android:id="@+id/action_albumDetail_to_trackAdd"
+                app:destination="@id/trackAddSheet" />
 
-    <fragment
-        android:id="@+id/artistDetailFragment"
-        android:name="com.equipo2.vinilos.ui.artists.detail.ArtistDetailFragment"
-        android:label="@string/artist_detail_title">
+            <!-- Del álbum a uno de sus intérpretes, sin salir de la pestaña -->
+            <action
+                android:id="@+id/action_albumDetail_to_artistDetail"
+                app:destination="@id/albumArtistDetailFragment" />
+        </fragment>
 
-        <argument
-            android:name="artistId"
-            app:argType="integer" />
+        <dialog
+            android:id="@+id/trackAddSheet"
+            android:name="com.equipo2.vinilos.ui.albums.tracks.TrackAddSheet">
 
-        <argument
-            android:name="artistType"
-            app:argType="string" />
-    </fragment>
+            <argument
+                android:name="albumId"
+                app:argType="integer" />
 
-    <fragment
-        android:id="@+id/collectorListFragment"
-        android:name="com.equipo2.vinilos.ui.collectors.CollectorListFragment"
-        android:label="@string/collector_list_title" />
+            <argument
+                android:name="albumName"
+                app:argType="string" />
+        </dialog>
+
+        <!-- El detalle de artista también vive en esta pestaña, para abrirlo desde un álbum sin cambiar de pestaña -->
+        <fragment
+            android:id="@+id/albumArtistDetailFragment"
+            android:name="com.equipo2.vinilos.ui.artists.detail.ArtistDetailFragment"
+            android:label="@string/artist_detail_title">
+
+            <argument
+                android:name="artistId"
+                app:argType="integer" />
+
+            <argument
+                android:name="artistType"
+                app:argType="string" />
+
+            <action
+                android:id="@+id/action_artistDetail_to_artistDetail"
+                app:destination="@id/albumArtistDetailFragment" />
+
+            <action
+                android:id="@+id/action_artistDetail_to_memberAdd"
+                app:destination="@id/albumMemberAddFragment" />
+
+            <action
+                android:id="@+id/action_artistDetail_to_albumDetail"
+                app:destination="@id/albumDetailFragment" />
+        </fragment>
+
+        <fragment
+            android:id="@+id/albumMemberAddFragment"
+            android:name="com.equipo2.vinilos.ui.artists.members.MemberAddFragment"
+            android:label="@string/member_add_title">
+
+            <argument
+                android:name="bandId"
+                app:argType="integer" />
+
+            <argument
+                android:name="bandName"
+                app:argType="string" />
+        </fragment>
+    </navigation>
+
+    <navigation
+        android:id="@+id/artistsGraph"
+        app:startDestination="@id/artistListFragment">
+
+        <fragment
+            android:id="@+id/artistListFragment"
+            android:name="com.equipo2.vinilos.ui.artists.list.ArtistListFragment"
+            android:label="@string/artist_list_title">
+
+            <action
+                android:id="@+id/action_artistList_to_artistDetail"
+                app:destination="@id/artistDetailFragment" />
+        </fragment>
+
+        <fragment
+            android:id="@+id/artistDetailFragment"
+            android:name="com.equipo2.vinilos.ui.artists.detail.ArtistDetailFragment"
+            android:label="@string/artist_detail_title">
+
+            <argument
+                android:name="artistId"
+                app:argType="integer" />
+
+            <argument
+                android:name="artistType"
+                app:argType="string" />
+
+            <!-- Del músico a su banda y de la banda a un integrante (HU04) -->
+            <action
+                android:id="@+id/action_artistDetail_to_artistDetail"
+                app:destination="@id/artistDetailFragment" />
+
+            <action
+                android:id="@+id/action_artistDetail_to_memberAdd"
+                app:destination="@id/memberAddFragment" />
+
+            <!-- Del carrusel de álbumes al detalle del álbum, sin salir de la pestaña -->
+            <action
+                android:id="@+id/action_artistDetail_to_albumDetail"
+                app:destination="@id/artistAlbumDetailFragment" />
+        </fragment>
+
+        <fragment
+            android:id="@+id/memberAddFragment"
+            android:name="com.equipo2.vinilos.ui.artists.members.MemberAddFragment"
+            android:label="@string/member_add_title">
+
+            <argument
+                android:name="bandId"
+                app:argType="integer" />
+
+            <argument
+                android:name="bandName"
+                app:argType="string" />
+        </fragment>
+
+        <!-- El detalle de álbum también vive en esta pestaña, para abrirlo desde un artista sin cambiar de pestaña -->
+        <fragment
+            android:id="@+id/artistAlbumDetailFragment"
+            android:name="com.equipo2.vinilos.ui.albums.detail.AlbumDetailFragment"
+            android:label="@string/album_detail_title">
+
+            <argument
+                android:name="albumId"
+                app:argType="integer" />
+
+            <action
+                android:id="@+id/action_albumDetail_to_trackAdd"
+                app:destination="@id/artistTrackAddSheet" />
+
+            <action
+                android:id="@+id/action_albumDetail_to_artistDetail"
+                app:destination="@id/artistDetailFragment" />
+        </fragment>
+
+        <dialog
+            android:id="@+id/artistTrackAddSheet"
+            android:name="com.equipo2.vinilos.ui.albums.tracks.TrackAddSheet">
+
+            <argument
+                android:name="albumId"
+                app:argType="integer" />
+
+            <argument
+                android:name="albumName"
+                app:argType="string" />
+        </dialog>
+    </navigation>
+
+    <navigation
+        android:id="@+id/collectorsGraph"
+        app:startDestination="@id/collectorListFragment">
+
+        <fragment
+            android:id="@+id/collectorListFragment"
+            android:name="com.equipo2.vinilos.ui.collectors.list.CollectorListFragment"
+            android:label="@string/collector_list_title">
+
+            <action
+                android:id="@+id/action_collectorList_to_collectorDetail"
+                app:destination="@id/collectorDetailFragment" />
+        </fragment>
+
+        <fragment
+            android:id="@+id/collectorDetailFragment"
+            android:name="com.equipo2.vinilos.ui.collectors.detail.CollectorDetailFragment"
+            android:label="@string/collector_detail_title">
+
+            <argument
+                android:name="collectorId"
+                app:argType="integer" />
+        </fragment>
+    </navigation>
 </navigation>

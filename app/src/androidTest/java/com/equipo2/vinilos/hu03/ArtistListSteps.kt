@@ -1,23 +1,32 @@
 package com.equipo2.vinilos.hu03
 
 import android.view.View
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.UiController
+import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.data.model.Artist
+import com.equipo2.vinilos.data.model.ArtistDetail
 import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.repository.ArtistRepository
 import com.equipo2.vinilos.support.enterAs
-import kotlinx.coroutines.awaitCancellation
+import com.equipo2.vinilos.support.isSettled
+import com.equipo2.vinilos.support.waitUntil
+import com.equipo2.vinilos.ui.artists.list.ArtistAdapter
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
 import java.io.IOException
-import java.text.Collator
 import java.time.LocalDate
-import java.util.Locale
+import kotlinx.coroutines.awaitCancellation
 
 /** Repositorio en memoria que da sus respuestas en orden y repite la última, o que nunca responde. */
 class InMemoryArtistRepository(private val responses: List<Result<List<Artist>>>) : ArtistRepository {
@@ -32,6 +41,10 @@ class InMemoryArtistRepository(private val responses: List<Result<List<Artist>>>
         if (neverAnswer) awaitCancellation()
         return responses[minOf(calls++, responses.lastIndex)]
     }
+
+    // Aquí solo se prueba que el detalle se abra; su contenido se prueba en HU04 con otro repositorio
+    override suspend fun getArtistDetail(id: Int, type: ArtistType): Result<ArtistDetail> =
+        Result.failure(UnsupportedOperationException("Estas pruebas no revisan el contenido del detalle"))
 }
 
 fun noConnection(): Result<List<Artist>> = Result.failure(IOException("Sin conexión"))
@@ -45,14 +58,73 @@ fun testBand(id: Int, name: String, creationYear: Int) =
 /** Entra como visitante y abre la pestaña Artistas de la barra inferior. */
 fun openArtists() {
     enterAs(collector = false)
-    onView(withId(R.id.artistListFragment)).perform(click())
+    onView(withId(R.id.artistsGraph)).perform(click())
 }
 
 /** Nombre de una fila del listado, sin confundirlo con otros textos de la pantalla. */
 fun artistRowName(name: String): Matcher<View> = allOf(withId(R.id.artistName), withText(name), isDescendantOfA(withId(R.id.artistList)))
 
-/** Orden en que la app muestra los artistas: alfabético sin importar tildes ni mayúsculas. */
-fun sortedLikeTheApp(names: List<String>): List<String> {
-    val collator = Collator.getInstance(Locale.forLanguageTag("es")).apply { strength = Collator.PRIMARY }
-    return names.sortedWith(collator)
+/**
+ * Artistas que muestra el listado con el filtro actual, cuando cumplen la condición.
+ * El listado calcula los cambios de cada filtro en otro hilo, que Espresso no espera, por eso se espera a que llegue.
+ */
+fun shownArtists(until: (List<Artist>) -> Boolean = { true }): List<Artist> {
+    var items = emptyList<Artist>()
+    waitUntil {
+        onView(withId(R.id.artistList)).check { view, noView ->
+            val list = (view ?: throw noView) as RecyclerView
+            items = if (list.isSettled()) list.artistAdapter.currentList else emptyList()
+        }
+        items.isNotEmpty() && until(items)
+    }
+    return items
 }
+
+/**
+ * Desplaza el listado hasta dejar el artista arriba, a la vista para revisarlo o tocarlo.
+ * Si el listado se reacomoda justo después, por ejemplo porque acaba de cambiar de filtro, lo intenta otra vez.
+ */
+fun showArtistRow(name: String) {
+    waitUntil {
+        runCatching {
+            onView(withId(R.id.artistList)).perform(scrollToArtist(name))
+            onView(artistRowName(name)).check(matches(isDisplayed()))
+        }.isSuccess
+    }
+}
+
+private fun scrollToArtist(name: String) = object : ViewAction {
+    override fun getConstraints(): Matcher<View> = isAssignableFrom(RecyclerView::class.java)
+
+    override fun getDescription() = "desplazar el listado hasta «$name»"
+
+    override fun perform(uiController: UiController, view: View) {
+        val list = view as RecyclerView
+        while (!list.isSettled()) uiController.loopMainThreadForAtLeast(50)
+        val position = list.artistAdapter.currentList.indexOfFirst { it.name == name }
+        check(position >= 0) { "El listado no tiene el artista «$name»" }
+        (list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, 0)
+        uiController.loopMainThreadUntilIdle()
+    }
+}
+
+/** Toca la primera fila del listado, sea cual sea el artista. */
+fun openFirstArtist() {
+    onView(withId(R.id.artistList)).perform(object : ViewAction {
+        override fun getConstraints(): Matcher<View> = isAssignableFrom(RecyclerView::class.java)
+
+        override fun getDescription() = "tocar la primera fila del listado"
+
+        override fun perform(uiController: UiController, view: View) {
+            val list = view as RecyclerView
+            list.scrollToPosition(0)
+            uiController.loopMainThreadUntilIdle()
+            list.findViewHolderForAdapterPosition(0)!!.itemView.performClick()
+            uiController.loopMainThreadUntilIdle()
+        }
+    })
+}
+
+private val RecyclerView.artistAdapter: ArtistAdapter
+    get() = adapter as ArtistAdapter
+

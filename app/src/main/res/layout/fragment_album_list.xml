@@ -5,36 +5,49 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Abajo queda espacio para que el botón «+» no tape la última fila. -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/albumGrid"
+    <!-- Deslizar hacia abajo recarga el catálogo -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/albumsRefresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingHorizontal="@dimen/album_grid_padding"
-        android:paddingTop="@dimen/album_grid_padding"
-        android:paddingBottom="88dp"
-        android:visibility="gone"
-        tools:itemCount="6"
-        tools:listitem="@layout/item_album"
-        tools:visibility="visible" />
+        android:layout_height="match_parent">
 
-    <include
-        android:id="@+id/albumsLoading"
-        layout="@layout/view_loading"
-        android:visibility="gone" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <include
-        android:id="@+id/albumsMessage"
-        layout="@layout/view_state_message"
-        android:visibility="gone" />
+            <!-- Abajo queda espacio para que el botón «+» y la barra inferior no tapen la última fila. -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/albumGrid"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingHorizontal="@dimen/album_grid_padding"
+                android:paddingTop="@dimen/album_grid_padding"
+                android:paddingBottom="@dimen/album_grid_padding_bottom"
+                android:visibility="gone"
+                tools:itemCount="6"
+                tools:listitem="@layout/item_album"
+                tools:visibility="visible" />
+
+            <include
+                android:id="@+id/albumsLoading"
+                layout="@layout/view_loading"
+                android:visibility="gone" />
+
+            <include
+                android:id="@+id/albumsMessage"
+                layout="@layout/view_state_message"
+                android:visibility="gone" />
+        </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/createAlbumButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="@dimen/fab_margin_bottom"
         android:contentDescription="@string/cd_create_album"
         android:visibility="gone"
         app:backgroundTint="@color/md_primary"

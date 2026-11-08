@@ -16,6 +16,9 @@ interface AlbumApi {
     @GET("albums/{id}")
     suspend fun getAlbumById(@Path("id") id: Int): AlbumDto
 
+    @POST("albums/{id}/tracks")
+    suspend fun addTrack(@Path("id") albumId: Int, @Body request: AddTrackRequest): TrackDto
+
     @GET("collectors")
     suspend fun getCommentAuthors(): List<CommentAuthorDto>
 }

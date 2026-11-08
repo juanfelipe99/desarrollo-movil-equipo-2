@@ -8,7 +8,11 @@ import com.equipo2.vinilos.support.musician
 import com.equipo2.vinilos.ui.state.ErrorReason
 import com.equipo2.vinilos.ui.state.UiState
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
@@ -132,5 +136,34 @@ class ArtistListViewModelTest {
 
         assertEquals(ArtistFilter.BANDS, recreated.filter.value)
         assertEquals(UiState.Success(listOf(queen)), recreated.state.value)
+    }
+
+    @Test
+    fun alDeslizarParaRecargar_conservaLosArtistasMientrasCarga_yLuegoMuestraLosNuevos() {
+        val viewModel = ArtistListViewModel(repository)
+        repository.response.complete(Result.success(listOf(ruben)))
+
+        repository.response = CompletableDeferred()
+        viewModel.refresh()
+
+        assertEquals(UiState.Success(listOf(ruben)), viewModel.state.value)
+        assertTrue(viewModel.pullRefresh.running.value)
+
+        repository.response.complete(Result.success(listOf(ruben, queen)))
+
+        assertEquals(UiState.Success(listOf(queen, ruben)), viewModel.state.value)
+        assertFalse(viewModel.pullRefresh.running.value)
+    }
+
+    @Test
+    fun siLaRecargaFalla_conservaLosArtistas_yAvisaElMotivo() = runTest {
+        val viewModel = ArtistListViewModel(repository)
+        repository.response.complete(Result.success(listOf(ruben)))
+
+        repository.response = CompletableDeferred(Result.failure(IOException("Sin conexión")))
+        viewModel.refresh()
+
+        assertEquals(UiState.Success(listOf(ruben)), viewModel.state.value)
+        assertEquals(ErrorReason.CONNECTION, viewModel.pullRefresh.failures.first())
     }
 }

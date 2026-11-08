@@ -50,11 +50,30 @@
 
         <item name="toolbarStyle">@style/Widget.Vinilos.Toolbar</item>
         <item name="bottomNavigationStyle">@style/Widget.Vinilos.BottomNavigation</item>
+        <item name="navigationRailStyle">@style/Widget.Vinilos.NavigationRail</item>
         <item name="materialButtonStyle">@style/Widget.Vinilos.Button</item>
         <item name="materialButtonOutlinedStyle">@style/Widget.Vinilos.Button.Outlined</item>
         <item name="materialCardViewStyle">@style/Widget.Vinilos.Card</item>
         <item name="snackbarStyle">@style/Widget.Vinilos.Snackbar</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.Vinilos.BottomSheetDialog</item>
     </style>
 
     <style name="Theme.Vinilos" parent="Base.Theme.Vinilos" />
+
+    <!-- Hojas inferiores como Agregar track: fondo surfaceContainer y el teclado empuja la hoja hacia arriba. -->
+    <style name="ThemeOverlay.Vinilos.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.Vinilos.BottomSheet</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+
+    <style name="Widget.Vinilos.BottomSheet" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="backgroundTint">@color/md_surface_container</item>
+    </style>
+
+    <!-- Pantalla de inicio con el disco de Vinilos mientras arranca la app, en todas las versiones desde Android 5.0. -->
+    <style name="Theme.Vinilos.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/md_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.Vinilos</item>
+    </style>
 </resources>

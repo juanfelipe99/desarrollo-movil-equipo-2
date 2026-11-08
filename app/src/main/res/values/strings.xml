@@ -8,22 +8,48 @@
     <string name="album_list_title">Álbumes</string>
     <string name="artist_list_title">Artistas</string>
     <string name="collector_list_title">Coleccionistas</string>
-    <!-- Avisos de las pantallas que llegan en el sprint 2 (HU04 y HU05). -->
-    <string name="collector_list_soon_body">La lista de coleccionistas llegará en la próxima versión de la app.</string>
+
+    <!-- Listado de coleccionistas (HU05) -->
+    <plurals name="collector_list_count">
+        <item quantity="one">%d coleccionista</item>
+        <item quantity="many">%d coleccionistas</item>
+        <item quantity="other">%d coleccionistas</item>
+    </plurals>
+    <plurals name="collector_album_count">
+        <item quantity="one">%d álbum en su colección</item>
+        <item quantity="many">%d álbumes en su colección</item>
+        <item quantity="other">%d álbumes en su colección</item>
+    </plurals>
+    <string name="collector_list_loading">Cargando coleccionistas…</string>
+    <string name="collector_list_object">los coleccionistas</string>
+    <string name="collector_list_empty_title">No hay coleccionistas registrados</string>
+    <string name="collector_list_empty_body">Cuando alguien registre su colección aparecerá aquí.</string>
+
+    <string name="collector_detail_title">Coleccionista</string>
+    <string name="collector_detail_soon_body">El detalle de los coleccionistas llegará en la próxima versión de la app.</string>
 
     <string name="coming_soon_title">Muy pronto</string>
 
     <string name="loading_default">Cargando…</string>
 
+    <string name="description_expand">Ver más</string>
+    <string name="description_collapse">Ver menos</string>
+
     <string name="error_load_title">No pudimos cargar %1$s</string>
     <string name="error_network_body">Revisa tu conexión a internet e inténtalo de nuevo.</string>
     <string name="error_server_body">El servidor no está disponible en este momento. Inténtalo más tarde.</string>
     <string name="error_network_retry">Reintentar</string>
+    <string name="refresh_failed_network">No pudimos actualizar. Revisa tu conexión a internet.</string>
+    <string name="refresh_failed_server">No pudimos actualizar. El servidor no está disponible en este momento.</string>
 
     <string name="form_required_note">Todos los campos son obligatorios (*).</string>
     <string name="action_cancel">Cancelar</string>
     <string name="action_save">Guardar</string>
+    <string name="action_add">Agregar</string>
     <string name="action_accept">Aceptar</string>
+
+    <!-- Distintivo del álbum o el track recién creado -->
+    <string name="badge_new">Nuevo</string>
 
     <string name="cd_close_snackbar">Cerrar aviso</string>
 </resources>

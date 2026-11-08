@@ -19,6 +19,7 @@ data class Performer(
     val id: Int,
     val name: String,
     val image: String,
+    val type: ArtistType = ArtistType.MUSICIAN,
 )
 
 data class Album(
@@ -32,6 +33,11 @@ data class Album(
     val tracks: List<Track> = emptyList(),
     val performers: List<Performer> = emptyList(),
     val comments: List<AlbumComment> = emptyList(),
+)
+
+data class NewTrack(
+    val name: String,
+    val duration: String,
 )
 
 data class NewAlbum(

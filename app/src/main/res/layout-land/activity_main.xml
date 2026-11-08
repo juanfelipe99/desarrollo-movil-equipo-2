@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- En horizontal falta alto, así que la navegación pasa a un riel a la izquierda y la barra superior baja a 56 dp.
+     El riel no quita alto, por eso solo la barra superior se esconde al bajar. -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <com.google.android.material.navigationrail.NavigationRailView
+            android:id="@+id/navBar"
+            android:layout_width="104dp"
+            android:layout_height="match_parent"
+            app:menu="@menu/bottom_nav"
+            tools:viewBindingType="com.google.android.material.navigation.NavigationBarView" />
+
+        <View
+            android:id="@+id/navDivider"
+            style="@style/Widget.Vinilos.Divider"
+            android:layout_width="1dp"
+            android:layout_height="match_parent" />
+
+        <!-- Los avisos salen aquí, a la derecha del riel, y no encima de él -->
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:id="@+id/snackbarParent"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/appBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/md_surface"
+                android:stateListAnimator="@null"
+                app:layout_behavior="com.equipo2.vinilos.ui.common.TolerantAppBarBehavior"
+                app:liftOnScroll="false">
+
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp">
+
+                    <FrameLayout
+                        android:id="@+id/roleChipSlot"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginEnd="8dp">
+
+                        <include
+                            android:id="@+id/roleChip"
+                            layout="@layout/view_role_chip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="@dimen/touch_target" />
+                    </FrameLayout>
+                </com.google.android.material.appbar.MaterialToolbar>
+
+                <View
+                    android:id="@+id/toolbarDivider"
+                    style="@style/Widget.Vinilos.Divider" />
+            </com.google.android.material.appbar.AppBarLayout>
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/navHost"
+                android:name="androidx.navigation.fragment.NavHostFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:defaultNavHost="true"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                app:navGraph="@navigation/nav_graph" />
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
