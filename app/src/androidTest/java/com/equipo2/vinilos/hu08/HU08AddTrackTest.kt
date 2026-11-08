@@ -4,6 +4,7 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.action.ViewActions.replaceText
+import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.Visibility
@@ -67,7 +68,7 @@ class HU08AddTrackTest {
         openAddTrackSheet()
 
         onView(withId(R.id.trackNameInput)).perform(replaceText(TRACK_NAME), closeSoftKeyboard())
-        onView(withId(R.id.trackCancelButton)).perform(click())
+        onView(withId(R.id.trackCancelButton)).perform(scrollTo(), click())
 
         onView(withId(R.id.trackAddSubtitle)).check(doesNotExist())
         onView(withText(R.string.album_detail_tracks_empty_title)).perform(scrollToWithBarsHidden()).check(matches(isDisplayed()))
@@ -79,7 +80,7 @@ class HU08AddTrackTest {
         openNewAlbum(collector = true)
         openAddTrackSheet()
 
-        onView(withId(R.id.trackAddButton)).perform(click())
+        onView(withId(R.id.trackAddButton)).perform(scrollTo(), click())
 
         onView(withId(R.id.trackNameField)).check(matches(hasFieldError(R.string.error_track_name_required)))
         onView(withId(R.id.trackDurationField)).check(matches(hasFieldError(R.string.error_track_duration_required)))
@@ -91,7 +92,7 @@ class HU08AddTrackTest {
         openAddTrackSheet()
 
         fillTrack(TRACK_NAME, "456")
-        onView(withId(R.id.trackAddButton)).perform(click())
+        onView(withId(R.id.trackAddButton)).perform(scrollTo(), click())
 
         onView(withId(R.id.trackNameField)).check(matches(hasFieldError(null)))
         onView(withId(R.id.trackDurationField)).check(matches(hasFieldError(R.string.error_track_duration_invalid)))
@@ -103,7 +104,7 @@ class HU08AddTrackTest {
         openAddTrackSheet()
 
         fillTrack(TRACK_NAME, "4:56")
-        onView(withId(R.id.trackAddButton)).perform(click())
+        onView(withId(R.id.trackAddButton)).perform(scrollTo(), click())
 
         onView(withId(R.id.trackAddSubtitle)).check(doesNotExist())
         onView(withText(R.string.snackbar_track_added)).check(matches(isDisplayed()))
@@ -122,7 +123,7 @@ class HU08AddTrackTest {
         rotateScreen()
         onView(withId(R.id.trackDurationInput)).perform(closeSoftKeyboard())
         waitForSheetToSettle()
-        onView(withId(R.id.trackAddButton)).perform(click())
+        onView(withId(R.id.trackAddButton)).perform(scrollTo(), click())
 
         onView(withText(R.string.snackbar_track_added)).check(matches(isDisplayed()))
         onView(allOf(withId(R.id.trackNewBadge), hasSibling(withText(TRACK_NAME))))
@@ -138,7 +139,7 @@ class HU08AddTrackTest {
         openAddTrackSheet()
 
         fillTrack(TRACK_NAME, "4:56")
-        onView(withId(R.id.trackAddButton)).perform(click())
+        onView(withId(R.id.trackAddButton)).perform(scrollTo(), click())
 
         onView(withText(R.string.error_track_add_failed)).check(matches(isDisplayed()))
         onView(withId(R.id.trackNameInput)).check(matches(withText(TRACK_NAME)))
@@ -161,19 +162,27 @@ class HU08AddTrackTest {
         waitForSheetToSettle()
     }
 
-    /** Un toque mientras la hoja todavía sube cae fuera de ella. */
+    /**
+     * Un toque mientras la hoja todavía sube cae fuera de ella.
+     * Antes de su primer layout el botón mide 0 de alto y está quieto en el borde, así que también se espera a que tenga alto.
+     */
     private fun waitForSheetToSettle() {
         var lastTop = -1
         waitUntil {
-            val top = addButtonTop()
-            (top == lastTop).also { lastTop = top }
+            val (top, height) = addButtonBounds()
+            (height > 0 && top == lastTop).also { lastTop = top }
         }
     }
 
-    private fun addButtonTop(): Int {
+    /** Posición vertical en la pantalla y alto del botón Agregar de la hoja. */
+    private fun addButtonBounds(): Pair<Int, Int> {
         val location = IntArray(2)
-        onView(withId(R.id.trackAddButton)).check { view, noView -> (view ?: throw noView).getLocationOnScreen(location) }
-        return location[1]
+        var height = 0
+        onView(withId(R.id.trackAddButton)).check { view, noView ->
+            (view ?: throw noView).getLocationOnScreen(location)
+            height = view.height
+        }
+        return location[1] to height
     }
 
     private fun fillTrack(name: String, duration: String) {
