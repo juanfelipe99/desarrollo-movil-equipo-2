@@ -1,5 +1,7 @@
 package com.equipo2.vinilos.support
 
+import android.app.UiAutomation
+import android.os.Build
 import android.os.ParcelFileDescriptor
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
@@ -44,8 +46,11 @@ class VinilosRule : ExternalResource() {
         IdlingRegistry.getInstance().unregister(apiIdling)
         VinilosApplication.container = originalContainer
         runBlocking { originalContainer.themeModeRepository.setThemeMode(ThemeMode.SYSTEM) }
-        // Una escala que nunca se cambió se lee como null y vale 1
-        originalAnimationScales.forEach { (scale, value) -> shell("settings put global $scale ${value.toFloatOrNull() ?: 1f}") }
+        // Una escala que nunca se cambió se lee como null y vale 1.
+        // Es solo limpieza, así que si el dispositivo no la acepta no hace fallar una prueba que ya pasó
+        originalAnimationScales.forEach { (scale, value) ->
+            runCatching { shell("settings put global $scale ${value.toFloatOrNull() ?: 1f}") }
+        }
     }
 
     /** Abre la app, que empieza en la selección de rol. */
@@ -57,8 +62,20 @@ class VinilosRule : ExternalResource() {
     val state: Lifecycle.State
         get() = checkNotNull(scenario).state
 
+    /**
+     * Ejecuta un comando de shell con UiAutomation.
+     * Algunos Samsung cortan esa conexión cuando cambia la accesibilidad del sistema. Si pasa, se pide una conexión
+     * nueva con otras opciones, que obliga a Android a crearla de nuevo, y se repite el comando.
+     */
     private fun shell(command: String): String {
-        val output = InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command)
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val output = try {
+            instrumentation.uiAutomation.executeShellCommand(command)
+        } catch (e: IllegalStateException) {
+            // Pedir la conexión con opciones solo existe desde Android 7.0
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) throw e
+            instrumentation.getUiAutomation(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES).executeShellCommand(command)
+        }
         return ParcelFileDescriptor.AutoCloseInputStream(output).bufferedReader().use { it.readText().trim() }
     }
 
