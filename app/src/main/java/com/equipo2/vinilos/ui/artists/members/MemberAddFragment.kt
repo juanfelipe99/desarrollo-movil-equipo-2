@@ -21,6 +21,7 @@ import com.equipo2.vinilos.databinding.FragmentMemberAddBinding
 import com.equipo2.vinilos.ui.common.buttonProgress
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.keepSnackbarsAbove
+import com.equipo2.vinilos.ui.common.releaseTextFieldsOnDestroyView
 import com.equipo2.vinilos.ui.common.showSnackbar
 import com.equipo2.vinilos.ui.state.UiState
 import com.equipo2.vinilos.ui.state.showEmpty
@@ -49,6 +50,7 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
         super.onViewCreated(view, savedInstanceState)
 
         val binding = FragmentMemberAddBinding.bind(view)
+        releaseTextFieldsOnDestroyView(view)
         binding.memberAddSubtitle.text = getString(R.string.member_add_subtitle, requireArguments().getString(ARG_BAND_NAME))
         setUpSearch(binding)
         setUpList(binding)

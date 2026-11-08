@@ -1,91 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Con el teclado abierto en pantallas bajas la hoja no alcanza a mostrar todo. Sin desplazamiento, la fila de
+     botones quedaba con alto cero y no se podía tocar Agregar -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingHorizontal="24dp"
-    android:paddingBottom="24dp">
-
-    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:tint="@color/md_outline" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/track_add_title"
-        android:textAppearance="@style/TextAppearance.Vinilos.HeadlineSmall"
-        android:textColor="@color/md_on_surface" />
-
-    <TextView
-        android:id="@+id/trackAddSubtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
-        android:textColor="@color/md_on_surface_variant"
-        tools:text="Para el álbum Buscando América" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/trackNameField"
-        style="@style/Widget.Vinilos.FormField"
-        android:layout_marginTop="20dp"
-        android:hint="@string/field_track_name"
-        app:placeholderText="@string/placeholder_track_name">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/trackNameInput"
-            style="@style/Widget.Vinilos.FormField.Input"
-            android:imeOptions="actionNext"
-            android:inputType="textCapSentences"
-            android:maxLength="100" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- El teclado de hora tiene los dos puntos, que el numérico no siempre trae -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/trackDurationField"
-        style="@style/Widget.Vinilos.FormField"
-        android:layout_marginTop="20dp"
-        android:hint="@string/field_track_duration"
-        app:helperText="@string/help_track_duration"
-        app:placeholderText="@string/placeholder_track_duration">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/trackDurationInput"
-            style="@style/Widget.Vinilos.FormField.Input"
-            android:digits="0123456789:"
-            android:imeOptions="actionDone"
-            android:inputType="time"
-            android:maxLength="5" />
-    </com.google.android.material.textfield.TextInputLayout>
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:gravity="end"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingBottom="24dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/trackCancelButton"
-            style="@style/Widget.Vinilos.Button.Text"
+        <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tint="@color/md_outline" />
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="@string/action_cancel" />
+            android:text="@string/track_add_title"
+            android:textAppearance="@style/TextAppearance.Vinilos.HeadlineSmall"
+            android:textColor="@color/md_on_surface" />
 
-        <!-- Mismos colores que Guardar en Crear álbum, también mientras envía -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/trackAddButton"
+        <TextView
+            android:id="@+id/trackAddSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/action_add"
-            android:textColor="@color/button_save_text"
-            app:backgroundTint="@color/button_save_background"
-            app:iconGravity="textStart"
-            app:iconTint="@color/md_on_surface_variant" />
+            android:layout_marginTop="4dp"
+            android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+            android:textColor="@color/md_on_surface_variant"
+            tools:text="Para el álbum Buscando América" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/trackNameField"
+            style="@style/Widget.Vinilos.FormField"
+            android:layout_marginTop="20dp"
+            android:hint="@string/field_track_name"
+            app:placeholderText="@string/placeholder_track_name">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/trackNameInput"
+                style="@style/Widget.Vinilos.FormField.Input"
+                android:imeOptions="actionNext"
+                android:inputType="textCapSentences"
+                android:maxLength="100" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- El teclado de hora tiene los dos puntos, que el numérico no siempre trae -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/trackDurationField"
+            style="@style/Widget.Vinilos.FormField"
+            android:layout_marginTop="20dp"
+            android:hint="@string/field_track_duration"
+            app:helperText="@string/help_track_duration"
+            app:placeholderText="@string/placeholder_track_duration">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/trackDurationInput"
+                style="@style/Widget.Vinilos.FormField.Input"
+                android:digits="0123456789:"
+                android:imeOptions="actionDone"
+                android:inputType="time"
+                android:maxLength="5" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/trackCancelButton"
+                style="@style/Widget.Vinilos.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/action_cancel" />
+
+            <!-- Mismos colores que Guardar en Crear álbum, también mientras envía -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/trackAddButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/action_add"
+                android:textColor="@color/button_save_text"
+                app:backgroundTint="@color/button_save_background"
+                app:iconGravity="textStart"
+                app:iconTint="@color/md_on_surface_variant" />
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

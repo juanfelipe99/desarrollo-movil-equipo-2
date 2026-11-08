@@ -1,6 +1,7 @@
 package com.equipo2.vinilos.hu03
 
 import android.view.View
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.UiController
@@ -18,12 +19,14 @@ import com.equipo2.vinilos.data.model.ArtistDetail
 import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.repository.ArtistRepository
 import com.equipo2.vinilos.support.enterAs
+import com.equipo2.vinilos.support.isSettled
+import com.equipo2.vinilos.support.waitUntil
 import com.equipo2.vinilos.ui.artists.list.ArtistAdapter
-import kotlinx.coroutines.awaitCancellation
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
 import java.io.IOException
 import java.time.LocalDate
+import kotlinx.coroutines.awaitCancellation
 
 /** Repositorio en memoria que da sus respuestas en orden y repite la última, o que nunca responde. */
 class InMemoryArtistRepository(private val responses: List<Result<List<Artist>>>) : ArtistRepository {
@@ -61,31 +64,48 @@ fun openArtists() {
 /** Nombre de una fila del listado, sin confundirlo con otros textos de la pantalla. */
 fun artistRowName(name: String): Matcher<View> = allOf(withId(R.id.artistName), withText(name), isDescendantOfA(withId(R.id.artistList)))
 
-/** Artistas que muestra el listado con el filtro actual. */
-fun shownArtists(): List<Artist> {
+/**
+ * Artistas que muestra el listado con el filtro actual, cuando cumplen la condición.
+ * El listado calcula los cambios de cada filtro en otro hilo, que Espresso no espera, por eso se espera a que llegue.
+ */
+fun shownArtists(until: (List<Artist>) -> Boolean = { true }): List<Artist> {
     var items = emptyList<Artist>()
-    onView(withId(R.id.artistList)).check { view, noView ->
-        items = ((view ?: throw noView) as RecyclerView).artistAdapter.currentList
+    waitUntil {
+        onView(withId(R.id.artistList)).check { view, noView ->
+            val list = (view ?: throw noView) as RecyclerView
+            items = if (list.isSettled()) list.artistAdapter.currentList else emptyList()
+        }
+        items.isNotEmpty() && until(items)
     }
     return items
 }
 
-/** Desplaza el listado hasta el artista, que debe estar a la vista para revisarlo o tocarlo. */
+/**
+ * Desplaza el listado hasta dejar el artista arriba, a la vista para revisarlo o tocarlo.
+ * Si el listado se reacomoda justo después, por ejemplo porque acaba de cambiar de filtro, lo intenta otra vez.
+ */
 fun showArtistRow(name: String) {
-    onView(withId(R.id.artistList)).perform(object : ViewAction {
-        override fun getConstraints(): Matcher<View> = isAssignableFrom(RecyclerView::class.java)
+    waitUntil {
+        runCatching {
+            onView(withId(R.id.artistList)).perform(scrollToArtist(name))
+            onView(artistRowName(name)).check(matches(isDisplayed()))
+        }.isSuccess
+    }
+}
 
-        override fun getDescription() = "desplazar el listado hasta «$name»"
+private fun scrollToArtist(name: String) = object : ViewAction {
+    override fun getConstraints(): Matcher<View> = isAssignableFrom(RecyclerView::class.java)
 
-        override fun perform(uiController: UiController, view: View) {
-            val list = view as RecyclerView
-            val position = list.artistAdapter.currentList.indexOfFirst { it.name == name }
-            check(position >= 0) { "El listado no tiene el artista «$name»" }
-            list.scrollToPosition(position)
-            uiController.loopMainThreadUntilIdle()
-        }
-    })
-    onView(artistRowName(name)).check(matches(isDisplayed()))
+    override fun getDescription() = "desplazar el listado hasta «$name»"
+
+    override fun perform(uiController: UiController, view: View) {
+        val list = view as RecyclerView
+        while (!list.isSettled()) uiController.loopMainThreadForAtLeast(50)
+        val position = list.artistAdapter.currentList.indexOfFirst { it.name == name }
+        check(position >= 0) { "El listado no tiene el artista «$name»" }
+        (list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, 0)
+        uiController.loopMainThreadUntilIdle()
+    }
 }
 
 /** Toca la primera fila del listado, sea cual sea el artista. */

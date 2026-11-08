@@ -60,6 +60,8 @@ class ArtistListFragment : Fragment(R.layout.fragment_artist_list), ScrollsToTop
             findNavController().navigateIfPossible(R.id.action_artistList_to_artistDetail, ArtistDetailFragment.args(artist))
         }
         binding.artistList.layoutManager = LinearLayoutManager(requireContext())
+        // La lista ocupa toda la pantalla, así los cambios del listado no la obligan a medirse de nuevo
+        binding.artistList.setHasFixedSize(true)
         binding.artistList.adapter = adapter
         bindPullToRefresh(binding.artistsRefresh, viewModel.pullRefresh, binding.artistList, binding.artistsMessage.root) {
             viewModel.refresh()

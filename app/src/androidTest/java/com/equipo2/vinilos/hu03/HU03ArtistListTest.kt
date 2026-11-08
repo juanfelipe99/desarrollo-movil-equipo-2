@@ -15,7 +15,6 @@ import com.equipo2.vinilos.support.OwnData
 import com.equipo2.vinilos.support.VinilosRule
 import com.equipo2.vinilos.support.toolbarTitle
 import org.junit.After
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -64,8 +63,8 @@ class HU03ArtistListTest {
 
         onView(withId(R.id.filterMusicians)).perform(click())
 
-        val shown = shownArtists()
-        assertTrue("El filtro Músicos muestra bandas", shown.all { it.type == ArtistType.MUSICIAN })
+        // Espera la lista ya filtrada, si nunca llega la prueba falla por tiempo
+        val shown = shownArtists { list -> list.all { it.type == ArtistType.MUSICIAN } }
         showArtistRow(musician)
         onView(artistRowName(band)).check(doesNotExist())
         onView(withText(countText(shown.size))).check(matches(isDisplayed()))
@@ -78,8 +77,8 @@ class HU03ArtistListTest {
 
         onView(withId(R.id.filterBands)).perform(click())
 
-        val shown = shownArtists()
-        assertTrue("El filtro Bandas muestra músicos", shown.all { it.type == ArtistType.BAND })
+        // Espera la lista ya filtrada, si nunca llega la prueba falla por tiempo
+        val shown = shownArtists { list -> list.all { it.type == ArtistType.BAND } }
         showArtistRow(band)
         onView(artistRowName(musician)).check(doesNotExist())
         onView(withText(countText(shown.size))).check(matches(isDisplayed()))

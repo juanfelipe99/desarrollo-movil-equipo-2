@@ -18,6 +18,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.support.VinilosRule
+import com.equipo2.vinilos.support.checkSnackbar
 import com.equipo2.vinilos.support.chooseInRoleMenu
 import com.equipo2.vinilos.support.enterAs
 import com.equipo2.vinilos.support.toolbarTitle
@@ -86,7 +87,7 @@ class HU07RolesTest {
         onView(withId(R.id.optionCollector)).inRoot(isPlatformPopup()).check(matches(isSelected()))
         onView(withId(R.id.optionVisitor)).inRoot(isPlatformPopup()).perform(click())
 
-        onView(withText(R.string.snackbar_role_visitor)).check(matches(isDisplayed()))
+        checkSnackbar(R.string.snackbar_role_visitor)
         onView(withId(R.id.createAlbumButton)).check(matches(withEffectiveVisibility(Visibility.GONE)))
     }
 
@@ -97,7 +98,7 @@ class HU07RolesTest {
 
         chooseInRoleMenu(R.id.optionCollector)
 
-        onView(withText(R.string.snackbar_role_collector)).check(matches(isDisplayed()))
+        checkSnackbar(R.string.snackbar_role_collector)
         onView(withId(R.id.createAlbumButton)).check(matches(isDisplayed()))
     }
 

@@ -59,6 +59,8 @@ class ArtistListViewModel(
 
     /** Recarga al deslizar hacia abajo. Los artistas siguen a la vista mientras llegan los nuevos. */
     fun refresh() {
+        // Recargar siempre va a la API
+        repository.clearCache()
         if (artists.value !is UiState.Success) return load()
         if (loading?.isActive == true) return
         loading = pullRefresh.launch({ repository.getArtists() }) { artists -> this.artists.value = artistsOf(artists) }

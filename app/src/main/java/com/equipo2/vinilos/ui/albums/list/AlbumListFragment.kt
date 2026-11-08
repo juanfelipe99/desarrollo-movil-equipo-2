@@ -61,6 +61,8 @@ class AlbumListFragment : Fragment(R.layout.fragment_album_list), ScrollsToTop {
                 override fun getSpanSize(position: Int) = if (position < countAdapter.itemCount) columns else 1
             }
         }
+        // La grilla ocupa toda la pantalla, así los cambios del catálogo no la obligan a medirse de nuevo
+        binding.albumGrid.setHasFixedSize(true)
         binding.albumGrid.adapter = ConcatAdapter(countAdapter, adapter)
         bindPullToRefresh(binding.albumsRefresh, viewModel.pullRefresh, binding.albumGrid, binding.albumsMessage.root) {
             viewModel.refresh()

@@ -140,6 +140,91 @@ class AlbumRepositoryImplTest {
         assertTrue(error is DataError.Server)
     }
 
+    @Test
+    fun getAlbums_otraVez_usaLoGuardadoSinVolverALaApi() = runTest {
+        server.respond("albums", ALBUMS_JSON)
+
+        val first = repository.getAlbums().getOrThrow()
+        val second = repository.getAlbums().getOrThrow()
+
+        assertEquals(listOf("albums"), server.requests)
+        assertEquals(first, second)
+    }
+
+    @Test
+    fun getAlbums_siFallo_laSiguienteVezVuelveAIntentar() = runTest {
+        server.respond("albums", """{"message":"Internal error"}""", code = 500)
+        repository.getAlbums()
+        server.respond("albums", "[]")
+
+        assertEquals(emptyList<Any>(), repository.getAlbums().getOrThrow())
+        assertEquals(listOf("albums", "albums"), server.requests)
+    }
+
+    @Test
+    fun getAlbums_despuesDeClearCache_vuelveALaApi() = runTest {
+        server.respond("albums", ALBUMS_JSON)
+
+        repository.getAlbums()
+        repository.clearCache()
+        repository.getAlbums()
+
+        assertEquals(listOf("albums", "albums"), server.requests)
+    }
+
+    @Test
+    fun getAlbumById_otraVez_usaLoGuardadoSinVolverALaApi() = runTest {
+        server.respond("albums/100", ALBUM_WITH_COMMENT_JSON)
+        server.respond("collectors", "[]")
+
+        repository.getAlbumById(100)
+        repository.getAlbumById(100)
+
+        assertEquals(1, server.requests.count { it == "albums/100" })
+    }
+
+    @Test
+    fun addTrack_agregaElTrackAlAlbumGuardado_yElCatalogoSePideDeNuevo() = runTest {
+        server.respond("albums", ALBUMS_JSON)
+        server.respond("albums/100", ALBUM_WITH_COMMENT_JSON)
+        server.respond("collectors", "[]")
+        server.respond("albums/100/tracks", TRACK_CREATED_JSON)
+        repository.getAlbums()
+        repository.getAlbumById(100)
+
+        repository.addTrack(100, NewTrack(name = "Todos vuelven", duration = "4:56"))
+        val album = repository.getAlbumById(100).getOrThrow()
+        repository.getAlbums()
+
+        assertEquals(listOf("Todos vuelven"), album.tracks.map { it.name })
+        assertEquals(1, server.requests.count { it == "albums/100" })
+        assertEquals(2, server.requests.count { it == "albums" })
+    }
+
+    @Test
+    fun abrirOtroAlbum_noVuelveAPedirLosAutoresDeLosComentarios() = runTest {
+        server.respond("albums/100", ALBUM_WITH_COMMENT_JSON)
+        server.respond("albums/101", ALBUM_WITH_COMMENT_JSON)
+        server.respond("collectors", "[]")
+
+        repository.getAlbumById(100)
+        repository.getAlbumById(101)
+
+        assertEquals(1, server.requests.count { it == "collectors" })
+    }
+
+    @Test
+    fun siFallanLosAutores_elSiguienteAlbumVuelveAPedirlos() = runTest {
+        server.respond("albums/100", ALBUM_WITH_COMMENT_JSON)
+        server.respond("albums/101", ALBUM_WITH_COMMENT_JSON)
+        server.respond("collectors", """{"message":"Internal error"}""", code = 500)
+
+        repository.getAlbumById(100)
+        repository.getAlbumById(101)
+
+        assertEquals(2, server.requests.count { it == "collectors" })
+    }
+
     private companion object {
         // Así responde BackVynils: el track con su id y el álbum al que quedó asociado
         const val TRACK_CREATED_JSON = """

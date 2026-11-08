@@ -71,6 +71,28 @@ class CollectorRepositoryImplTest {
         assertTrue(offline.getCollectors().exceptionOrNull() is DataError.Network)
     }
 
+    @Test
+    fun getCollectors_otraVez_usaLoGuardadoSinVolverALaApi() = runTest {
+        server.respond("collectors", COLLECTORS_JSON)
+
+        val first = repository.getCollectors().getOrThrow()
+        val second = repository.getCollectors().getOrThrow()
+
+        assertEquals(first, second)
+        assertEquals(listOf("collectors"), server.requests)
+    }
+
+    @Test
+    fun getCollectors_despuesDeClearCache_vuelveALaApi() = runTest {
+        server.respond("collectors", COLLECTORS_JSON)
+
+        repository.getCollectors()
+        repository.clearCache()
+        repository.getCollectors()
+
+        assertEquals(listOf("collectors", "collectors"), server.requests)
+    }
+
     private companion object {
         // Así responde BackVynils: teléfono, comentarios e intérpretes favoritos llegan pero la lista no los usa
         const val COLLECTORS_JSON = """

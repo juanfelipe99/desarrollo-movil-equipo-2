@@ -29,7 +29,7 @@ open class AppContainer(context: Context) {
     open val albumRepository: AlbumRepository by lazy { AlbumRepositoryImpl(AlbumServiceAdapter(apiClient)) }
     open val artistRepository: ArtistRepository by lazy { ArtistRepositoryImpl(ArtistServiceAdapter(apiClient)) }
     open val collectorRepository: CollectorRepository by lazy { CollectorRepositoryImpl(CollectorServiceAdapter(apiClient)) }
-    open val bandRepository: BandRepository by lazy { BandRepositoryImpl(BandServiceAdapter(apiClient)) }
+    open val bandRepository: BandRepository by lazy { BandRepositoryImpl(BandServiceAdapter(apiClient), onMembersChanged = { artistRepository.clearCache() }) }
     open val roleRepository: RoleRepository by lazy { RoleRepositoryImpl(RoleLocalDataSource(context.appDataStore)) }
     open val themeModeRepository: ThemeModeRepository by lazy { ThemeModeRepositoryImpl(ThemeModeLocalDataSource(context.appDataStore)) }
 }

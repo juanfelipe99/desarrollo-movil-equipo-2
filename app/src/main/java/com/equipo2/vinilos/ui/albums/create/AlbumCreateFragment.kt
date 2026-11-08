@@ -16,6 +16,7 @@ import com.equipo2.vinilos.ui.common.buttonProgress
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.keepSnackbarsAbove
 import com.equipo2.vinilos.ui.common.reconnectDatePicker
+import com.equipo2.vinilos.ui.common.releaseTextFieldsOnDestroyView
 import com.equipo2.vinilos.ui.common.showError
 import com.equipo2.vinilos.ui.common.showPastDatePicker
 import com.equipo2.vinilos.ui.common.showSnackbar
@@ -35,6 +36,7 @@ class AlbumCreateFragment : Fragment(R.layout.fragment_album_create) {
         super.onViewCreated(view, savedInstanceState)
 
         val binding = FragmentAlbumCreateBinding.bind(view)
+        releaseTextFieldsOnDestroyView(view)
         setUpTextFields(binding)
         setUpCoverPreview(binding)
         setUpReleaseDate(binding)

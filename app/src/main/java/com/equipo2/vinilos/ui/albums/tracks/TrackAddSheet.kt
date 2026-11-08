@@ -12,6 +12,7 @@ import com.equipo2.vinilos.databinding.SheetTrackAddBinding
 import com.equipo2.vinilos.ui.common.AppSnackbar
 import com.equipo2.vinilos.ui.common.buttonProgress
 import com.equipo2.vinilos.ui.common.collectWhileVisible
+import com.equipo2.vinilos.ui.common.releaseTextFieldsOnDestroyView
 import com.equipo2.vinilos.ui.common.showError
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -29,6 +30,7 @@ class TrackAddSheet : BottomSheetDialogFragment(R.layout.sheet_track_add) {
         super.onViewCreated(view, savedInstanceState)
 
         val binding = SheetTrackAddBinding.bind(view)
+        releaseTextFieldsOnDestroyView(view)
         binding.trackAddSubtitle.text = getString(R.string.track_add_subtitle, requireArguments().getString(ARG_ALBUM_NAME))
 
         binding.trackNameInput.doAfterTextChanged { text -> viewModel.update { copy(name = text.toString()) } }

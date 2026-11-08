@@ -7,13 +7,16 @@ import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.scrollTo
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
@@ -79,6 +82,17 @@ fun scrollToWithBarsHidden(): ViewAction = object : ViewAction {
 fun pickOption(@IdRes inputId: Int, option: String) {
     onView(withId(inputId)).perform(scrollTo(), click())
     onView(withText(option)).inRoot(isPlatformPopup()).perform(click())
+}
+
+/**
+ * La lista no tiene cambios pendientes de aplicar ni animaciones en curso.
+ * Los ListAdapter calculan los cambios en otro hilo, que Espresso no espera.
+ */
+fun RecyclerView.isSettled() = !hasPendingAdapterUpdates() && !isAnimating && !isComputingLayout
+
+/** Espera a que se vea el aviso, que aparece cuando responde la API y se desliza unos instantes. */
+fun checkSnackbar(@StringRes text: Int) {
+    waitUntil { runCatching { onView(withText(text)).check(matches(isDisplayed())) }.isSuccess }
 }
 
 /** Espera algo que Espresso no vigila, como un guardado en DataStore. */
