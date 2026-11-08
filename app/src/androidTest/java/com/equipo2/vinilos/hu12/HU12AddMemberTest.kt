@@ -19,6 +19,7 @@ import com.equipo2.vinilos.hu04.countText
 import com.equipo2.vinilos.hu04.memberRow
 import com.equipo2.vinilos.support.BackVynils
 import com.equipo2.vinilos.support.VinilosRule
+import com.equipo2.vinilos.support.checkSnackbar
 import com.equipo2.vinilos.support.rotateScreen
 import com.equipo2.vinilos.support.scrollToWithBarsHidden
 import com.equipo2.vinilos.support.toolbarTitle

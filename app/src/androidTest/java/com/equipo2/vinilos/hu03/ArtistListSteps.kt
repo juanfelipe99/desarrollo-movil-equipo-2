@@ -19,13 +19,14 @@ import com.equipo2.vinilos.data.model.ArtistDetail
 import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.repository.ArtistRepository
 import com.equipo2.vinilos.support.enterAs
+import com.equipo2.vinilos.support.isSettled
 import com.equipo2.vinilos.support.waitUntil
 import com.equipo2.vinilos.ui.artists.list.ArtistAdapter
-import kotlinx.coroutines.awaitCancellation
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
 import java.io.IOException
 import java.time.LocalDate
+import kotlinx.coroutines.awaitCancellation
 
 /** Repositorio en memoria que da sus respuestas en orden y repite la última, o que nunca responde. */
 class InMemoryArtistRepository(private val responses: List<Result<List<Artist>>>) : ArtistRepository {
@@ -85,21 +86,25 @@ fun shownArtists(until: (List<Artist>) -> Boolean = { true }): List<Artist> {
  */
 fun showArtistRow(name: String) {
     waitUntil {
-        onView(withId(R.id.artistList)).perform(object : ViewAction {
-            override fun getConstraints(): Matcher<View> = isAssignableFrom(RecyclerView::class.java)
+        runCatching {
+            onView(withId(R.id.artistList)).perform(scrollToArtist(name))
+            onView(artistRowName(name)).check(matches(isDisplayed()))
+        }.isSuccess
+    }
+}
 
-            override fun getDescription() = "desplazar el listado hasta «$name»"
+private fun scrollToArtist(name: String) = object : ViewAction {
+    override fun getConstraints(): Matcher<View> = isAssignableFrom(RecyclerView::class.java)
 
-            override fun perform(uiController: UiController, view: View) {
-                val list = view as RecyclerView
-                while (!list.isSettled()) uiController.loopMainThreadForAtLeast(50)
-                val position = list.artistAdapter.currentList.indexOfFirst { it.name == name }
-                check(position >= 0) { "El listado no tiene el artista «$name»" }
-                (list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, 0)
-                uiController.loopMainThreadUntilIdle()
-            }
-        })
-        runCatching { onView(artistRowName(name)).check(matches(isDisplayed())) }.isSuccess
+    override fun getDescription() = "desplazar el listado hasta «$name»"
+
+    override fun perform(uiController: UiController, view: View) {
+        val list = view as RecyclerView
+        while (!list.isSettled()) uiController.loopMainThreadForAtLeast(50)
+        val position = list.artistAdapter.currentList.indexOfFirst { it.name == name }
+        check(position >= 0) { "El listado no tiene el artista «$name»" }
+        (list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, 0)
+        uiController.loopMainThreadUntilIdle()
     }
 }
 
@@ -122,7 +127,4 @@ fun openFirstArtist() {
 
 private val RecyclerView.artistAdapter: ArtistAdapter
     get() = adapter as ArtistAdapter
-
-/** Sin cambios pendientes de aplicar ni animaciones en curso. */
-private fun RecyclerView.isSettled() = !hasPendingAdapterUpdates() && !isAnimating && !isComputingLayout
 

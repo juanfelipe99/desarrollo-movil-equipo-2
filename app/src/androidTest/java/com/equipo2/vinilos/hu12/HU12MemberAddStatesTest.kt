@@ -22,14 +22,15 @@ import com.equipo2.vinilos.hu03.testBand
 import com.equipo2.vinilos.hu03.testMusician
 import com.equipo2.vinilos.hu04.InMemoryArtistDetailRepository
 import com.equipo2.vinilos.support.VinilosRule
+import com.equipo2.vinilos.support.checkSnackbar
 import com.equipo2.vinilos.support.scrollToWithBarsHidden
 import com.equipo2.vinilos.support.useBandRepositories
-import kotlinx.coroutines.CompletableDeferred
 import org.hamcrest.Matchers.not
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlinx.coroutines.CompletableDeferred
 
 /**
  * UI de HU12 con repositorios en memoria: sin músicos disponibles, error al cargar, envío en curso,

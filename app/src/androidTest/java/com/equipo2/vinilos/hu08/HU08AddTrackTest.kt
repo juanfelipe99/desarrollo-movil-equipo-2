@@ -20,6 +20,7 @@ import com.equipo2.vinilos.hu01.openAlbum
 import com.equipo2.vinilos.support.BackVynils
 import com.equipo2.vinilos.support.RUN_TAG
 import com.equipo2.vinilos.support.VinilosRule
+import com.equipo2.vinilos.support.checkSnackbar
 import com.equipo2.vinilos.support.enterAs
 import com.equipo2.vinilos.support.hasFieldError
 import com.equipo2.vinilos.support.rotateScreen
@@ -107,7 +108,7 @@ class HU08AddTrackTest {
         onView(withId(R.id.trackAddButton)).perform(scrollTo(), click())
 
         onView(withId(R.id.trackAddSubtitle)).check(doesNotExist())
-        onView(withText(R.string.snackbar_track_added)).check(matches(isDisplayed()))
+        checkSnackbar(R.string.snackbar_track_added)
         onView(allOf(withId(R.id.trackNewBadge), hasSibling(withText(TRACK_NAME))))
             .perform(scrollToWithBarsHidden())
             .check(matches(isDisplayed()))
@@ -125,7 +126,7 @@ class HU08AddTrackTest {
         waitForSheetToSettle()
         onView(withId(R.id.trackAddButton)).perform(scrollTo(), click())
 
-        onView(withText(R.string.snackbar_track_added)).check(matches(isDisplayed()))
+        checkSnackbar(R.string.snackbar_track_added)
         onView(allOf(withId(R.id.trackNewBadge), hasSibling(withText(TRACK_NAME))))
             .perform(scrollToWithBarsHidden())
             .check(matches(isDisplayed()))
