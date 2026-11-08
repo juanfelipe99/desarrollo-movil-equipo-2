@@ -29,8 +29,8 @@ android {
         applicationId = "com.equipo2.vinilos"
         minSdk = 21
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "API_BASE_URL", "\"$publishedApiBaseUrl\"")
