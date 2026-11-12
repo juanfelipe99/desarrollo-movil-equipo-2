@@ -17,6 +17,7 @@ import com.equipo2.vinilos.ui.albums.create.AlbumCreateFragment
 import com.equipo2.vinilos.ui.albums.detail.AlbumDetailFragment
 import com.equipo2.vinilos.ui.common.ScrollsToTop
 import com.equipo2.vinilos.ui.common.bindPullToRefresh
+import com.equipo2.vinilos.ui.common.collectResult
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.keepSnackbarsAbove
 import com.equipo2.vinilos.ui.common.navigateIfPossible
@@ -113,15 +114,10 @@ class AlbumListFragment : Fragment(R.layout.fragment_album_list), ScrollsToTop {
 
     /** Al volver de Crear álbum con un álbum nuevo aparece el aviso «Álbum creado» y el álbum se marca como «Nuevo». */
     private fun showCreatedAlbumMessage() {
-        val savedState = findNavController().currentBackStackEntry?.savedStateHandle ?: return
-
-        viewLifecycleOwner.collectWhileVisible(savedState.getStateFlow<Int?>(AlbumCreateFragment.CREATED_ALBUM_ID, null)) { albumId ->
-            if (albumId == null) return@collectWhileVisible
+        collectResult<Int>(AlbumCreateFragment.CREATED_ALBUM_ID) { albumId ->
             showSnackbar(getString(R.string.snackbar_album_created))
             scrollToNewAlbum = true
             viewModel.onAlbumCreated(albumId)
-            // Se quita para que el aviso no se repita al girar o volver a la pestaña
-            savedState.remove<Int>(AlbumCreateFragment.CREATED_ALBUM_ID)
         }
     }
 }

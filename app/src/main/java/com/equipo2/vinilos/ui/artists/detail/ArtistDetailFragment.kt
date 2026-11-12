@@ -11,7 +11,6 @@ import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.fragment.findNavController
 import coil3.load
 import com.equipo2.vinilos.R
@@ -27,9 +26,11 @@ import com.equipo2.vinilos.ui.albums.detail.AlbumDetailFragment
 import com.equipo2.vinilos.ui.artists.members.MemberAddFragment
 import com.equipo2.vinilos.ui.common.bindExpandableText
 import com.equipo2.vinilos.ui.common.bindPullToRefresh
+import com.equipo2.vinilos.ui.common.collectResult
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.initialsOf
 import com.equipo2.vinilos.ui.common.navigateIfPossible
+import com.equipo2.vinilos.ui.common.ownBackStackEntry
 import com.equipo2.vinilos.ui.common.showSnackbar
 import com.equipo2.vinilos.ui.common.toLongText
 import com.equipo2.vinilos.ui.role.RoleViewModel
@@ -51,13 +52,9 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         ArtistDetailViewModel.factory(args.getInt(ARG_ARTIST_ID), ArtistType.valueOf(requireNotNull(args.getString(ARG_ARTIST_TYPE))))
     }
 
-    /** Entrada de esta pantalla, para no abrir dos detalles con dos toques seguidos. */
-    private var ownEntry: NavBackStackEntry? = null
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        ownEntry = findNavController().currentBackStackEntry
         val binding = FragmentArtistDetailBinding.bind(view)
         binding.membersList.adapter = MemberAdapter(::openArtist)
         binding.albumsList.adapter = ArtistAlbumAdapter { album -> openAlbum(album) }
@@ -94,16 +91,12 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
 
     /** Al volver de Agregar integrante, el músico aparece al final de la lista marcado y con el aviso «Integrante agregado». */
     private fun showAddedMember() {
-        val savedState = ownEntry?.savedStateHandle ?: return
-
-        viewLifecycleOwner.collectWhileVisible(savedState.getStateFlow<Bundle?>(MemberAddFragment.ADDED_MEMBER, null)) { added ->
-            if (added == null) return@collectWhileVisible
+        collectResult<Bundle>(MemberAddFragment.ADDED_MEMBER) { added ->
             viewModel.onMemberAdded(MemberAddFragment.memberOf(added))
             showSnackbar(getString(R.string.snackbar_member_added))
-            // Se quita para que el aviso no se repita al girar
-            savedState.remove<Bundle>(MemberAddFragment.ADDED_MEMBER)
         }
     }
+
 
     private fun showArtist(binding: FragmentArtistDetailBinding, detail: ArtistDetail) {
         val artist = detail.artist
@@ -213,7 +206,8 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
     private fun openAlbum(album: Album) {
         val navController = findNavController()
         // Con dos toques seguidos el segundo ya no está en esta pantalla
-        if (navController.currentBackStackEntry != ownEntry) return
+        // Si ya no es la pantalla actual, un toque anterior ya abrió otra
+        if (navController.currentBackStackEntry != ownBackStackEntry) return
         navController.navigateIfPossible(R.id.action_artistDetail_to_albumDetail, AlbumDetailFragment.args(album.id))
     }
 
@@ -221,14 +215,16 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
     private fun openArtist(artist: Artist) {
         val navController = findNavController()
         // Con dos toques seguidos el segundo ya no está en esta pantalla
-        if (navController.currentBackStackEntry != ownEntry) return
+        // Si ya no es la pantalla actual, un toque anterior ya abrió otra
+        if (navController.currentBackStackEntry != ownBackStackEntry) return
         navController.navigateIfPossible(R.id.action_artistDetail_to_artistDetail, args(artist))
     }
 
     /** Abre Agregar integrante para la banda (HU12). */
     private fun openMemberAdd(band: Artist) {
         val navController = findNavController()
-        if (navController.currentBackStackEntry != ownEntry) return
+        // Si ya no es la pantalla actual, un toque anterior ya abrió otra
+        if (navController.currentBackStackEntry != ownBackStackEntry) return
         navController.navigateIfPossible(R.id.action_artistDetail_to_memberAdd, MemberAddFragment.args(band.id, band.name))
     }
 
