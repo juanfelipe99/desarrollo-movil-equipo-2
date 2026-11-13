@@ -19,7 +19,7 @@ interface ArtistRepository {
 
 /**
  * Guarda en memoria el último listado y los últimos artistas abiertos, así volver a una pantalla o reintentar no repite la petición.
- * Deslizar para recargar y agregar un integrante a una banda llaman a [clearCache].
+ * Deslizar para recargar, agregar un integrante a una banda y agregar un premio a un artista llaman a [clearCache].
  */
 class ArtistRepositoryImpl(private val serviceAdapter: ArtistServiceAdapter) : ArtistRepository {
 
