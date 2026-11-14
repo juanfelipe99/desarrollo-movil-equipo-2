@@ -36,6 +36,8 @@
         <item quantity="other">· %d premios</item>
     </plurals>
     <string name="artist_detail_prizes_empty_body">Sin premios registrados.</string>
+    <string name="artist_detail_prizes_empty_body_collector">Sin premios registrados. Usa «Agregar premio» para asociarle uno.</string>
+    <string name="artist_detail_add_prize">Agregar premio</string>
 
     <string name="artist_detail_loading">Cargando artista…</string>
     <string name="artist_detail_object">el artista</string>

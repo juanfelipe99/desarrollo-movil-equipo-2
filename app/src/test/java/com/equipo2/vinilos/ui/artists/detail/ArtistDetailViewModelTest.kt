@@ -2,6 +2,7 @@ package com.equipo2.vinilos.ui.artists.detail
 
 import androidx.lifecycle.SavedStateHandle
 import com.equipo2.vinilos.data.model.ArtistDetail
+import com.equipo2.vinilos.data.model.ArtistPrize
 import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.repository.DataError
 import com.equipo2.vinilos.support.FakeArtistRepository
@@ -16,6 +17,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import java.time.LocalDate
 
 class ArtistDetailViewModelTest {
 
@@ -155,5 +157,56 @@ class ArtistDetailViewModelTest {
         val recreated = ArtistDetailViewModel(repository, 101, ArtistType.BAND, savedState)
 
         assertEquals(listOf(11), recreated.newMemberIds.value.toList())
+    }
+
+    @Test
+    fun alAgregarUnPremio_aparecePrimero_marcadoComoNuevo_sinVolverAPedirElArtista() {
+        val grammy = ArtistPrize(100, "Grammy Award", "National Academy", LocalDate.of(1978, 12, 10))
+        repository.detail = { Result.success(queen.copy(prizes = listOf(grammy))) }
+        val viewModel = viewModel()
+
+        val gardel = ArtistPrize(37, "Premio Gardel", "CAPIF", LocalDate.of(2005, 5, 5))
+        viewModel.onPrizeAdded(gardel)
+
+        assertEquals(listOf(gardel, grammy), (viewModel.state.value as UiState.Success).data.prizes)
+        assertEquals(listOf(37), viewModel.newPrizeIds.value.toList())
+        assertEquals(1, repository.detailRequests.size)
+    }
+
+    @Test
+    fun siLaEntregaYaEstaEnLaLista_noSeRepite_peroSeMarcaComoNueva() {
+        val grammy = ArtistPrize(100, "Grammy Award", "National Academy", LocalDate.of(1978, 12, 10))
+        repository.detail = { Result.success(queen.copy(prizes = listOf(grammy))) }
+        val viewModel = viewModel()
+
+        viewModel.onPrizeAdded(grammy)
+        viewModel.onPrizeAdded(grammy)
+
+        assertEquals(listOf(grammy), (viewModel.state.value as UiState.Success).data.prizes)
+        assertEquals(listOf(100), viewModel.newPrizeIds.value.toList())
+    }
+
+    @Test
+    fun elMismoPremioConOtraFecha_esOtraEntrega_yAparecenLasDos() {
+        val grammy = ArtistPrize(100, "Grammy Award", "National Academy", LocalDate.of(1978, 12, 10))
+        repository.detail = { Result.success(queen.copy(prizes = listOf(grammy))) }
+        val viewModel = viewModel()
+
+        val again = grammy.copy(id = 38, date = LocalDate.of(2000, 9, 13))
+        viewModel.onPrizeAdded(again)
+
+        assertEquals(listOf(again, grammy), (viewModel.state.value as UiState.Success).data.prizes)
+    }
+
+    @Test
+    fun losPremiosNuevos_seConservanSiSeRecreaLaPantalla() {
+        repository.detail = { Result.success(queen) }
+        val savedState = SavedStateHandle()
+        ArtistDetailViewModel(repository, 101, ArtistType.BAND, savedState)
+            .onPrizeAdded(ArtistPrize(37, "Premio Gardel", "CAPIF", LocalDate.of(2005, 5, 5)))
+
+        val recreated = ArtistDetailViewModel(repository, 101, ArtistType.BAND, savedState)
+
+        assertEquals(listOf(37), recreated.newPrizeIds.value.toList())
     }
 }

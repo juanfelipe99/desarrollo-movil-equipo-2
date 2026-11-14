@@ -24,6 +24,7 @@ import com.equipo2.vinilos.databinding.FragmentArtistDetailBinding
 import com.equipo2.vinilos.databinding.ItemArtistPrizeBinding
 import com.equipo2.vinilos.ui.albums.detail.AlbumDetailFragment
 import com.equipo2.vinilos.ui.artists.members.MemberAddFragment
+import com.equipo2.vinilos.ui.artists.prizes.PrizeAddFragment
 import com.equipo2.vinilos.ui.common.bindExpandableText
 import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectResult
@@ -42,7 +43,7 @@ import com.equipo2.vinilos.ui.state.showLoading
 
 /**
  * Detalle de un músico o de una banda (HU04). Desde aquí se pasa del músico a su banda y de la banda a sus integrantes,
- * y el coleccionista agrega integrantes a la banda (HU12).
+ * y el coleccionista agrega integrantes a la banda (HU12) y premios a cualquier artista (HU14).
  */
 class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
 
@@ -78,15 +79,23 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
             binding.artistRefresh.isEnabled = state != UiState.Loading
         }
 
-        // Solo el coleccionista agrega integrantes, y el vacío de integrantes le dice cómo
+        // Solo el coleccionista agrega integrantes y premios, y el vacío de cada sección le dice cómo
         viewLifecycleOwner.collectWhileVisible(roleViewModel.role) { role ->
             binding.addMemberButton.isVisible = role == Role.COLLECTOR
-            (viewModel.state.value as? UiState.Success)?.let { showMembers(binding, it.data.members) }
+            binding.addPrizeButton.isVisible = role == Role.COLLECTOR
+            (viewModel.state.value as? UiState.Success)?.let {
+                showMembers(binding, it.data.members)
+                showPrizes(binding, it.data.prizes)
+            }
         }
         viewLifecycleOwner.collectWhileVisible(viewModel.newMemberIds) {
             (viewModel.state.value as? UiState.Success)?.let { showMembers(binding, it.data.members) }
         }
+        viewLifecycleOwner.collectWhileVisible(viewModel.newPrizeIds) {
+            (viewModel.state.value as? UiState.Success)?.let { showPrizes(binding, it.data.prizes) }
+        }
         showAddedMember()
+        showAddedPrize()
     }
 
     /** Al volver de Agregar integrante, el músico aparece al final de la lista marcado y con el aviso «Integrante agregado». */
@@ -97,6 +106,13 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         }
     }
 
+    /** Al volver de Agregar premio, el premio aparece primero marcado y con el aviso «Premio agregado». */
+    private fun showAddedPrize() {
+        collectResult<Bundle>(PrizeAddFragment.ADDED_PRIZE) { added ->
+            viewModel.onPrizeAdded(PrizeAddFragment.prizeOf(added))
+            showSnackbar(getString(R.string.snackbar_prize_added))
+        }
+    }
 
     private fun showArtist(binding: FragmentArtistDetailBinding, detail: ArtistDetail) {
         val artist = detail.artist
@@ -123,6 +139,7 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         }
         showAlbums(binding, detail)
         showPrizes(binding, detail.prizes)
+        binding.addPrizeButton.setOnClickListener { openPrizeAdd(artist) }
     }
 
     /** La banda del músico, subrayada como un enlace que abre su detalle, o «No pertenece a una banda». */
@@ -188,16 +205,27 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         binding.prizesList.removeAllViews()
 
         if (prizes.isEmpty()) {
-            binding.prizesList.addEmptyNote(getString(R.string.artist_detail_prizes_empty_body))
+            val body = if (roleViewModel.role.value == Role.COLLECTOR) {
+                R.string.artist_detail_prizes_empty_body_collector
+            } else {
+                R.string.artist_detail_prizes_empty_body
+            }
+            binding.prizesList.addEmptyNote(getString(body))
             return
         }
 
         val gap = resources.getDimensionPixelSize(R.dimen.detail_section_gap)
+        val newIds = viewModel.newPrizeIds.value
         prizes.forEachIndexed { index, prize ->
             val card = ItemArtistPrizeBinding.inflate(layoutInflater, binding.prizesList, true)
             card.prizeName.text = prize.name
             card.prizeOrganization.text = prize.organization
             card.prizeDate.text = prize.date.toLongText()
+            // El premio recién agregado lleva «Nuevo» y el fondo de fila nueva
+            if (prize.id in newIds) {
+                card.prizeNewBadge.isVisible = true
+                card.root.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.new_row))
+            }
             if (index > 0) card.root.updateLayoutParams<LinearLayout.LayoutParams> { topMargin = gap }
         }
     }
@@ -205,7 +233,6 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
     /** Abre el detalle de un álbum del carrusel. */
     private fun openAlbum(album: Album) {
         val navController = findNavController()
-        // Con dos toques seguidos el segundo ya no está en esta pantalla
         // Si ya no es la pantalla actual, un toque anterior ya abrió otra
         if (navController.currentBackStackEntry != ownBackStackEntry) return
         navController.navigateIfPossible(R.id.action_artistDetail_to_albumDetail, AlbumDetailFragment.args(album.id))
@@ -214,7 +241,6 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
     /** Abre el detalle de la banda del músico o de un integrante de la banda. */
     private fun openArtist(artist: Artist) {
         val navController = findNavController()
-        // Con dos toques seguidos el segundo ya no está en esta pantalla
         // Si ya no es la pantalla actual, un toque anterior ya abrió otra
         if (navController.currentBackStackEntry != ownBackStackEntry) return
         navController.navigateIfPossible(R.id.action_artistDetail_to_artistDetail, args(artist))
@@ -226,6 +252,14 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         // Si ya no es la pantalla actual, un toque anterior ya abrió otra
         if (navController.currentBackStackEntry != ownBackStackEntry) return
         navController.navigateIfPossible(R.id.action_artistDetail_to_memberAdd, MemberAddFragment.args(band.id, band.name))
+    }
+
+    /** Abre Agregar premio para el artista (HU14). */
+    private fun openPrizeAdd(artist: Artist) {
+        val navController = findNavController()
+        // Si ya no es la pantalla actual, un toque anterior ya abrió otra
+        if (navController.currentBackStackEntry != ownBackStackEntry) return
+        navController.navigateIfPossible(R.id.action_artistDetail_to_prizeAdd, PrizeAddFragment.args(artist))
     }
 
     companion object {
