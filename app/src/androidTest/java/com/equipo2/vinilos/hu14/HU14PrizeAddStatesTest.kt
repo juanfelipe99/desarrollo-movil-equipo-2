@@ -49,7 +49,7 @@ class HU14PrizeAddStatesTest {
 
     private val ruben = testMusician(100, "Rubén Blades Bellido de Luna", 1948)
     private val grammyDelivery = ArtistPrize(100, "Grammy Award", "National Academy", LocalDate.of(1978, 12, 10))
-    private val rubenDetail = ArtistDetail(artist = ruben, description = "Cantante panameño.", prizes = listOf(grammyDelivery))
+    private val rubenDetail = ArtistDetail(artist = ruben, description = LONG_DESCRIPTION, prizes = listOf(grammyDelivery))
 
     private val grammy = PrizeCandidate(Prize(100, "Grammy Award", "National Academy"), listOf(LocalDate.of(1978, 12, 10), LocalDate.of(1990, 2, 21)))
     private val latinGrammy = PrizeCandidate(Prize(1, "Latin Grammy", "Academia Latina de Artes y Ciencias de la Grabación"))
@@ -67,6 +67,24 @@ class HU14PrizeAddStatesTest {
         choosePrize(latinGrammy.prize.name)
         pickTodayAsPremiationDate()
         tapSavePrize()
+    }
+
+    // Detalle
+
+    @Test
+    fun laDescripcionExpandida_sigueExpandida_alVolverConElPremioAgregado() {
+        usePrizeRepositories(InMemoryArtistDetailRepository(listOf(rubenDetail)), InMemoryPrizeRepository(all))
+        app.launch()
+        openArtistDetail(ruben.name)
+        onView(withId(R.id.artistDescriptionToggle)).perform(scrollToWithBarsHidden(), click())
+        onView(withId(R.id.artistDescription)).check(matches(withText(LONG_DESCRIPTION)))
+
+        openPrizeAdd()
+        saveLatinGrammy()
+
+        checkSnackbar(R.string.snackbar_prize_added)
+        onView(withId(R.id.artistDescription)).check(matches(withText(LONG_DESCRIPTION)))
+        onView(withId(R.id.artistDescriptionToggle)).check(matches(withText(R.string.description_collapse)))
     }
 
     // Carga
@@ -223,5 +241,10 @@ class HU14PrizeAddStatesTest {
         checkSnackbar(R.string.error_prize_add_not_found)
         waitForPrizes { rows -> rows.map { it.candidate.prize.name } == listOf(grammy.prize.name) && rows.none { it.selected } }
         assertEquals(2, prizes.candidateRequests.size)
+    }
+
+    private companion object {
+        /** Más larga que lo que el detalle muestra sin «Ver más». */
+        val LONG_DESCRIPTION = "Cantante, compositor, músico, actor, abogado y político panameño. ".repeat(4).trim()
     }
 }

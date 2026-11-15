@@ -44,7 +44,7 @@ class AlbumDetailViewModel(
 
     /** Agrega el track al final de la lista sin volver a pedir el álbum, y lo marca como «Nuevo». */
     fun onTrackAdded(track: Track) {
-        savedState[NEW_TRACK_IDS] = newTrackIds.value + track.id
+        if (track.id !in newTrackIds.value) savedState[NEW_TRACK_IDS] = newTrackIds.value + track.id
         val album = (_state.value as? UiState.Success)?.data ?: return
         if (album.tracks.none { it.id == track.id }) _state.value = UiState.Success(album.copy(tracks = album.tracks + track))
     }

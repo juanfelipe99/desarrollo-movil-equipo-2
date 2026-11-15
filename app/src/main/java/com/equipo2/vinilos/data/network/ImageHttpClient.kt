@@ -2,6 +2,7 @@ package com.equipo2.vinilos.data.network
 
 import android.content.Context
 import android.os.Build
+import com.equipo2.vinilos.BuildConfig
 import com.equipo2.vinilos.R
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
@@ -41,7 +42,7 @@ fun trustManagerWithLetsEncrypt(context: Context): X509TrustManager {
     return factory.trustManagers.filterIsInstance<X509TrustManager>().first()
 }
 
-private const val USER_AGENT = "Vinilos/1.0 (https://github.com/juanfelipe99/desarrollo-movil-equipo-2)"
+private const val USER_AGENT = "Vinilos/${BuildConfig.VERSION_NAME} (https://github.com/juanfelipe99/desarrollo-movil-equipo-2)"
 private const val WIKIMEDIA_HOST = "upload.wikimedia.org"
 private val WIKIMEDIA_SIZES = listOf(120, 250, 330, 500, 960)
 private val THUMB_SIZE = Regex("/(\\d+)px-")

@@ -88,7 +88,6 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
         }
     }
 
-
     private fun showAlbum(binding: FragmentAlbumDetailBinding, album: Album) {
         binding.albumCover.load(album.cover)
         binding.albumName.text = album.name
