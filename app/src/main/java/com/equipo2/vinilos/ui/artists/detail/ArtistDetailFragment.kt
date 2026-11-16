@@ -130,7 +130,9 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         binding.artistDate.infoValue.text = artist.date.toLongText()
         showBand(binding, detail.band, isMusician)
 
-        bindExpandableText(binding.artistDescription, binding.artistDescriptionToggle, detail.description)
+        bindExpandableText(binding.artistDescription, binding.artistDescriptionToggle, detail.description, viewModel.descriptionExpanded) {
+            viewModel.descriptionExpanded = it
+        }
 
         binding.membersSection.isVisible = !isMusician
         if (!isMusician) {

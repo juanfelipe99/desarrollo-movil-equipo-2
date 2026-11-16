@@ -98,7 +98,9 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
         binding.albumGenre.show(R.drawable.ic_music_note, R.string.album_detail_genre_label, album.genre)
         binding.albumRecordLabel.show(R.drawable.ic_sell, R.string.album_detail_record_label_label, album.recordLabel)
 
-        bindExpandableText(binding.albumDescription, binding.albumDescriptionToggle, album.description)
+        bindExpandableText(binding.albumDescription, binding.albumDescriptionToggle, album.description, viewModel.descriptionExpanded) {
+            viewModel.descriptionExpanded = it
+        }
         showTracks(binding, album.tracks)
         binding.addTrackButton.setOnClickListener {
             findNavController().navigateIfPossible(R.id.action_albumDetail_to_trackAdd, TrackAddSheet.args(album.id, album.name))

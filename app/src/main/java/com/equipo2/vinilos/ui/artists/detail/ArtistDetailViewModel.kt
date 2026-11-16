@@ -38,6 +38,13 @@ class ArtistDetailViewModel(
     /** Ids de las entregas de premios agregadas desde esta pantalla, que se marcan como «Nuevo». */
     val newPrizeIds: StateFlow<IntArray> = savedState.getStateFlow(NEW_PRIZE_IDS, IntArray(0))
 
+    /** Si la descripción larga se ve completa. Sigue igual al redibujar la pantalla, al volver de otra y al girar. */
+    var descriptionExpanded: Boolean
+        get() = savedState[DESCRIPTION_EXPANDED] ?: false
+        set(value) {
+            savedState[DESCRIPTION_EXPANDED] = value
+        }
+
     private var loading: Job? = null
 
     val pullRefresh = PullRefresh(viewModelScope)
@@ -93,6 +100,7 @@ class ArtistDetailViewModel(
     companion object {
         private const val NEW_MEMBER_IDS = "newMemberIds"
         private const val NEW_PRIZE_IDS = "newPrizeIds"
+        private const val DESCRIPTION_EXPANDED = "descriptionExpanded"
 
         fun factory(artistId: Int, artistType: ArtistType) = viewModelFactory {
             initializer {

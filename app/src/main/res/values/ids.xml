@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Etiqueta con la que un texto recuerda si está expandido -->
-    <item name="expandable_text_state" type="id" />
-</resources>
