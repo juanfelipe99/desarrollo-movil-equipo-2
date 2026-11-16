@@ -23,6 +23,7 @@ import com.equipo2.vinilos.data.model.PrizeCandidate
 import com.equipo2.vinilos.data.repository.PrizeRepository
 import com.equipo2.vinilos.hu04.openArtist
 import com.equipo2.vinilos.support.enterAs
+import com.equipo2.vinilos.support.openTab
 import com.equipo2.vinilos.support.scrollToWithBarsHidden
 import com.equipo2.vinilos.support.waitUntil
 import com.equipo2.vinilos.ui.artists.prizes.PrizeCandidateAdapter
@@ -78,7 +79,7 @@ class InMemoryPrizeRepository(candidates: List<PrizeCandidate>) : PrizeRepositor
 /** Entra con el rol, abre la pestaña Artistas y el detalle del artista. */
 fun openArtistDetail(name: String, collector: Boolean = true) {
     enterAs(collector)
-    onView(withId(R.id.artistsGraph)).perform(click())
+    openTab(R.id.artistsGraph)
     openArtist(name)
 }
 

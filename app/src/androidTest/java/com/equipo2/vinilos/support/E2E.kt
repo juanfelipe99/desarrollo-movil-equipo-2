@@ -18,6 +18,7 @@ import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
+import androidx.test.espresso.matcher.ViewMatchers.isSelected
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.platform.app.InstrumentationRegistry
@@ -29,6 +30,19 @@ import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.TypeSafeMatcher
+
+/**
+ * Toca una pestaña de la barra inferior y espera a que quede marcada.
+ * En emuladores lentos el toque a veces se pierde y la app sigue en la pestaña anterior, por eso lo repite si hace falta.
+ */
+fun openTab(@IdRes tab: Int) {
+    onView(withId(tab)).perform(click())
+    waitUntil {
+        val selected = runCatching { onView(withId(tab)).check(matches(isSelected())) }.isSuccess
+        if (!selected) runCatching { onView(withId(tab)).perform(click()) }
+        selected
+    }
+}
 
 /** Título de la barra superior, sin confundirlo con textos iguales de la pantalla. */
 fun toolbarTitle(@StringRes title: Int): Matcher<View> = allOf(withText(title), isDescendantOfA(withId(R.id.toolbar)))

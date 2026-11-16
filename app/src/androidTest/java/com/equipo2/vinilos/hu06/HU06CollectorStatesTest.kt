@@ -23,6 +23,7 @@ import com.equipo2.vinilos.hu04.countText
 import com.equipo2.vinilos.hu04.pressToolbarUp
 import com.equipo2.vinilos.hu05.openCollectors
 import com.equipo2.vinilos.support.VinilosRule
+import com.equipo2.vinilos.support.openTab
 import com.equipo2.vinilos.support.rotateScreen
 import com.equipo2.vinilos.support.scrollToWithBarsHidden
 import com.equipo2.vinilos.support.toolbarTitle
@@ -178,11 +179,11 @@ class HU06CollectorStatesTest {
     fun desdeElDetalle_laBarraInferiorLlevaAAlbumesYArtistas_yAlVolverSigueElDetalle() {
         openWith(InMemoryCollectorDetailRepository(listOf(jaime)), jaime.collector.name)
 
-        onView(withId(R.id.albumsGraph)).perform(click())
+        openTab(R.id.albumsGraph)
         onView(toolbarTitle(R.string.album_list_title)).check(matches(isDisplayed()))
-        onView(withId(R.id.artistsGraph)).perform(click())
+        openTab(R.id.artistsGraph)
         onView(toolbarTitle(R.string.artist_list_title)).check(matches(isDisplayed()))
-        onView(withId(R.id.collectorsGraph)).perform(click())
+        openTab(R.id.collectorsGraph)
 
         checkShowingCollector("Jaime Monsalve")
     }
