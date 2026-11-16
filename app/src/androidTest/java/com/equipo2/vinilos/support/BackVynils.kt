@@ -105,6 +105,65 @@ object BackVynils {
         bandIds.forEach { request("bands/$it", "DELETE") }
     }
 
+    /** Crea un coleccionista de prueba sin álbumes, favoritos ni comentarios y devuelve su id (HU06). */
+    fun createCollector(name: String): Int {
+        val collector = JSONObject()
+            .put("name", name)
+            .put("telephone", TEST_TELEPHONE)
+            .put("email", TEST_EMAIL)
+        return JSONObject(request("collectors", "POST", collector.toString())).getInt("id")
+    }
+
+    /** Agrega el músico a los artistas favoritos del coleccionista. */
+    fun addFavoriteMusician(collectorId: Int, musicianId: Int) {
+        // Sin cuerpo, pero el servidor publicado exige el Content-Length
+        request("collectors/$collectorId/musicians/$musicianId", "POST", "")
+    }
+
+    /** Agrega el álbum a la colección con su precio y su estado, «Active» o «Inactive». */
+    fun addAlbumToCollector(collectorId: Int, albumId: Int, price: Int, status: String) {
+        val body = JSONObject().put("price", price).put("status", status)
+        request("collectors/$collectorId/albums/$albumId", "POST", body.toString())
+    }
+
+    /** Comenta el álbum en nombre del coleccionista y devuelve el id del comentario. */
+    fun addComment(albumId: Int, collectorId: Int, description: String, rating: Int): Int {
+        val comment = JSONObject()
+            .put("description", description)
+            .put("rating", rating)
+            .put("collector", JSONObject().put("id", collectorId))
+        return JSONObject(request("albums/$albumId/comments", "POST", comment.toString())).getInt("id")
+    }
+
+    fun deleteComment(albumId: Int, commentId: Int) {
+        request("albums/$albumId/comments/$commentId", "DELETE")
+    }
+
+    /**
+     * Borra el coleccionista. La API no lo borra mientras tenga favoritos o álbumes, así que primero los quita.
+     * Sus comentarios se borran antes con [deleteComment].
+     */
+    fun deleteCollector(id: Int) {
+        val (code, text) = send("collectors/$id", "GET", null)
+        // Si ya no existe es porque otra ejecución contra la misma API lo borró antes
+        if (code == 404) return
+        val favorites = JSONObject(text).optJSONArray("favoritePerformers") ?: JSONArray()
+        for (f in 0 until favorites.length()) {
+            val performer = favorites.getJSONObject(f)
+            val route = if (performer.has("birthDate")) "musicians" else "bands"
+            request("collectors/$id/$route/${performer.getInt("id")}", "DELETE")
+        }
+        val albums = JSONArray(request("collectors/$id/albums", "GET"))
+        for (a in 0 until albums.length()) {
+            val album = albums.getJSONObject(a).optJSONObject("album") ?: continue
+            request("collectors/$id/albums/${album.getInt("id")}", "DELETE")
+        }
+        request("collectors/$id", "DELETE")
+    }
+
+    const val TEST_TELEPHONE = "3000000000"
+    const val TEST_EMAIL = "e2e@ejemplo.com"
+
     /**
      * El servidor publicado a veces responde 404 o 5xx un momento mientras despierta o se reinicia.
      * Esas respuestas dicen que no hizo nada, así que se reintenta sin riesgo de crear datos dos veces.

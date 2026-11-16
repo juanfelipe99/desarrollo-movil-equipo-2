@@ -122,7 +122,7 @@ class HU05CollectorStatesTest {
     }
 
     @Test
-    fun tocarUnColeccionista_abreElDetalleProvisional_yAtrasVuelveAlListado() {
+    fun tocarUnColeccionista_abreSuDetalle_yAtrasVuelveAlListado() {
         useCollectorRepository(InMemoryCollectorRepository(Result.success(listOf(manolo, jaime))))
         app.launch()
         openCollectors()
@@ -130,8 +130,8 @@ class HU05CollectorStatesTest {
         onView(collectorRowName("Jaime Monsalve")).perform(click())
 
         onView(toolbarTitle(R.string.collector_detail_title)).check(matches(isDisplayed()))
-        onView(withText(R.string.coming_soon_title)).check(matches(isDisplayed()))
-        onView(withText(R.string.collector_detail_soon_body)).check(matches(isDisplayed()))
+        // El detalle completo se prueba en HU06
+        onView(withId(R.id.collectorName)).check(matches(withText("Jaime Monsalve")))
 
         pressBack()
 
