@@ -16,6 +16,7 @@ import com.equipo2.vinilos.hu03.artistRowName
 import com.equipo2.vinilos.hu03.testBand
 import com.equipo2.vinilos.support.VinilosRule
 import com.equipo2.vinilos.support.enterAs
+import com.equipo2.vinilos.support.openTab
 import com.equipo2.vinilos.support.toolbarTitle
 import com.equipo2.vinilos.support.useTabRepositories
 import org.hamcrest.Matchers.not
@@ -51,19 +52,19 @@ class HU05CollectorNavigationTest {
         onView(albumCardName("Buscando América")).check(matches(isDisplayed()))
         onView(withId(R.id.albumsGraph)).check(matches(isSelected()))
 
-        onView(withId(R.id.artistsGraph)).perform(click())
+        openTab(R.id.artistsGraph)
         onView(toolbarTitle(R.string.artist_list_title)).check(matches(isDisplayed()))
         onView(artistRowName("Queen")).check(matches(isDisplayed()))
         onView(withId(R.id.artistsGraph)).check(matches(isSelected()))
         onView(withId(R.id.albumsGraph)).check(matches(not(isSelected())))
 
-        onView(withId(R.id.collectorsGraph)).perform(click())
+        openTab(R.id.collectorsGraph)
         onView(toolbarTitle(R.string.collector_list_title)).check(matches(isDisplayed()))
         onView(collectorRowName("Manolo Bellon")).check(matches(isDisplayed()))
         onView(withId(R.id.collectorsGraph)).check(matches(isSelected()))
         onView(withId(R.id.artistsGraph)).check(matches(not(isSelected())))
 
-        onView(withId(R.id.albumsGraph)).perform(click())
+        openTab(R.id.albumsGraph)
         onView(toolbarTitle(R.string.album_list_title)).check(matches(isDisplayed()))
         onView(withId(R.id.albumsGraph)).check(matches(isSelected()))
         onView(withId(R.id.collectorsGraph)).check(matches(not(isSelected())))
@@ -75,8 +76,8 @@ class HU05CollectorNavigationTest {
         openCollectors()
         onView(collectorRowName("Manolo Bellon")).perform(click())
 
-        onView(withId(R.id.albumsGraph)).perform(click())
-        onView(withId(R.id.collectorsGraph)).perform(click())
+        openTab(R.id.albumsGraph)
+        openTab(R.id.collectorsGraph)
 
         onView(toolbarTitle(R.string.collector_detail_title)).check(matches(isDisplayed()))
         onView(withId(R.id.collectorsGraph)).check(matches(isSelected()))

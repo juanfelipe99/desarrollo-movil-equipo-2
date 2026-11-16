@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- Premios y fecha: se ven con premios y en el vacío, no al cargar ni en el error -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/prizeScroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="32dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintWidth_max="528dp">
+
+                    <TextView
+                        android:id="@+id/prizeAddSubtitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+                        android:textColor="@color/md_on_surface_variant"
+                        tools:text="Elige el premio que recibió Rubén Blades Bellido de Luna y la fecha en que lo recibió." />
+
+                    <!-- También le da nombre a la lista de premios para TalkBack -->
+                    <TextView
+                        android:id="@+id/prizeGroupTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:accessibilityHeading="true"
+                        android:labelFor="@id/prizeList"
+                        android:text="@string/prize_add_group_title"
+                        android:textAppearance="@style/TextAppearance.Vinilos.BodyLarge.SemiBold"
+                        android:textColor="@color/md_on_surface"
+                        tools:targetApi="p" />
+
+                    <!-- Con el ícono del mismo tamaño que el de los errores de los campos -->
+                    <LinearLayout
+                        android:id="@+id/prizeRequiredError"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:accessibilityLiveRegion="assertive"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:visibility="gone"
+                        tools:ignore="UseCompoundDrawables"
+                        tools:visibility="visible">
+
+                        <ImageView
+                            android:layout_width="@dimen/field_error_icon"
+                            android:layout_height="@dimen/field_error_icon"
+                            android:importantForAccessibility="no"
+                            app:srcCompat="@drawable/ic_error"
+                            app:tint="@color/md_error" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/field_error_icon_padding"
+                            android:layout_weight="1"
+                            android:text="@string/error_prize_required"
+                            android:textAppearance="@style/TextAppearance.Vinilos.Supporting"
+                            android:textColor="@color/md_error" />
+                    </LinearLayout>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/prizeCard"
+                        style="@style/Widget.Vinilos.Card"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/prizeList"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false"
+                            tools:itemCount="4"
+                            tools:listitem="@layout/item_prize_candidate" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- «Aún no hay premios creados.» -->
+                    <FrameLayout
+                        android:id="@+id/prizeEmpty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:visibility="gone" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/premiationDateField"
+                        style="@style/Widget.Vinilos.FormField"
+                        android:layout_marginTop="20dp"
+                        android:hint="@string/field_premiation_date"
+                        app:endIconContentDescription="@string/cd_open_date_picker"
+                        app:endIconDrawable="@drawable/ic_calendar_today"
+                        app:endIconMode="custom"
+                        app:helperText="@string/help_premiation_date"
+                        app:placeholderText="@string/placeholder_release_date">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/premiationDateInput"
+                            style="@style/Widget.Vinilos.FormField.Input"
+                            android:cursorVisible="false"
+                            android:focusable="false"
+                            android:inputType="none" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <include
+            android:id="@+id/prizeLoading"
+            layout="@layout/view_loading"
+            android:visibility="gone" />
+
+        <include
+            android:id="@+id/prizeMessage"
+            layout="@layout/view_state_message"
+            android:visibility="gone" />
+
+        <!-- Encima del formulario para no moverlo al aparecer -->
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/prizeSavingProgress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:indicatorColor="@color/md_primary"
+            app:trackColor="@color/md_primary_container"
+            app:trackThickness="4dp" />
+    </FrameLayout>
+
+    <!-- Botones: se ven con premios y en el vacío -->
+    <LinearLayout
+        android:id="@+id/prizeFooter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <View style="@style/Widget.Vinilos.Divider" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Sin alinear por el texto: al mostrar «Guardando…» con el círculo, el botón bajaba y quedaba cortado -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_max="528dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/prizeCancelButton"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="12dp"
+                    android:layout_weight="1"
+                    android:text="@string/action_cancel" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/prizeSaveButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/action_save"
+                    android:textColor="@color/button_save_text"
+                    app:backgroundTint="@color/button_save_background"
+                    app:iconGravity="textStart"
+                    app:iconTint="@color/md_on_surface_variant" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+</LinearLayout>

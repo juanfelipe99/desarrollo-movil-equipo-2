@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.equipo2.vinilos.VinilosApplication
 import com.equipo2.vinilos.data.model.Artist
 import com.equipo2.vinilos.data.model.ArtistDetail
+import com.equipo2.vinilos.data.model.ArtistPrize
 import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.repository.ArtistRepository
 import com.equipo2.vinilos.ui.state.PullRefresh
@@ -20,7 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-/** Detalle de un músico o de una banda (HU04), y los integrantes agregados a la banda (HU12). Se conserva al girar. */
+/** Detalle de un músico o de una banda (HU04), con los integrantes (HU12) y los premios (HU14) agregados desde aquí. Se conserva al girar. */
 class ArtistDetailViewModel(
     private val repository: ArtistRepository,
     private val artistId: Int,
@@ -33,6 +34,16 @@ class ArtistDetailViewModel(
 
     /** Ids de los integrantes agregados desde esta pantalla, que se marcan como «Nuevo». */
     val newMemberIds: StateFlow<IntArray> = savedState.getStateFlow(NEW_MEMBER_IDS, IntArray(0))
+
+    /** Ids de las entregas de premios agregadas desde esta pantalla, que se marcan como «Nuevo». */
+    val newPrizeIds: StateFlow<IntArray> = savedState.getStateFlow(NEW_PRIZE_IDS, IntArray(0))
+
+    /** Si la descripción larga se ve completa. Sigue igual al redibujar la pantalla, al volver de otra y al girar. */
+    var descriptionExpanded: Boolean
+        get() = savedState[DESCRIPTION_EXPANDED] ?: false
+        set(value) {
+            savedState[DESCRIPTION_EXPANDED] = value
+        }
 
     private var loading: Job? = null
 
@@ -50,6 +61,15 @@ class ArtistDetailViewModel(
         val detail = (_state.value as? UiState.Success)?.data ?: return
         if (detail.members.none { it.id == musician.id }) {
             _state.value = UiState.Success(detail.copy(members = detail.members + musician))
+        }
+    }
+
+    /** Pone el premio primero sin volver a pedir el artista, y lo marca como «Nuevo». */
+    fun onPrizeAdded(prize: ArtistPrize) {
+        if (prize.id !in newPrizeIds.value) savedState[NEW_PRIZE_IDS] = newPrizeIds.value + prize.id
+        val detail = (_state.value as? UiState.Success)?.data ?: return
+        if (detail.prizes.none { it.id == prize.id }) {
+            _state.value = UiState.Success(detail.copy(prizes = listOf(prize) + detail.prizes))
         }
     }
 
@@ -79,6 +99,8 @@ class ArtistDetailViewModel(
 
     companion object {
         private const val NEW_MEMBER_IDS = "newMemberIds"
+        private const val NEW_PRIZE_IDS = "newPrizeIds"
+        private const val DESCRIPTION_EXPANDED = "descriptionExpanded"
 
         fun factory(artistId: Int, artistType: ArtistType) = viewModelFactory {
             initializer {

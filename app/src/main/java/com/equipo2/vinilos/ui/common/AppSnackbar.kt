@@ -10,6 +10,8 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.DefaultLifecycleObserver
 import com.equipo2.vinilos.MainActivity
 import com.equipo2.vinilos.R
 import com.google.android.material.snackbar.Snackbar
@@ -63,12 +65,24 @@ fun Fragment.showSnackbar(message: CharSequence, isError: Boolean = false) {
     (requireActivity() as MainActivity).showSnackbar(message, isError)
 }
 
-/** Los avisos aparecen encima de esta vista hasta que se destruya la vista del fragment. */
+/**
+ * Los avisos aparecen encima de esta vista hasta que se destruya la vista del fragment.
+ *
+ * Se registra otra vez cada vez que la pantalla vuelve al frente. Con el retroceso predictivo de Android 15 o superior,
+ * que también usa la tecla Atrás, la pantalla anterior arma su vista antes de volver a ser la actual, y MainActivity
+ * olvida la vista registrada al cambiar de pantalla. Al registrarla se acomoda según las barras de la pantalla actual.
+ */
 fun Fragment.keepSnackbarsAbove(view: View) {
     val activity = requireActivity() as MainActivity
     activity.snackbarAnchor = view
 
-    viewLifecycleOwner.lifecycle.doOnDestroy {
-        if (activity.snackbarAnchor === view) activity.snackbarAnchor = null
-    }
+    viewLifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
+        override fun onResume(owner: LifecycleOwner) {
+            activity.snackbarAnchor = view
+        }
+
+        override fun onDestroy(owner: LifecycleOwner) {
+            if (activity.snackbarAnchor === view) activity.snackbarAnchor = null
+        }
+    })
 }

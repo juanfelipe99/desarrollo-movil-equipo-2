@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="es">
+    <string name="prize_add_title">Agregar premio</string>
+    <string name="prize_add_subtitle">Elige el premio que recibió %1$s y la fecha en que lo recibió.</string>
+    <string name="prize_add_group_title">Premio *</string>
+
+    <!-- «Ya lo recibió el 10 de diciembre de 1978.» o, con varias fechas, «el … y el …» -->
+    <string name="prize_already_received">Ya lo recibió %1$s. Puedes agregarlo otra vez con otra fecha.</string>
+    <string name="prize_received_date">el %1$s</string>
+    <string name="prize_received_dates_join">%1$s y %2$s</string>
+    <string name="cd_prize_selected">Elegido</string>
+    <string name="cd_prize_not_selected">No elegido</string>
+
+    <string name="field_premiation_date">Fecha de premiación *</string>
+    <string name="help_premiation_date">Fecha en que el artista recibió el premio.</string>
+    <string name="premiation_date_picker_title">Fecha de premiación</string>
+
+    <string name="prize_add_loading">Cargando premios…</string>
+    <string name="prize_add_object">los premios</string>
+    <string name="prize_add_empty">Aún no hay premios creados.</string>
+    <string name="prize_add_artist_missing_title">Este artista ya no existe</string>
+    <string name="prize_add_artist_missing_body">Puede que lo hayan eliminado. Cierra esta pantalla para volver.</string>
+
+    <string name="error_prize_required">Elige un premio.</string>
+    <string name="error_premiation_date_required">Selecciona la fecha en que recibió el premio.</string>
+    <string name="error_premiation_date_future">La fecha no puede ser futura.</string>
+    <string name="error_premiation_date_invalid">La fecha no es válida. Elige otra.</string>
+
+    <string name="prize_add_saving">Guardando…</string>
+    <string name="snackbar_prize_added">Premio agregado</string>
+
+    <string name="error_prize_add_connection">No pudimos agregar el premio. Revisa tu conexión a internet.</string>
+    <string name="error_prize_add_failed">No pudimos agregar el premio. Inténtalo de nuevo.</string>
+    <string name="error_prize_add_not_found">No encontramos el premio o el artista. Actualizamos la lista.</string>
+</resources>

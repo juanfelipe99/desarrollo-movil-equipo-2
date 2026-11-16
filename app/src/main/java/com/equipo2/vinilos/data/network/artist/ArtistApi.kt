@@ -1,5 +1,6 @@
 package com.equipo2.vinilos.data.network.artist
 
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -24,4 +25,19 @@ interface ArtistApi {
     // Si el músico estaba en otra banda, la API lo cambia a esta. La respuesta es la banda, que no se usa
     @POST("bands/{bandId}/musicians/{musicianId}")
     suspend fun addMusicianToBand(@Path("bandId") bandId: Int, @Path("musicianId") musicianId: Int)
+
+    // Músicos y bandas reciben premios en rutas distintas. La respuesta es la entrega, con su id
+    @POST("prizes/{prizeId}/musicians/{musicianId}")
+    suspend fun addPrizeToMusician(
+        @Path("prizeId") prizeId: Int,
+        @Path("musicianId") musicianId: Int,
+        @Body prize: NewPerformerPrizeDto,
+    ): PerformerPrizeDto
+
+    @POST("prizes/{prizeId}/bands/{bandId}")
+    suspend fun addPrizeToBand(
+        @Path("prizeId") prizeId: Int,
+        @Path("bandId") bandId: Int,
+        @Body prize: NewPerformerPrizeDto,
+    ): PerformerPrizeDto
 }

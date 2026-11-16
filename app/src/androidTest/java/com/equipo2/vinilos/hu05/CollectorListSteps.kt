@@ -1,8 +1,6 @@
 package com.equipo2.vinilos.hu05
 
 import android.view.View
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
@@ -12,6 +10,7 @@ import com.equipo2.vinilos.data.model.CollectorDetail
 import com.equipo2.vinilos.data.repository.CollectorRepository
 import com.equipo2.vinilos.data.repository.DataError
 import com.equipo2.vinilos.support.enterAs
+import com.equipo2.vinilos.support.openTab
 import kotlinx.coroutines.awaitCancellation
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
@@ -53,7 +52,7 @@ fun testCollector(id: Int, name: String, email: String, albumCount: Int) =
 /** Entra como visitante y abre la pestaña Coleccionistas de la barra inferior. */
 fun openCollectors() {
     enterAs(collector = false)
-    onView(withId(R.id.collectorsGraph)).perform(click())
+    openTab(R.id.collectorsGraph)
 }
 
 /** Nombre de una fila del listado, sin confundirlo con otros textos de la pantalla. */

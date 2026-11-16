@@ -7,6 +7,7 @@ import com.equipo2.vinilos.data.repository.AlbumRepository
 import com.equipo2.vinilos.data.repository.ArtistRepository
 import com.equipo2.vinilos.data.repository.BandRepository
 import com.equipo2.vinilos.data.repository.CollectorRepository
+import com.equipo2.vinilos.data.repository.PrizeRepository
 
 /** La app usa este repositorio de álbumes en lugar del real. VinilosRule devuelve el real al terminar. */
 fun useAlbumRepository(repository: AlbumRepository) {
@@ -25,6 +26,18 @@ fun useBandRepositories(artists: ArtistRepository, bands: BandRepository) {
     VinilosApplication.container = object : AppContainer(context) {
         override val artistRepository: ArtistRepository = artists
         override val bandRepository: BandRepository = bands
+    }
+}
+
+/**
+ * La app usa estos repositorios de artistas y de premios en lugar de los reales (HU14).
+ * Van juntos porque Agregar premio se abre desde el detalle del artista.
+ */
+fun usePrizeRepositories(artists: ArtistRepository, prizes: PrizeRepository) {
+    val context = InstrumentationRegistry.getInstrumentation().targetContext
+    VinilosApplication.container = object : AppContainer(context) {
+        override val artistRepository: ArtistRepository = artists
+        override val prizeRepository: PrizeRepository = prizes
     }
 }
 

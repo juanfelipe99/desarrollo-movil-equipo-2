@@ -99,6 +99,42 @@ object BackVynils {
         return List(members.length()) { members.getJSONObject(it).getString("name") }
     }
 
+    /** Crea un premio de prueba y devuelve su id. */
+    fun createPrize(name: String, organization: String): Int {
+        val prize = JSONObject()
+            .put("name", name)
+            .put("organization", organization)
+            .put("description", "Premio creado por una prueba E2E.")
+        return JSONObject(request("prizes", "POST", prize.toString())).getInt("id")
+    }
+
+    /** Entrega el premio al músico o a la banda en ese día, con el formato «2000-09-13». */
+    fun givePrize(prizeId: Int, artistId: Int, day: String) {
+        // La ruta de los músicos sirve también para las bandas, porque la API no revisa el tipo
+        request("prizes/$prizeId/musicians/$artistId", "POST", JSONObject().put("premiationDate", "${day}T00:00:00.000Z").toString())
+    }
+
+    /** Días en que el músico recibió premios, con el formato «2000-09-13», en orden. */
+    fun musicianPrizeDays(musicianId: Int): List<String> = prizeDays(JSONObject(request("musicians/$musicianId", "GET")))
+
+    /** Días en que la banda recibió premios, con el formato «2000-09-13», en orden. */
+    fun bandPrizeDays(bandId: Int): List<String> = prizeDays(JSONObject(request("bands/$bandId", "GET")))
+
+    private fun prizeDays(artist: JSONObject): List<String> {
+        val deliveries = artist.optJSONArray("performerPrizes") ?: JSONArray()
+        return List(deliveries.length()) { deliveries.getJSONObject(it).getString("premiationDate").take(10) }.sorted()
+    }
+
+    /** Borra el premio, primero cada una de sus entregas, porque la API no borra un artista ni un premio que las tenga. */
+    fun deletePrize(id: Int) {
+        val deliveries = JSONArray(request("prizes/$id/performers", "GET"))
+        for (d in 0 until deliveries.length()) {
+            val artistId = deliveries.getJSONObject(d).getJSONObject("performer").getInt("id")
+            request("prizes/$id/musicians/$artistId", "DELETE")
+        }
+        request("prizes/$id", "DELETE")
+    }
+
     /** Borra los músicos y luego las bandas indicados, para que ninguna banda se borre con integrantes. */
     fun deleteArtists(musicianIds: List<Int>, bandIds: List<Int>) {
         musicianIds.forEach { request("musicians/$it", "DELETE") }
