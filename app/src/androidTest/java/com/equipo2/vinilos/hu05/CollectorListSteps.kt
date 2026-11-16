@@ -8,6 +8,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.data.model.Collector
+import com.equipo2.vinilos.data.model.CollectorDetail
 import com.equipo2.vinilos.data.repository.CollectorRepository
 import com.equipo2.vinilos.data.repository.DataError
 import com.equipo2.vinilos.support.enterAs
@@ -31,6 +32,16 @@ class InMemoryCollectorRepository(private val responses: List<Result<List<Collec
         requests++
         if (neverAnswer) awaitCancellation()
         return responses[minOf(requests - 1, responses.lastIndex)]
+    }
+
+    /** Detalle de cada coleccionista. Si no se indica, el del listado sin teléfono, favoritos, álbumes ni comentarios. */
+    var details: Map<Int, CollectorDetail> = emptyMap()
+
+    override suspend fun getCollectorDetail(id: Int): Result<CollectorDetail> {
+        details[id]?.let { return Result.success(it) }
+        val collector = responses.firstNotNullOfOrNull { response -> response.getOrNull()?.firstOrNull { it.id == id } }
+            ?: return Result.failure(DataError.NotFound())
+        return Result.success(CollectorDetail(collector = collector.copy(albumCount = 0), telephone = ""))
     }
 }
 
