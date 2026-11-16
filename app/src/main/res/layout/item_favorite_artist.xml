@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Artista favorito de un coleccionista (HU06): foto o iniciales y nombre -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/favorite_artist_width"
+    android:layout_height="wrap_content"
+    android:focusable="true"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingHorizontal="4dp"
+    android:paddingVertical="4dp">
+
+    <!-- Las iniciales quedan detrás y se ven mientras la foto carga, si falla o si no hay -->
+    <FrameLayout
+        android:layout_width="@dimen/favorite_artist_photo"
+        android:layout_height="@dimen/favorite_artist_photo"
+        android:background="@drawable/bg_circle_surface_variant">
+
+        <TextView
+            android:id="@+id/favoriteInitials"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:importantForAccessibility="no"
+            android:textAppearance="@style/TextAppearance.Vinilos.TitleMedium"
+            android:textColor="@color/md_on_surface_variant"
+            tools:text="RB" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/favoritePhoto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Vinilos.Circle" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/favoriteName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:gravity="center_horizontal"
+        android:maxLines="2"
+        android:textAppearance="@style/TextAppearance.Vinilos.LabelMedium.SemiBold"
+        android:textColor="@color/md_on_surface"
+        tools:text="Rubén Blades" />
+</LinearLayout>

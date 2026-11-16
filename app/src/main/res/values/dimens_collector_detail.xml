@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Artistas favoritos del detalle de coleccionista (HU06) -->
+    <dimen name="favorite_artist_photo">72dp</dimen>
+    <dimen name="favorite_artist_width">96dp</dimen>
+</resources>

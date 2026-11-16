@@ -2,11 +2,9 @@ package com.equipo2.vinilos.ui.albums.detail
 
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -34,6 +32,7 @@ import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.initialsOf
 import com.equipo2.vinilos.ui.common.navigateIfPossible
 import com.equipo2.vinilos.ui.common.showSnackbar
+import com.equipo2.vinilos.ui.common.showStars
 import com.equipo2.vinilos.ui.common.toLongText
 import com.equipo2.vinilos.ui.role.RoleViewModel
 import com.equipo2.vinilos.ui.state.UiState
@@ -198,20 +197,7 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
             card.commentRating.text = getString(R.string.album_detail_comment_rating, comment.rating)
             card.commentRatingRow.contentDescription = getString(R.string.cd_album_detail_comment_rating, comment.rating)
             card.commentText.text = getString(R.string.album_detail_comment_text, comment.description)
-            showStars(card.commentStars, comment.rating)
-        }
-    }
-
-    /** Cinco estrellas, rellenas hasta la calificación. */
-    private fun showStars(container: LinearLayout, rating: Int) {
-        val size = resources.getDimensionPixelSize(R.dimen.rating_star)
-        val gap = resources.getDimensionPixelSize(R.dimen.rating_star_gap)
-        repeat(MAX_RATING) { index ->
-            val star = ImageView(requireContext())
-            star.setImageResource(R.drawable.ic_star)
-            val color = if (index < rating) R.color.md_tertiary else R.color.md_outline_variant
-            star.setColorFilter(ContextCompat.getColor(requireContext(), color))
-            container.addView(star, LinearLayout.LayoutParams(size, size).apply { if (index > 0) marginStart = gap })
+            card.commentStars.showStars(comment.rating)
         }
     }
 
@@ -224,7 +210,5 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
         private const val ARG_ALBUM_ID = "albumId"
 
         fun args(albumId: Int): Bundle = bundleOf(ARG_ALBUM_ID to albumId)
-
-        private const val MAX_RATING = 5
     }
 }
