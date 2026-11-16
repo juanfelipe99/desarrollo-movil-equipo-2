@@ -76,12 +76,8 @@ class HU06CollectorDetailTest {
 
         onView(withId(R.id.collectorAlbumsCount)).perform(scrollToWithBarsHidden())
             .check(matches(withText(countText(R.plurals.collector_detail_albums_count, 2))))
-        onView(collectorAlbumName(activeAlbum)).perform(scrollToWithBarsHidden()).check(matches(isDisplayed()))
-        onView(withText("Precio: $25")).check(matches(isDisplayed()))
-        onView(withText(R.string.collector_detail_status_active)).check(matches(isDisplayed()))
-        onView(collectorAlbumName(inactiveAlbum)).perform(scrollToWithBarsHidden()).check(matches(isDisplayed()))
-        onView(withText("Precio: $40")).check(matches(isDisplayed()))
-        onView(withText(R.string.collector_detail_status_inactive)).check(matches(isDisplayed()))
+        checkCollectorAlbumRow(activeAlbum, "Precio: $25", R.string.collector_detail_status_active)
+        checkCollectorAlbumRow(inactiveAlbum, "Precio: $40", R.string.collector_detail_status_inactive)
 
         onView(commentAlbumLink(activeAlbum)).perform(scrollToWithBarsHidden()).check(matches(isDisplayed()))
         onView(withText("4/5")).perform(scrollToWithBarsHidden()).check(matches(isDisplayed()))

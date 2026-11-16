@@ -1,6 +1,7 @@
 package com.equipo2.vinilos.hu06
 
 import android.view.View
+import androidx.annotation.StringRes
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
@@ -9,10 +10,12 @@ import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withParent
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.data.model.AlbumStatus
@@ -116,6 +119,17 @@ fun favoriteName(name: String): Matcher<View> =
 
 fun collectorAlbumName(name: String): Matcher<View> =
     allOf(withId(R.id.collectorAlbumName), withText(name), isDescendantOfA(withId(R.id.collectorAlbumsList)))
+
+/**
+ * Baja hasta la fila completa del álbum en la colección y revisa que muestre su precio y su estado.
+ * Se baja hasta la fila y no solo hasta el nombre: en pantallas pequeñas el precio, que va debajo del nombre,
+ * queda fuera del borde. El precio y el estado se buscan dentro de esa fila, así no se confunden con los de otro álbum.
+ */
+fun checkCollectorAlbumRow(name: String, price: String, @StringRes status: Int) {
+    onView(allOf(withParent(withId(R.id.collectorAlbumsList)), hasDescendant(collectorAlbumName(name))))
+        .perform(scrollToWithBarsHidden())
+        .check(matches(allOf(isDisplayed(), hasDescendant(withText(price)), hasDescendant(withText(status)))))
+}
 
 fun commentAlbumLink(name: String): Matcher<View> =
     allOf(withId(R.id.commentAlbum), withText(name), isDescendantOfA(withId(R.id.commentsList)))
