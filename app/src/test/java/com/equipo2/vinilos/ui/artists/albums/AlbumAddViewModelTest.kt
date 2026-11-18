@@ -61,13 +61,15 @@ class AlbumAddViewModelTest {
         val viewModel = viewModelWith(listOf(buscando))
 
         assertEquals(UiState.Empty, viewModel.state.value)
+        assertTrue(viewModel.allAlreadyAdded.value)
     }
 
     @Test
-    fun siElCatalogoEstaVacio_quedaVacio() {
+    fun siElCatalogoEstaVacio_quedaVacio_yNoDiceQueYaLosTengaTodos() {
         val viewModel = viewModelWith(emptyList())
 
         assertEquals(UiState.Empty, viewModel.state.value)
+        assertFalse(viewModel.allAlreadyAdded.value)
     }
 
     @Test

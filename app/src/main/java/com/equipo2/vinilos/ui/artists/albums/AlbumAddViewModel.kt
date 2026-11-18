@@ -65,6 +65,7 @@ class AlbumAddViewModel(
     private val currentSubmitting = MutableStateFlow(false)
     private val currentMissingSelection = MutableStateFlow(false)
     private val currentArtistMissing = MutableStateFlow(false)
+    private val currentAllAlreadyAdded = MutableStateFlow(false)
     private val pendingEvents = Channel<AlbumAddEvent>(Channel.BUFFERED)
 
     private val selectedId: StateFlow<Int?> = savedState.getStateFlow(SELECTED, null)
@@ -90,6 +91,12 @@ class AlbumAddViewModel(
      * así que la pantalla lo dice en lugar del error de carga.
      */
     val artistMissing: StateFlow<Boolean> = currentArtistMissing.asStateFlow()
+
+    /**
+     * Con [state] en [UiState.Empty], dice por qué: el catálogo tiene álbumes pero el artista ya los tiene todos.
+     * Si es false, es que el catálogo no tiene ninguno.
+     */
+    val allAlreadyAdded: StateFlow<Boolean> = currentAllAlreadyAdded.asStateFlow()
 
     val events: Flow<AlbumAddEvent> = pendingEvents.receiveAsFlow()
 
@@ -157,6 +164,7 @@ class AlbumAddViewModel(
     private fun show(list: List<AlbumCandidate>) {
         // Si el elegido ya no está o ahora el artista ya lo tiene, se suelta la selección
         if (list.none { it.selectable && it.album.id == selectedId.value }) savedState[SELECTED] = null
+        currentAllAlreadyAdded.value = list.isNotEmpty() && list.none { it.selectable }
         candidates.value = if (list.none { it.selectable }) UiState.Empty else UiState.Success(list)
     }
 
