@@ -13,6 +13,7 @@ import com.equipo2.vinilos.data.model.MusicianStatus
 import com.equipo2.vinilos.data.repository.BandRepository
 import com.equipo2.vinilos.data.repository.DataError
 import com.equipo2.vinilos.data.repository.toDataError
+import com.equipo2.vinilos.ui.common.containsIgnoringAccents
 import com.equipo2.vinilos.ui.state.ErrorReason
 import com.equipo2.vinilos.ui.state.UiState
 import com.equipo2.vinilos.ui.state.toErrorReason
@@ -27,7 +28,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.text.Normalizer
 
 /** Por qué no se pudo agregar el integrante, que decide qué le ofrece la pantalla al usuario. */
 enum class MemberAddFailure {
@@ -204,11 +204,3 @@ private fun Throwable.toMemberAddFailure(): MemberAddFailure = when {
     toErrorReason() == ErrorReason.CONNECTION -> MemberAddFailure.CONNECTION
     else -> MemberAddFailure.SERVER
 }
-
-// Así «ruben» encuentra a «Rubén Blades»
-private fun String.containsIgnoringAccents(query: String): Boolean =
-    query.isBlank() || withoutAccents().contains(query.trim().withoutAccents(), ignoreCase = true)
-
-private val ACCENTS = Regex("\\p{Mn}+")
-
-private fun String.withoutAccents(): String = Normalizer.normalize(this, Normalizer.Form.NFD).replace(ACCENTS, "")

@@ -1,9 +1,13 @@
 package com.equipo2.vinilos.ui.artists.albums
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -17,6 +21,7 @@ import com.equipo2.vinilos.databinding.FragmentAlbumAddBinding
 import com.equipo2.vinilos.ui.common.buttonProgress
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.keepSnackbarsAbove
+import com.equipo2.vinilos.ui.common.releaseTextFieldsOnDestroyView
 import com.equipo2.vinilos.ui.common.showSnackbar
 import com.equipo2.vinilos.ui.state.UiState
 import com.equipo2.vinilos.ui.state.showEmpty
@@ -24,16 +29,19 @@ import com.equipo2.vinilos.ui.state.showError
 import com.equipo2.vinilos.ui.state.showLoading
 import kotlinx.coroutines.flow.combine
 
-/** Lo que muestra el listado: los álbumes, el elegido, si se está enviando y por qué no hay qué mostrar. */
+/** Por qué el listado puede no tener qué mostrar: el artista ya no existe o ya tiene todos los álbumes. */
+private data class Reasons(val artistMissing: Boolean, val allAlreadyAdded: Boolean)
+
+/** Lo que muestra el listado: los álbumes, el elegido, si se está enviando, la búsqueda y por qué no hay qué mostrar. */
 private data class ListScreen(
     val state: UiState<List<AlbumCandidate>>,
     val selected: AlbumCandidate?,
     val submitting: Boolean,
-    val artistMissing: Boolean,
-    val allAlreadyAdded: Boolean,
+    val query: String,
+    val reasons: Reasons,
 )
 
-/** Elegir el álbum que se agrega a un músico o a una banda (HU15): lista de selección única y «Elige un álbum». */
+/** Elegir el álbum que se agrega a un músico o a una banda (HU15): buscador, lista de selección única y «Elige un álbum». */
 class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
 
     private val viewModel: AlbumAddViewModel by viewModels {
@@ -45,7 +53,9 @@ class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
         super.onViewCreated(view, savedInstanceState)
 
         val binding = FragmentAlbumAddBinding.bind(view)
+        releaseTextFieldsOnDestroyView(view)
         binding.albumAddSubtitle.text = getString(R.string.album_add_subtitle, requireArguments().getString(ARG_ARTIST_NAME))
+        setUpSearch(binding)
         setUpList(binding)
         setUpSubmitting(binding)
         setUpEvents(binding)
@@ -56,33 +66,41 @@ class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
 
         // Cancelar y la X de arriba vuelven al detalle sin guardar nada
         binding.albumAddCancelButton.setOnClickListener { findNavController().navigateUp() }
-        binding.albumAddButton.setOnClickListener { viewModel.add() }
+        binding.albumAddButton.setOnClickListener {
+            hideKeyboard(binding)
+            viewModel.add()
+        }
+    }
+
+    /** Filtra mientras se escribe. El campo recuerda lo escrito al girar, y al volver a escribirlo el ViewModel ya lo tiene. */
+    private fun setUpSearch(binding: FragmentAlbumAddBinding) {
+        binding.albumSearchInput.doAfterTextChanged { text -> viewModel.search(text.toString()) }
+        binding.albumSearchInput.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) hideKeyboard(binding)
+            actionId == EditorInfo.IME_ACTION_SEARCH
+        }
     }
 
     /**
-     * Filas con cada álbum y el elegido resaltado, y los estados de carga, vacío y error con Reintentar.
+     * Filas con cada álbum y el elegido resaltado, el conteo, y los estados de carga, vacío, sin resultados y error con Reintentar.
      * Si el artista ya no existe se dice eso en lugar del error, porque reintentar no lo arregla.
      */
     private fun setUpList(binding: FragmentAlbumAddBinding) {
-        val adapter = AlbumCandidateAdapter { candidate -> viewModel.select(candidate) }
+        val adapter = AlbumCandidateAdapter { candidate -> select(binding, candidate) }
         binding.albumAddList.layoutManager = LinearLayoutManager(requireContext())
         binding.albumAddList.adapter = adapter
         // Al elegir, la fila cambia en su lugar sin el fundido, que la hacía parpadear
         (binding.albumAddList.itemAnimator as? SimpleItemAnimator)?.supportsChangeAnimations = false
 
-        val screen = combine(
-            viewModel.state,
-            viewModel.selected,
-            viewModel.isSubmitting,
-            viewModel.artistMissing,
-            viewModel.allAlreadyAdded,
-            ::ListScreen,
-        )
-        viewLifecycleOwner.collectWhileVisible(screen) { (state, selected, submitting, artistMissing, allAlreadyAdded) ->
+        // La búsqueda va aparte porque dos búsquedas sin resultados dan la misma lista vacía y el mensaje debe mostrar la última
+        val reasons = combine(viewModel.artistMissing, viewModel.allAlreadyAdded, ::Reasons)
+        val screen = combine(viewModel.state, viewModel.selected, viewModel.isSubmitting, viewModel.query, reasons, ::ListScreen)
+        viewLifecycleOwner.collectWhileVisible(screen) { (state, selected, submitting, query, reasons) ->
+            val noResults = state is UiState.Success && state.data.isEmpty()
             when (state) {
                 UiState.Loading ->
                     binding.albumAddLoading.showLoading(getString(R.string.album_add_loading), R.layout.view_skeleton_rows)
-                UiState.Empty -> if (allAlreadyAdded) {
+                UiState.Empty -> if (reasons.allAlreadyAdded) {
                     binding.albumAddMessage.showEmpty(
                         getString(R.string.album_add_all_added_title),
                         getString(R.string.album_add_all_added_body),
@@ -95,7 +113,7 @@ class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
                         R.drawable.ic_album,
                     )
                 }
-                is UiState.Error -> if (artistMissing) {
+                is UiState.Error -> if (reasons.artistMissing) {
                     binding.albumAddMessage.showEmpty(
                         getString(R.string.album_add_artist_missing_title),
                         getString(R.string.album_add_artist_missing_body),
@@ -104,18 +122,41 @@ class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
                 } else {
                     binding.albumAddMessage.showError(getString(R.string.album_add_object), state.reason) { viewModel.retry() }
                 }
-                is UiState.Success ->
+                is UiState.Success -> {
                     adapter.submitList(state.data.map { AlbumRow(it, selected = it == selected, enabled = !submitting) })
+                    if (noResults) binding.albumAddMessage.showEmpty(
+                        getString(R.string.album_add_no_results_title),
+                        getString(R.string.album_add_no_results_body, query.trim()),
+                        R.drawable.ic_album,
+                    )
+                }
             }
+            showCount(binding, state, query, reasons.allAlreadyAdded)
 
-            // El texto y los botones se quedan en el vacío, así se puede cancelar desde ahí
+            // Buscador y botones se quedan en el vacío y sin resultados, así se puede cambiar la búsqueda o cancelar
             val showsContent = state is UiState.Success || state == UiState.Empty
             binding.albumAddHeader.isVisible = showsContent
             binding.albumAddFooter.isVisible = showsContent
             binding.albumAddLoading.root.isVisible = state == UiState.Loading
-            binding.albumAddMessage.root.isVisible = state == UiState.Empty || state is UiState.Error
-            binding.albumAddList.isVisible = state is UiState.Success
+            binding.albumAddMessage.root.isVisible = state == UiState.Empty || state is UiState.Error || noResults
+            binding.albumAddList.isVisible = state is UiState.Success && !noResults
         }
+    }
+
+    /**
+     * Sin búsqueda, cuántos álbumes hay en el catálogo, y al buscar, cuántos coinciden.
+     * Si el artista ya tiene todos no se muestra, porque «0 álbumes en el catálogo» sería falso.
+     */
+    private fun showCount(binding: FragmentAlbumAddBinding, state: UiState<List<AlbumCandidate>>, query: String, allAlreadyAdded: Boolean) {
+        val count = when (state) {
+            is UiState.Success -> state.data.size
+            UiState.Empty -> 0.takeUnless { allAlreadyAdded }
+            else -> null
+        }
+        binding.albumAddCount.isVisible = count != null
+        if (count == null) return
+        val plurals = if (query.isBlank()) R.plurals.album_list_count else R.plurals.album_add_result_count
+        binding.albumAddCount.text = resources.getQuantityString(plurals, count, count)
     }
 
     /** Mientras se envía: barra de progreso, «Agregando…» y nada se puede tocar, para no enviar dos veces. */
@@ -124,6 +165,7 @@ class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
 
         viewLifecycleOwner.collectWhileVisible(viewModel.isSubmitting) { submitting ->
             binding.albumAddSubmittingProgress.isVisible = submitting
+            binding.albumSearchField.isEnabled = !submitting
             binding.albumAddCancelButton.isEnabled = !submitting
             binding.albumAddButton.isEnabled = !submitting
             binding.albumAddButton.icon = progress.takeIf { submitting }
@@ -159,6 +201,18 @@ class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
         val navController = findNavController()
         navController.previousBackStackEntry?.savedStateHandle?.set(ADDED_ALBUM, albumId)
         navController.navigateUp()
+    }
+
+    private fun select(binding: FragmentAlbumAddBinding, candidate: AlbumCandidate) {
+        hideKeyboard(binding)
+        viewModel.select(candidate)
+    }
+
+    // Al elegir o agregar se baja el teclado para que se vean la lista y los botones
+    private fun hideKeyboard(binding: FragmentAlbumAddBinding) {
+        binding.albumSearchInput.clearFocus()
+        val keyboard = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        keyboard.hideSoftInputFromWindow(binding.albumSearchInput.windowToken, 0)
     }
 
     companion object {

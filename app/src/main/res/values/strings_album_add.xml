@@ -2,6 +2,16 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="es">
     <string name="album_add_title">Agregar álbum</string>
     <string name="album_add_subtitle">Elige el álbum que quieres agregar a %1$s.</string>
+    <string name="album_add_search_hint">Buscar álbum o intérprete</string>
+    <string name="cd_album_add_search_clear">Borrar búsqueda</string>
+    <!-- Sin búsqueda se usa «%d álbumes en el catálogo» del catálogo (HU01) -->
+    <plurals name="album_add_result_count">
+        <item quantity="one">%d resultado</item>
+        <item quantity="many">%d resultados</item>
+        <item quantity="other">%d resultados</item>
+    </plurals>
+    <string name="album_add_no_results_title">Sin resultados</string>
+    <string name="album_add_no_results_body">Ningún álbum ni intérprete coincide con %1$s.</string>
 
     <!-- «1978 · Salsa» como en el catálogo (HU01), seguido de los intérpretes: «1978 · Salsa · Rubén Blades» -->
     <string name="album_candidate_details">%1$s · %2$s</string>

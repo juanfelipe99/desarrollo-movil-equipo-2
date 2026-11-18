@@ -13,6 +13,7 @@ import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.repository.ArtistAlbumRepository
 import com.equipo2.vinilos.data.repository.DataError
 import com.equipo2.vinilos.data.repository.toDataError
+import com.equipo2.vinilos.ui.common.containsIgnoringAccents
 import com.equipo2.vinilos.ui.state.ErrorReason
 import com.equipo2.vinilos.ui.state.UiState
 import com.equipo2.vinilos.ui.state.toErrorReason
@@ -70,13 +71,19 @@ class AlbumAddViewModel(
 
     private val selectedId: StateFlow<Int?> = savedState.getStateFlow(SELECTED, null)
 
-    /**
-     * Álbumes del catálogo, con los que el artista ya tiene al final.
-     * Es [UiState.Empty] si no queda ningún álbum que se le pueda agregar.
-     */
-    val state: StateFlow<UiState<List<AlbumCandidate>>> = candidates.asStateFlow()
+    val query: StateFlow<String> = savedState.getStateFlow(QUERY, "")
 
-    /** Álbum elegido, o null si no hay ninguno. */
+    /**
+     * Álbumes del catálogo que coinciden con la búsqueda, con los que el artista ya tiene al final.
+     * Es [UiState.Empty] si no queda ningún álbum que se le pueda agregar. Si solo la búsqueda
+     * no encuentra ninguno, es un [UiState.Success] con la lista vacía.
+     */
+    val state: StateFlow<UiState<List<AlbumCandidate>>> = combine(candidates, query) { candidates, query ->
+        if (candidates !is UiState.Success) return@combine candidates
+        UiState.Success(candidates.data.filter { it.matches(query) })
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, UiState.Loading)
+
+    /** Álbum elegido, que sigue elegido aunque la búsqueda lo oculte. */
     val selected: StateFlow<AlbumCandidate?> = combine(candidates, selectedId) { _, _ -> currentSelection() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
@@ -107,6 +114,11 @@ class AlbumAddViewModel(
     }
 
     fun retry() = load()
+
+    /** Filtra por el nombre del álbum o de cualquiera de sus intérpretes, sin importar tildes ni mayúsculas. */
+    fun search(query: String) {
+        savedState[QUERY] = query
+    }
 
     /** Elige el álbum, salvo que el artista ya lo tenga o haya un envío en curso. */
     fun select(candidate: AlbumCandidate) {
@@ -175,6 +187,7 @@ class AlbumAddViewModel(
     }
 
     companion object {
+        private const val QUERY = "query"
         private const val SELECTED = "selectedAlbumId"
 
         fun factory(artistId: Int, artistType: ArtistType) = viewModelFactory {
@@ -184,6 +197,9 @@ class AlbumAddViewModel(
         }
     }
 }
+
+private fun AlbumCandidate.matches(query: String): Boolean =
+    album.name.containsIgnoringAccents(query) || album.performers.any { it.name.containsIgnoringAccents(query) }
 
 private fun Throwable.toAlbumAddFailure(): AlbumAddFailure = when {
     toDataError() is DataError.NotFound -> AlbumAddFailure.NOT_FOUND

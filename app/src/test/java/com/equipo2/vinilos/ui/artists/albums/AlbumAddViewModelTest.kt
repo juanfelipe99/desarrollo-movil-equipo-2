@@ -3,6 +3,7 @@ package com.equipo2.vinilos.ui.artists.albums
 import androidx.lifecycle.SavedStateHandle
 import com.equipo2.vinilos.data.model.AlbumCandidate
 import com.equipo2.vinilos.data.model.ArtistType
+import com.equipo2.vinilos.data.model.Performer
 import com.equipo2.vinilos.data.repository.DataError
 import com.equipo2.vinilos.support.FakeArtistAlbumRepository
 import com.equipo2.vinilos.support.FakeArtistAlbumRepository.Added
@@ -121,6 +122,109 @@ class AlbumAddViewModelTest {
         val viewModel = AlbumAddViewModel(repository, artistId = 100, artistType = ArtistType.MUSICIAN)
 
         assertFalse(viewModel.artistMissing.value)
+    }
+
+    // Búsqueda
+
+    private val ruben = Performer(100, "Rubén Blades", "", ArtistType.MUSICIAN)
+    private val willie = Performer(1, "Willie Colón", "", ArtistType.MUSICIAN)
+    private val beatles = Performer(15, "The Beatles", "", ArtistType.BAND)
+    private val abbeyRoadByBeatles = albumCandidate(173, "Abbey Road", false, beatles)
+    private val siembraByBoth = albumCandidate(178, "Siembra", false, willie, ruben)
+    private val buscandoByRuben = albumCandidate(100, "Buscando América", true, ruben)
+    private val withPerformers = listOf(abbeyRoadByBeatles, siembraByBoth, buscandoByRuben)
+
+    @Test
+    fun sinBuscar_muestraTodoElCatalogo() {
+        val viewModel = viewModelWith(withPerformers)
+
+        assertEquals("", viewModel.query.value)
+        assertEquals(UiState.Success(withPerformers), viewModel.state.value)
+    }
+
+    @Test
+    fun buscar_filtraPorElNombreDelAlbum_sinImportarTildesMayusculasNiEspacios() {
+        val viewModel = viewModelWith(withPerformers)
+
+        viewModel.search("  AMERICA ")
+
+        assertEquals(UiState.Success(listOf(buscandoByRuben)), viewModel.state.value)
+    }
+
+    @Test
+    fun buscar_filtraPorCualquieraDeSusInterpretes_yConservaElOrden() {
+        val viewModel = viewModelWith(withPerformers)
+
+        viewModel.search("ruben")
+
+        // Siembra tiene dos intérpretes y basta con que coincida uno. Buscando América sigue al final porque ya lo tiene
+        assertEquals(UiState.Success(listOf(siembraByBoth, buscandoByRuben)), viewModel.state.value)
+    }
+
+    @Test
+    fun buscar_porUnaBanda_encuentraSusAlbumes() {
+        val viewModel = viewModelWith(withPerformers)
+
+        viewModel.search("beatles")
+
+        assertEquals(UiState.Success(listOf(abbeyRoadByBeatles)), viewModel.state.value)
+    }
+
+    @Test
+    fun siLaBusquedaNoEncuentraNada_esUnaListaVaciaYNoElEstadoVacio() {
+        val viewModel = viewModelWith(withPerformers)
+
+        viewModel.search("zeppelin")
+
+        assertEquals(UiState.Success(emptyList<AlbumCandidate>()), viewModel.state.value)
+    }
+
+    @Test
+    fun borrarLaBusqueda_vuelveAMostrarTodo() {
+        val viewModel = viewModelWith(withPerformers)
+        viewModel.search("zeppelin")
+
+        viewModel.search("")
+
+        assertEquals(UiState.Success(withPerformers), viewModel.state.value)
+    }
+
+    @Test
+    fun laSeleccion_sigueAunqueLaBusquedaLaOculte_ySePuedeAgregar() {
+        val viewModel = viewModelWith(withPerformers)
+        viewModel.select(siembraByBoth)
+
+        viewModel.search("beatles")
+        viewModel.add()
+
+        assertEquals(siembraByBoth, viewModel.selected.value)
+        assertEquals(listOf(Added(100, ArtistType.MUSICIAN, 178)), repository.added)
+    }
+
+    @Test
+    fun laBusquedaYLaSeleccion_seConservanAlGirar() {
+        val savedState = SavedStateHandle()
+        viewModelWith(withPerformers, savedState = savedState).apply {
+            search("sie")
+            select(siembraByBoth)
+        }
+
+        val recreated = viewModelWith(withPerformers, savedState = savedState)
+
+        assertEquals("sie", recreated.query.value)
+        assertEquals(UiState.Success(listOf(siembraByBoth)), recreated.state.value)
+        assertEquals(siembraByBoth, recreated.selected.value)
+    }
+
+    @Test
+    fun mientrasCarga_buscarNoCambiaLaCarga() {
+        val response = CompletableDeferred<Result<List<AlbumCandidate>>>()
+        repository.candidates = { response.await() }
+        val viewModel = AlbumAddViewModel(repository, artistId = 100, artistType = ArtistType.MUSICIAN)
+
+        viewModel.search("sie")
+
+        assertEquals(UiState.Loading, viewModel.state.value)
     }
 
     // Selección

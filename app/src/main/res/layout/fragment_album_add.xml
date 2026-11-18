@@ -35,6 +35,48 @@
                     android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
                     android:textColor="@color/md_on_surface_variant"
                     tools:text="Elige el álbum que quieres agregar a Rubén Blades Bellido de Luna." />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/albumSearchField"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="@string/album_add_search_hint"
+                    app:boxBackgroundColor="@color/md_surface_container"
+                    app:boxCornerRadiusBottomEnd="28dp"
+                    app:boxCornerRadiusBottomStart="28dp"
+                    app:boxCornerRadiusTopEnd="28dp"
+                    app:boxCornerRadiusTopStart="28dp"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="2dp"
+                    app:endIconContentDescription="@string/cd_album_add_search_clear"
+                    app:endIconMode="clear_text"
+                    app:hintEnabled="false"
+                    app:startIconDrawable="@drawable/ic_search"
+                    app:startIconTint="@color/md_on_surface_variant">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/albumSearchInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/album_add_search_hint"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:textAppearance="@style/TextAppearance.Vinilos.BodyLarge" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- «13 álbumes en el catálogo» sin búsqueda, y «1 resultado» al buscar. TalkBack lo lee al cambiar -->
+                <TextView
+                    android:id="@+id/albumAddCount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:accessibilityLiveRegion="polite"
+                    android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+                    android:textColor="@color/md_on_surface_variant"
+                    tools:text="13 álbumes en el catálogo" />
             </LinearLayout>
 
             <FrameLayout
