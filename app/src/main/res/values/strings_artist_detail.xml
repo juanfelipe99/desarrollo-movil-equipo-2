@@ -28,6 +28,8 @@
         <item quantity="other">· %d álbumes</item>
     </plurals>
     <string name="artist_detail_albums_empty_body">Este artista aún no tiene álbumes registrados.</string>
+    <string name="artist_detail_albums_empty_body_collector">Este artista aún no tiene álbumes. Usa «Agregar álbum» para asociarle uno.</string>
+    <string name="artist_detail_add_album">Agregar álbum</string>
 
     <string name="artist_detail_prizes_title">Premios</string>
     <plurals name="artist_detail_prizes_count">

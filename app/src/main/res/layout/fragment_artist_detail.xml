@@ -255,33 +255,65 @@
                     </LinearLayout>
 
                     <!-- Álbumes -->
-                    <LinearLayout
+                    <!-- Si el título con su cantidad y el botón no caben en una línea, el botón pasa a la siguiente -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/albumsHeader"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp"
-                        android:gravity="center_vertical"
                         android:minHeight="48dp"
-                        android:orientation="horizontal"
                         android:paddingHorizontal="16dp">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/artist_detail_albums_title"
-                            android:textAppearance="@style/TextAppearance.Vinilos.TitleMedium"
-                            android:textColor="@color/md_on_surface" />
-
-                        <TextView
-                            android:id="@+id/albumsCount"
+                        <androidx.constraintlayout.helper.widget.Flow
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:layout_weight="1"
-                            android:ellipsize="end"
-                            android:maxLines="1"
-                            android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
-                            android:textColor="@color/md_on_surface_variant" />
-                    </LinearLayout>
+                            app:constraint_referenced_ids="albumsTitleGroup,addAlbumButton"
+                            app:flow_horizontalBias="0"
+                            app:flow_horizontalGap="8dp"
+                            app:flow_horizontalStyle="spread_inside"
+                            app:flow_verticalAlign="center"
+                            app:flow_verticalGap="4dp"
+                            app:flow_wrapMode="chain"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <LinearLayout
+                            android:id="@+id/albumsTitleGroup"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:baselineAligned="true"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/artist_detail_albums_title"
+                                android:textAppearance="@style/TextAppearance.Vinilos.TitleMedium"
+                                android:textColor="@color/md_on_surface" />
+
+                            <TextView
+                                android:id="@+id/albumsCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+                                android:textColor="@color/md_on_surface_variant" />
+                        </LinearLayout>
+
+                        <!-- Solo para el coleccionista (HU15) -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/addAlbumButton"
+                            style="@style/Widget.Vinilos.Button.SectionAction"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/artist_detail_add_album"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/albumsList"

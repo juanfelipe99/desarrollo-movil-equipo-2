@@ -45,6 +45,7 @@
 
     <string name="error_album_required">Elige un álbum.</string>
     <string name="album_add_saving">Agregando…</string>
+    <string name="snackbar_album_added">Álbum agregado</string>
 
     <string name="error_album_add_connection">No pudimos agregar el álbum. Revisa tu conexión a internet.</string>
     <string name="error_album_add_failed">No pudimos agregar el álbum. Inténtalo de nuevo.</string>

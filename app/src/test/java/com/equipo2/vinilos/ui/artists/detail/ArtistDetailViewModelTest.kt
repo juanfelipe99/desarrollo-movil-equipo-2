@@ -7,6 +7,7 @@ import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.repository.DataError
 import com.equipo2.vinilos.support.FakeArtistRepository
 import com.equipo2.vinilos.support.MainDispatcherRule
+import com.equipo2.vinilos.support.albumCandidate
 import com.equipo2.vinilos.support.band
 import com.equipo2.vinilos.support.musician
 import com.equipo2.vinilos.ui.state.ErrorReason
@@ -208,5 +209,60 @@ class ArtistDetailViewModelTest {
         val recreated = ArtistDetailViewModel(repository, 101, ArtistType.BAND, savedState)
 
         assertEquals(listOf(37), recreated.newPrizeIds.value.toList())
+    }
+
+    // Álbumes (HU15)
+
+    private fun album(id: Int, name: String) =
+        albumCandidate(id, name).album
+
+    @Test
+    fun alAgregarUnAlbum_aparecePrimero_marcadoComoNuevo_sinVolverAPedirElArtista() {
+        val newsOfTheWorld = album(176, "News of the World")
+        repository.detail = { Result.success(queen.copy(albums = listOf(newsOfTheWorld))) }
+        val viewModel = viewModel()
+
+        val siembra = album(178, "Siembra")
+        viewModel.onAlbumAdded(siembra)
+
+        assertEquals(listOf(siembra, newsOfTheWorld), (viewModel.state.value as UiState.Success).data.albums)
+        assertEquals(listOf(178), viewModel.newAlbumIds.value.toList())
+        assertEquals(1, repository.detailRequests.size)
+    }
+
+    @Test
+    fun alAgregarDosAlbumes_elUltimoQuedaPrimero() {
+        repository.detail = { Result.success(queen) }
+        val viewModel = viewModel()
+
+        viewModel.onAlbumAdded(album(178, "Siembra"))
+        viewModel.onAlbumAdded(album(100, "Buscando América"))
+
+        assertEquals(listOf(100, 178), (viewModel.state.value as UiState.Success).data.albums.map { it.id })
+        assertEquals(listOf(100, 178), viewModel.newAlbumIds.value.toList())
+    }
+
+    @Test
+    fun siElAlbumYaEstaEnLaLista_noSeRepite_peroSeMarcaComoNuevo() {
+        val siembra = album(178, "Siembra")
+        repository.detail = { Result.success(queen.copy(albums = listOf(siembra))) }
+        val viewModel = viewModel()
+
+        viewModel.onAlbumAdded(siembra)
+        viewModel.onAlbumAdded(siembra)
+
+        assertEquals(listOf(siembra), (viewModel.state.value as UiState.Success).data.albums)
+        assertEquals(listOf(178), viewModel.newAlbumIds.value.toList())
+    }
+
+    @Test
+    fun losAlbumesNuevos_seConservanSiSeRecreaLaPantalla() {
+        repository.detail = { Result.success(queen) }
+        val savedState = SavedStateHandle()
+        ArtistDetailViewModel(repository, 101, ArtistType.BAND, savedState).onAlbumAdded(album(178, "Siembra"))
+
+        val recreated = ArtistDetailViewModel(repository, 101, ArtistType.BAND, savedState)
+
+        assertEquals(listOf(178), recreated.newAlbumIds.value.toList())
     }
 }

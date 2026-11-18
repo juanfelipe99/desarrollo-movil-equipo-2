@@ -14,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.equipo2.vinilos.R
+import com.equipo2.vinilos.data.model.Album
 import com.equipo2.vinilos.data.model.AlbumCandidate
 import com.equipo2.vinilos.data.model.Artist
 import com.equipo2.vinilos.data.model.ArtistType
@@ -28,6 +29,7 @@ import com.equipo2.vinilos.ui.state.showEmpty
 import com.equipo2.vinilos.ui.state.showError
 import com.equipo2.vinilos.ui.state.showLoading
 import kotlinx.coroutines.flow.combine
+import java.time.LocalDate
 
 /** Por qué el listado puede no tener qué mostrar: el artista ya no existe o ya tiene todos los álbumes. */
 private data class Reasons(val artistMissing: Boolean, val allAlreadyAdded: Boolean)
@@ -206,7 +208,7 @@ class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
                     performerCount = event.replaced.size,
                     bandName = artistName,
                 )
-                is AlbumAddEvent.Added -> returnToArtist(event.album.id)
+                is AlbumAddEvent.Added -> returnToArtist(event.album)
                 is AlbumAddEvent.Failed -> showFailure(event.failure)
             }
         }
@@ -223,10 +225,10 @@ class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
         showSnackbar(getString(message), isError = true)
     }
 
-    /** Vuelve al detalle con el id del álbum agregado, para que lo muestre primero y marcado como «Nuevo». */
-    private fun returnToArtist(albumId: Int) {
+    /** Vuelve al detalle con el álbum agregado, que lo pone primero, lo marca como «Nuevo» y muestra «Álbum agregado». */
+    private fun returnToArtist(album: Album) {
         val navController = findNavController()
-        navController.previousBackStackEntry?.savedStateHandle?.set(ADDED_ALBUM, albumId)
+        navController.previousBackStackEntry?.savedStateHandle?.set(ADDED_ALBUM, album.toResult())
         navController.navigateUp()
     }
 
@@ -243,7 +245,7 @@ class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
     }
 
     companion object {
-        /** Clave con la que el detalle del artista recibe el id del álbum agregado. */
+        /** Clave con la que el detalle del artista recibe el álbum agregado. */
         const val ADDED_ALBUM = "addedAlbum"
 
         /** Deben coincidir con los argumentos de albumAddFragment en nav_graph.xml. */
@@ -251,6 +253,38 @@ class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
         const val ARG_ARTIST_TYPE = "artistType"
         const val ARG_ARTIST_NAME = "artistName"
 
+        private const val ALBUM_ID = "id"
+        private const val ALBUM_NAME = "name"
+        private const val ALBUM_COVER = "cover"
+        private const val ALBUM_RELEASE_DATE = "releaseDate"
+        private const val ALBUM_DESCRIPTION = "description"
+        private const val ALBUM_GENRE = "genre"
+        private const val ALBUM_RECORD_LABEL = "recordLabel"
+
         fun args(artist: Artist) = bundleOf(ARG_ARTIST_ID to artist.id, ARG_ARTIST_TYPE to artist.type.name, ARG_ARTIST_NAME to artist.name)
+
+        /**
+         * El álbum recién agregado que llegó en [ADDED_ALBUM], con lo que muestra el carrusel.
+         * Sin tracks, intérpretes ni comentarios: el detalle del álbum los pide al abrirlo.
+         */
+        fun albumOf(result: Bundle) = Album(
+            id = result.getInt(ALBUM_ID),
+            name = result.getString(ALBUM_NAME).orEmpty(),
+            cover = result.getString(ALBUM_COVER).orEmpty(),
+            releaseDate = LocalDate.parse(result.getString(ALBUM_RELEASE_DATE)),
+            description = result.getString(ALBUM_DESCRIPTION).orEmpty(),
+            genre = result.getString(ALBUM_GENRE).orEmpty(),
+            recordLabel = result.getString(ALBUM_RECORD_LABEL).orEmpty(),
+        )
+
+        private fun Album.toResult(): Bundle = bundleOf(
+            ALBUM_ID to id,
+            ALBUM_NAME to name,
+            ALBUM_COVER to cover,
+            ALBUM_RELEASE_DATE to releaseDate.toString(),
+            ALBUM_DESCRIPTION to description,
+            ALBUM_GENRE to genre,
+            ALBUM_RECORD_LABEL to recordLabel,
+        )
     }
 }
