@@ -40,4 +40,11 @@ interface ArtistApi {
         @Path("bandId") bandId: Int,
         @Body prize: NewPerformerPrizeDto,
     ): PerformerPrizeDto
+
+    // Músicos y bandas reciben álbumes en rutas distintas. La respuesta no se usa: el álbum ya se tiene del catálogo
+    @POST("musicians/{musicianId}/albums/{albumId}")
+    suspend fun addAlbumToMusician(@Path("musicianId") musicianId: Int, @Path("albumId") albumId: Int)
+
+    @POST("bands/{bandId}/albums/{albumId}")
+    suspend fun addAlbumToBand(@Path("bandId") bandId: Int, @Path("albumId") albumId: Int)
 }

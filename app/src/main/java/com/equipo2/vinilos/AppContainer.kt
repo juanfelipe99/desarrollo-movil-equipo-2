@@ -6,12 +6,15 @@ import com.equipo2.vinilos.data.local.ThemeModeLocalDataSource
 import com.equipo2.vinilos.data.local.appDataStore
 import com.equipo2.vinilos.data.network.ApiClient
 import com.equipo2.vinilos.data.network.album.AlbumServiceAdapter
+import com.equipo2.vinilos.data.network.artist.ArtistAlbumServiceAdapter
 import com.equipo2.vinilos.data.network.artist.ArtistServiceAdapter
 import com.equipo2.vinilos.data.network.collector.CollectorServiceAdapter
 import com.equipo2.vinilos.data.network.artist.BandServiceAdapter
 import com.equipo2.vinilos.data.network.artist.PrizeServiceAdapter
 import com.equipo2.vinilos.data.repository.AlbumRepository
 import com.equipo2.vinilos.data.repository.AlbumRepositoryImpl
+import com.equipo2.vinilos.data.repository.ArtistAlbumRepository
+import com.equipo2.vinilos.data.repository.ArtistAlbumRepositoryImpl
 import com.equipo2.vinilos.data.repository.ArtistRepository
 import com.equipo2.vinilos.data.repository.ArtistRepositoryImpl
 import com.equipo2.vinilos.data.repository.CollectorRepository
@@ -34,6 +37,12 @@ open class AppContainer(context: Context) {
     open val collectorRepository: CollectorRepository by lazy { CollectorRepositoryImpl(CollectorServiceAdapter(apiClient)) }
     open val bandRepository: BandRepository by lazy { BandRepositoryImpl(BandServiceAdapter(apiClient), onMembersChanged = { artistRepository.clearCache() }) }
     open val prizeRepository: PrizeRepository by lazy { PrizeRepositoryImpl(PrizeServiceAdapter(apiClient), onPrizesChanged = { artistRepository.clearCache() }) }
+    open val artistAlbumRepository: ArtistAlbumRepository by lazy {
+        ArtistAlbumRepositoryImpl(ArtistAlbumServiceAdapter(apiClient), onAlbumsChanged = {
+            artistRepository.clearCache()
+            albumRepository.clearCache()
+        })
+    }
     open val roleRepository: RoleRepository by lazy { RoleRepositoryImpl(RoleLocalDataSource(context.appDataStore)) }
     open val themeModeRepository: ThemeModeRepository by lazy { ThemeModeRepositoryImpl(ThemeModeLocalDataSource(context.appDataStore)) }
 }
