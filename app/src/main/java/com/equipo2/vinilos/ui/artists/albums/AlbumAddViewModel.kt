@@ -10,6 +10,7 @@ import com.equipo2.vinilos.VinilosApplication
 import com.equipo2.vinilos.data.model.Album
 import com.equipo2.vinilos.data.model.AlbumCandidate
 import com.equipo2.vinilos.data.model.ArtistType
+import com.equipo2.vinilos.data.model.Performer
 import com.equipo2.vinilos.data.repository.ArtistAlbumRepository
 import com.equipo2.vinilos.data.repository.DataError
 import com.equipo2.vinilos.data.repository.toDataError
@@ -43,6 +44,9 @@ enum class AlbumAddFailure {
 
 /** Lo que la pantalla debe hacer una sola vez tras tocar Agregar. */
 sealed interface AlbumAddEvent {
+
+    /** El artista es una banda y el álbum tiene otros intérpretes: hay que confirmar que los reemplazará antes de enviarlo. */
+    data class ConfirmReplace(val album: Album, val replaced: List<Performer>) : AlbumAddEvent
 
     /** El álbum quedó en el artista. El detalle lo usa para mostrarlo primero y marcado como Nuevo. */
     data class Added(val album: Album) : AlbumAddEvent
@@ -127,7 +131,10 @@ class AlbumAddViewModel(
         currentMissingSelection.value = false
     }
 
-    /** Agrega el álbum elegido. Si no hay ninguno, pide elegirlo sin llamar a la API. */
+    /**
+     * Agrega el álbum elegido, o pide confirmar el reemplazo si el artista es una banda y el álbum tiene otros intérpretes.
+     * Si no hay ninguno elegido, pide elegirlo sin llamar a la API.
+     */
     fun add() {
         if (currentSubmitting.value) return
         val candidate = currentSelection()
@@ -135,7 +142,18 @@ class AlbumAddViewModel(
             currentMissingSelection.value = true
             return
         }
-        submit(candidate)
+        val replaced = candidate.performersReplacedBy(artistId, artistType)
+        if (replaced.isEmpty()) {
+            submit(candidate)
+        } else {
+            pendingEvents.trySend(AlbumAddEvent.ConfirmReplace(candidate.album, replaced))
+        }
+    }
+
+    /** Agrega el álbum elegido sin volver a preguntar, después de confirmar el reemplazo de intérpretes. */
+    fun confirmAdd() {
+        if (currentSubmitting.value) return
+        currentSelection()?.let(::submit)
     }
 
     private fun submit(candidate: AlbumCandidate) {

@@ -36,6 +36,23 @@
                     android:textColor="@color/md_on_surface_variant"
                     tools:text="Elige el álbum que quieres agregar a Rubén Blades Bellido de Luna." />
 
+                <!-- Solo cuando el artista es una banda -->
+                <TextView
+                    android:id="@+id/albumAddBandNotice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_notice"
+                    android:drawablePadding="12dp"
+                    android:padding="16dp"
+                    android:text="@string/album_add_band_notice"
+                    android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+                    android:textColor="@color/md_on_primary_container"
+                    android:visibility="gone"
+                    app:drawableStartCompat="@drawable/ic_info"
+                    app:drawableTint="@color/md_on_primary_container"
+                    tools:visibility="visible" />
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/albumSearchField"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"

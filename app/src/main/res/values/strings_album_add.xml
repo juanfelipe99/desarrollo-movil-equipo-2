@@ -28,6 +28,21 @@
     <string name="album_add_artist_missing_title">Este artista ya no existe</string>
     <string name="album_add_artist_missing_body">Puede que lo hayan eliminado. Cierra esta pantalla para volver.</string>
 
+    <!-- Reemplazo de intérpretes al agregar a una banda (T5) -->
+    <string name="album_add_band_notice">Al agregar un álbum a una banda, la banda reemplaza a los intérpretes que tenga el álbum.</string>
+    <string name="album_candidate_replaces">Se reemplazará a %1$s</string>
+    <!-- Une los nombres: «Willie Colón y Rubén Blades», o «A, B y C» -->
+    <string name="performer_names_separator">", "</string>
+    <string name="performer_names_last">%1$s y %2$s</string>
+    <string name="album_replace_title">¿Reemplazar intérpretes?</string>
+    <!-- %1$s el álbum, %2$s los intérpretes que tiene, %3$s la banda -->
+    <plurals name="album_replace_body">
+        <item quantity="one">%1$s tiene como intérprete a %2$s. Si lo agregas a %3$s, el álbum quedará solo con %3$s como intérprete.</item>
+        <item quantity="many">%1$s tiene como intérpretes a %2$s. Si lo agregas a %3$s, el álbum quedará solo con %3$s como intérprete.</item>
+        <item quantity="other">%1$s tiene como intérpretes a %2$s. Si lo agregas a %3$s, el álbum quedará solo con %3$s como intérprete.</item>
+    </plurals>
+    <string name="album_replace_confirm">Agregar y reemplazar</string>
+
     <string name="error_album_required">Elige un álbum.</string>
     <string name="album_add_saving">Agregando…</string>
 

@@ -41,20 +41,26 @@ private data class ListScreen(
     val reasons: Reasons,
 )
 
-/** Elegir el álbum que se agrega a un músico o a una banda (HU15): buscador, lista de selección única y «Elige un álbum». */
+/**
+ * Elegir el álbum que se agrega a un músico o a una banda (HU15): buscador, lista de selección única y «Elige un álbum».
+ * Con una banda, avisa que reemplaza a los intérpretes del álbum y pide confirmarlo antes de enviar.
+ */
 class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
 
-    private val viewModel: AlbumAddViewModel by viewModels {
-        val args = requireArguments()
-        AlbumAddViewModel.factory(args.getInt(ARG_ARTIST_ID), ArtistType.valueOf(requireNotNull(args.getString(ARG_ARTIST_TYPE))))
-    }
+    private val artistId: Int by lazy { requireArguments().getInt(ARG_ARTIST_ID) }
+    private val artistType: ArtistType by lazy { ArtistType.valueOf(requireNotNull(requireArguments().getString(ARG_ARTIST_TYPE))) }
+    private val artistName: String by lazy { requireArguments().getString(ARG_ARTIST_NAME).orEmpty() }
+
+    private val viewModel: AlbumAddViewModel by viewModels { AlbumAddViewModel.factory(artistId, artistType) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val binding = FragmentAlbumAddBinding.bind(view)
         releaseTextFieldsOnDestroyView(view)
-        binding.albumAddSubtitle.text = getString(R.string.album_add_subtitle, requireArguments().getString(ARG_ARTIST_NAME))
+        binding.albumAddSubtitle.text = getString(R.string.album_add_subtitle, artistName)
+        // Al agregar a una banda, la banda reemplaza a los intérpretes del álbum, así que se avisa desde el principio
+        binding.albumAddBandNotice.isVisible = artistType == ArtistType.BAND
         setUpSearch(binding)
         setUpList(binding)
         setUpSubmitting(binding)
@@ -123,7 +129,17 @@ class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
                     binding.albumAddMessage.showError(getString(R.string.album_add_object), state.reason) { viewModel.retry() }
                 }
                 is UiState.Success -> {
-                    adapter.submitList(state.data.map { AlbumRow(it, selected = it == selected, enabled = !submitting) })
+                    adapter.submitList(
+                        state.data.map { candidate ->
+                            val isSelected = candidate == selected
+                            AlbumRow(
+                                candidate,
+                                selected = isSelected,
+                                enabled = !submitting,
+                                replaced = if (isSelected) candidate.performersReplacedBy(artistId, artistType) else emptyList(),
+                            )
+                        },
+                    )
                     if (noResults) binding.albumAddMessage.showEmpty(
                         getString(R.string.album_add_no_results_title),
                         getString(R.string.album_add_no_results_body, query.trim()),
@@ -173,12 +189,23 @@ class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
         }
     }
 
-    /** Si se agregó vuelve al detalle con el álbum, y si falló avisa encima de los botones y conserva el elegido. */
+    /**
+     * Si la banda reemplazará intérpretes se pide confirmar, y al aceptar se envía sin volver a preguntar.
+     * Si se agregó vuelve al detalle con el álbum, y si falló avisa encima de los botones y conserva el elegido.
+     */
     private fun setUpEvents(binding: FragmentAlbumAddBinding) {
+        AlbumReplaceDialog.onReplaceConfirmed(this) { viewModel.confirmAdd() }
         keepSnackbarsAbove(binding.albumAddFooter)
 
         viewLifecycleOwner.collectWhileVisible(viewModel.events) { event ->
             when (event) {
+                is AlbumAddEvent.ConfirmReplace -> AlbumReplaceDialog.show(
+                    host = this,
+                    albumName = event.album.name,
+                    performers = requireContext().performerNames(event.replaced),
+                    performerCount = event.replaced.size,
+                    bandName = artistName,
+                )
                 is AlbumAddEvent.Added -> returnToArtist(event.album.id)
                 is AlbumAddEvent.Failed -> showFailure(event.failure)
             }

@@ -74,6 +74,22 @@
                 android:textColor="@color/md_on_surface_variant"
                 tools:text="1978 · Salsa · Rubén Blades" />
 
+            <!-- Solo en el álbum elegido cuando el artista es una banda y el álbum tiene otros intérpretes -->
+            <TextView
+                android:id="@+id/albumCandidateReplaces"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:drawablePadding="6dp"
+                android:gravity="center_vertical"
+                android:textAppearance="@style/TextAppearance.Vinilos.LabelMedium.SemiBold"
+                android:textColor="@color/md_on_surface"
+                android:visibility="gone"
+                app:drawableStartCompat="@drawable/ic_warning"
+                app:drawableTint="@color/md_on_surface"
+                tools:text="Se reemplazará a Rubén Blades"
+                tools:visibility="visible" />
+
             <!-- Solo en los álbumes que el artista ya tiene -->
             <TextView
                 android:id="@+id/albumCandidateAlreadyAdded"

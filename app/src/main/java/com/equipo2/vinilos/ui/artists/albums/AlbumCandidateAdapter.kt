@@ -10,13 +10,18 @@ import androidx.recyclerview.widget.RecyclerView
 import coil3.load
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.data.model.AlbumCandidate
+import com.equipo2.vinilos.data.model.Performer
 import com.equipo2.vinilos.databinding.ItemAlbumCandidateBinding
 
-/** Fila del listado: el álbum, si es el elegido y si se puede tocar mientras no haya un envío en curso. */
+/**
+ * Fila del listado: el álbum, si es el elegido y si se puede tocar mientras no haya un envío en curso.
+ * [replaced] son los intérpretes que perdería el álbum elegido al agregarlo a una banda; en las demás filas va vacío.
+ */
 data class AlbumRow(
     val candidate: AlbumCandidate,
     val selected: Boolean,
     val enabled: Boolean,
+    val replaced: List<Performer> = emptyList(),
 )
 
 /** Lista de selección única. Al tocar un álbum que se puede agregar avisa con él. */
@@ -53,6 +58,13 @@ class AlbumCandidateAdapter(
                 context.getString(R.string.album_list_subtitle, album.releaseDate.year, album.genre),
                 performers,
             )
+
+            // El aviso de a quién reemplaza solo acompaña al álbum elegido
+            binding.albumCandidateReplaces.isVisible = row.replaced.isNotEmpty()
+            if (row.replaced.isNotEmpty()) {
+                binding.albumCandidateReplaces.text =
+                    context.getString(R.string.album_candidate_replaces, context.performerNames(row.replaced))
+            }
 
             binding.albumCandidateRadio.isChecked = row.selected
             binding.root.isSelected = row.selected

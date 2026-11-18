@@ -325,6 +325,65 @@ class AlbumAddViewModelTest {
         assertEquals(abbeyRoad, viewModel.selected.value)
     }
 
+    // Reemplazo de intérpretes en una banda
+
+    @Test
+    fun aUnaBanda_unAlbumConOtrosInterpretes_pideConfirmarAntesDeEnviar() = runTest {
+        val viewModel = viewModelWith(withPerformers, type = ArtistType.BAND)
+        viewModel.select(siembraByBoth)
+
+        viewModel.add()
+
+        assertEquals(AlbumAddEvent.ConfirmReplace(siembraByBoth.album, listOf(willie, ruben)), viewModel.events.first())
+        assertTrue(repository.added.isEmpty())
+        assertFalse(viewModel.isSubmitting.value)
+
+        viewModel.confirmAdd()
+        assertEquals(listOf(Added(100, ArtistType.BAND, 178)), repository.added)
+        assertTrue(viewModel.isSubmitting.value)
+    }
+
+    @Test
+    fun aUnaBanda_unAlbumSinInterpretes_seEnviaSinPreguntar() {
+        val viewModel = viewModelWith(type = ArtistType.BAND)
+        viewModel.select(abbeyRoad)
+
+        viewModel.add()
+
+        assertEquals(listOf(Added(100, ArtistType.BAND, 173)), repository.added)
+    }
+
+    @Test
+    fun aUnMusico_unAlbumConInterpretes_seEnviaSinPreguntar() {
+        val viewModel = viewModelWith(withPerformers, type = ArtistType.MUSICIAN)
+        viewModel.select(siembraByBoth)
+
+        viewModel.add()
+
+        assertEquals(listOf(Added(100, ArtistType.MUSICIAN, 178)), repository.added)
+    }
+
+    @Test
+    fun confirmarSinElegir_noEnviaNada() {
+        val viewModel = viewModelWith(type = ArtistType.BAND)
+
+        viewModel.confirmAdd()
+
+        assertTrue(repository.added.isEmpty())
+    }
+
+    @Test
+    fun mientrasSeEnvia_confirmarOtraVezNoEnviaDosVeces() {
+        val viewModel = viewModelWith(withPerformers, type = ArtistType.BAND)
+        viewModel.select(siembraByBoth)
+        viewModel.confirmAdd()
+
+        viewModel.confirmAdd()
+        viewModel.add()
+
+        assertEquals(1, repository.added.size)
+    }
+
     @Test
     fun siLaApiLoAgrega_avisaConElAlbum() = runTest {
         val viewModel = viewModelWith()
