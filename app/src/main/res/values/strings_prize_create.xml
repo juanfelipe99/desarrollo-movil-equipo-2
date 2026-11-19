@@ -16,4 +16,8 @@
     <string name="error_prize_name_required">Escribe el nombre del premio.</string>
     <string name="error_prize_organization_required">Escribe la organización que otorga el premio.</string>
     <string name="error_prize_description_required">Escribe una descripción del premio.</string>
+
+    <string name="prize_create_saving">Creando…</string>
+    <string name="snackbar_prize_created">Premio creado</string>
+    <string name="error_prize_create_failed">No pudimos crear el premio. Inténtalo de nuevo.</string>
 </resources>
