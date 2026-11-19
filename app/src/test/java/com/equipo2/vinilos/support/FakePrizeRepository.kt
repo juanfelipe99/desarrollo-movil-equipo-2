@@ -2,6 +2,7 @@ package com.equipo2.vinilos.support
 
 import com.equipo2.vinilos.data.model.ArtistPrize
 import com.equipo2.vinilos.data.model.ArtistType
+import com.equipo2.vinilos.data.model.NewPrize
 import com.equipo2.vinilos.data.model.Prize
 import com.equipo2.vinilos.data.model.PrizeCandidate
 import com.equipo2.vinilos.data.repository.PrizeRepository
@@ -34,6 +35,17 @@ class FakePrizeRepository : PrizeRepository {
     override suspend fun addPrize(artistId: Int, type: ArtistType, prize: Prize, date: LocalDate): Result<ArtistPrize> {
         added += Added(artistId, type, prize, date)
         return addResponse.await()
+    }
+
+    /** Premios que se pidió crear, en orden. */
+    val created = mutableListOf<NewPrize>()
+
+    /** Respuesta de la próxima creación, que la prueba completa cuando quiera. */
+    var createResponse = CompletableDeferred<Result<Prize>>()
+
+    override suspend fun createPrize(prize: NewPrize): Result<Prize> {
+        created += prize
+        return createResponse.await()
     }
 }
 

@@ -1,6 +1,7 @@
 package com.equipo2.vinilos.ui.artists.prizes.create
 
 import com.equipo2.vinilos.R
+import com.equipo2.vinilos.data.model.NewPrize
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -33,6 +34,13 @@ class PrizeFormTest {
         val errors = valid.copy(name = "   ", organization = "\t", description = " \n ").errors()
 
         assertEquals(PrizeField.entries, errors.keys.toList())
+    }
+
+    @Test
+    fun toNewPrize_quitaLosEspaciosDeLosExtremos() {
+        val prize = PrizeForm(name = "  Premio Gardel ", organization = "\tCAPIF", description = " Premio argentino.\n").toNewPrize()
+
+        assertEquals(NewPrize("Premio Gardel", "CAPIF", "Premio argentino."), prize)
     }
 
     @Test

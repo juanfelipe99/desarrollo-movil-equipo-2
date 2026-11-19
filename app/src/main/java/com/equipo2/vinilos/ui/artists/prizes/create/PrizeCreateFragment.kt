@@ -16,7 +16,7 @@ import com.google.android.material.textfield.TextInputLayout
 /** Formulario para crear un premio (HU13). */
 class PrizeCreateFragment : Fragment(R.layout.fragment_prize_create) {
 
-    private val viewModel: PrizeCreateViewModel by viewModels()
+    private val viewModel: PrizeCreateViewModel by viewModels { PrizeCreateViewModel.Factory }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

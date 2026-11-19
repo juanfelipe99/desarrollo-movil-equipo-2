@@ -18,6 +18,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.data.model.ArtistPrize
 import com.equipo2.vinilos.data.model.ArtistType
+import com.equipo2.vinilos.data.model.NewPrize
 import com.equipo2.vinilos.data.model.Prize
 import com.equipo2.vinilos.data.model.PrizeCandidate
 import com.equipo2.vinilos.data.repository.PrizeRepository
@@ -74,6 +75,9 @@ class InMemoryPrizeRepository(candidates: List<PrizeCandidate>) : PrizeRepositor
         addFailures.getOrNull(added.size - 1)?.let { return Result.failure(it) }
         return Result.success(ArtistPrize(1_000 + added.size, prize.name, prize.organization, date))
     }
+
+    // Las pruebas de HU14 no crean premios
+    override suspend fun createPrize(prize: NewPrize): Result<Prize> = Result.failure(UnsupportedOperationException())
 }
 
 /** Entra con el rol, abre la pestaña Artistas y el detalle del artista. */
