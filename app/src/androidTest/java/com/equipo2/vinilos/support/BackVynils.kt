@@ -67,6 +67,18 @@ object BackVynils {
         request("musicians/$musicianId/albums/$albumId", "POST", "")
     }
 
+    /** Asocia el álbum a la banda, que reemplaza a los intérpretes que tuviera (HU15). */
+    fun addAlbumToBand(bandId: Int, albumId: Int) {
+        // Sin cuerpo, pero el servidor publicado exige el Content-Length
+        request("bands/$bandId/albums/$albumId", "POST", "")
+    }
+
+    /** Nombres de los intérpretes del álbum, músicos o bandas, en orden alfabético. */
+    fun albumPerformerNames(albumId: Int): List<String> {
+        val performers = JSONObject(request("albums/$albumId", "GET")).optJSONArray("performers") ?: JSONArray()
+        return List(performers.length()) { performers.getJSONObject(it).getString("name") }.sorted()
+    }
+
     /** Crea una banda de prueba sin integrantes y devuelve su id. */
     fun createBand(name: String): Int {
         val band = JSONObject()
