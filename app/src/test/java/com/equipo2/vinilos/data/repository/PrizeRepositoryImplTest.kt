@@ -2,6 +2,7 @@ package com.equipo2.vinilos.data.repository
 
 import com.equipo2.vinilos.data.model.ArtistPrize
 import com.equipo2.vinilos.data.model.ArtistType
+import com.equipo2.vinilos.data.model.NewPrize
 import com.equipo2.vinilos.data.model.Prize
 import com.equipo2.vinilos.data.network.ApiClient
 import com.equipo2.vinilos.data.network.artist.PrizeServiceAdapter
@@ -162,7 +163,71 @@ class PrizeRepositoryImplTest {
         assertEquals(0, changes)
     }
 
+    // Creación (HU13)
+
+    private val gardel = NewPrize("Premio Gardel", "CAPIF", "Reconoce a los mejores artistas de música en español")
+
+    @Test
+    fun createPrize_enviaLosTresCampos_yDevuelveElPremioConSuId() = runTest {
+        server.respond("prizes", CREATED_PRIZE_JSON)
+
+        val prize = repository.createPrize(gardel).getOrThrow()
+
+        assertEquals(listOf("prizes"), server.requests)
+        assertEquals(
+            """{"name":"Premio Gardel","organization":"CAPIF","description":"Reconoce a los mejores artistas de música en español"}""",
+            server.bodies["prizes"],
+        )
+        assertEquals(Prize(205, "Premio Gardel", "CAPIF"), prize)
+    }
+
+    @Test
+    fun createPrize_siLaApiRechazaLosDatos_devuelveLaSolicitudRechazada() = runTest {
+        // Así responde BackVynils cuando la validación con Joi falla
+        server.respond(
+            "prizes",
+            """{"statusCode":400,"message":"ValidationError: \"name\" is not allowed to be empty"}""",
+            code = 400,
+        )
+
+        val error = repository.createPrize(gardel).exceptionOrNull()
+
+        assertEquals(400, (error as DataError.Request).code)
+    }
+
+    @Test
+    fun createPrize_siElServidorFalla_devuelveErrorDelServidor() = runTest {
+        server.respond("prizes", """{"message":"Internal error"}""", code = 500)
+
+        assertTrue(repository.createPrize(gardel).exceptionOrNull() is DataError.Server)
+    }
+
+    @Test
+    fun createPrize_sinServidor_devuelveErrorDeRed() = runTest {
+        val freePort = ServerSocket(0).use { it.localPort }
+        val offline = repositoryFor("http://127.0.0.1:$freePort/")
+
+        assertTrue(offline.createPrize(gardel).exceptionOrNull() is DataError.Network)
+    }
+
+    @Test
+    fun createPrize_noAvisaQueLosPremiosCambiaron() = runTest {
+        var changes = 0
+        val repository = repositoryFor(server.baseUrl) { changes++ }
+        server.respond("prizes", CREATED_PRIZE_JSON)
+
+        repository.createPrize(gardel).getOrThrow()
+
+        assertEquals(0, changes)
+    }
+
     private companion object {
+        // El premio guardado vuelve sin la lista de entregas
+        const val CREATED_PRIZE_JSON = """
+            {"name": "Premio Gardel", "organization": "CAPIF",
+             "description": "Reconoce a los mejores artistas de música en español", "id": 205}
+        """
+
         // Así responde BackVynils: cada premio trae sus entregas, sin decir a quién, y cada artista trae las suyas
         const val PRIZES_JSON = """
             [

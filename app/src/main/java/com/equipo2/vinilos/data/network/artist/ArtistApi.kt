@@ -22,6 +22,10 @@ interface ArtistApi {
     @GET("prizes")
     suspend fun getPrizes(): List<PrizeDto>
 
+    // Responde el premio creado, con su id y sin entregas
+    @POST("prizes")
+    suspend fun createPrize(@Body prize: NewPrizeDto): PrizeDto
+
     // Si el músico estaba en otra banda, la API lo cambia a esta. La respuesta es la banda, que no se usa
     @POST("bands/{bandId}/musicians/{musicianId}")
     suspend fun addMusicianToBand(@Path("bandId") bandId: Int, @Path("musicianId") musicianId: Int)

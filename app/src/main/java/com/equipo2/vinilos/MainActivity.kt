@@ -207,6 +207,10 @@ class MainActivity : AppCompatActivity() {
             R.id.albumMemberAddFragment,
             R.id.prizeAddFragment,
             R.id.albumPrizeAddFragment,
+            // Crear premio se abre desde Agregar premio en las tres pestañas (HU13)
+            R.id.prizeCreateFragment,
+            R.id.albumPrizeCreateFragment,
+            R.id.collectorPrizeCreateFragment,
             R.id.albumAddFragment,
             R.id.albumAlbumAddFragment,
             R.id.collectorAlbumAddFragment,

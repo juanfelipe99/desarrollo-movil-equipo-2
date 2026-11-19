@@ -78,6 +78,9 @@ class PrizeAddViewModel(
 
     val selectedPrizeId: StateFlow<Int?> = savedState.getStateFlow(SELECTED, null)
 
+    /** Ids de los premios creados desde esta pantalla (HU13), el más reciente primero. Van arriba y se marcan como «Nuevo». */
+    val newPrizeIds: StateFlow<IntArray> = savedState.getStateFlow(NEW_PRIZE_IDS, IntArray(0))
+
     val date: StateFlow<LocalDate?> = currentDate.asStateFlow()
 
     /** Se tocó Guardar sin elegir un premio. Se quita al elegir uno. */
@@ -115,6 +118,24 @@ class PrizeAddViewModel(
         if (currentSaving.value) return
         savedState[SELECTED] = candidate.prize.id
         currentPrizeMissing.value = false
+    }
+
+    /**
+     * Pone el premio recién creado primero, lo elige y lo marca como «Nuevo», sin volver a pedir el listado.
+     * Si el listado estaba vacío, pasa a tener solo ese premio.
+     */
+    fun onPrizeCreated(prize: Prize) {
+        savedState[NEW_PRIZE_IDS] = intArrayOf(prize.id) + newPrizeIds.value.filter { it != prize.id }
+        savedState[SELECTED] = prize.id
+        currentPrizeMissing.value = false
+
+        val current = when (val state = candidates.value) {
+            is UiState.Success -> state.data
+            UiState.Empty -> emptyList()
+            // Si está cargando, el listado que llegue ya lo trae
+            else -> return
+        }
+        show(current.filter { it.prize.id != prize.id } + PrizeCandidate(prize))
     }
 
     fun setDate(date: LocalDate) {
@@ -180,7 +201,15 @@ class PrizeAddViewModel(
     private fun show(list: List<PrizeCandidate>) {
         // Si el premio elegido ya no está, se suelta la selección
         if (list.none { it.prize.id == selectedPrizeId.value }) savedState[SELECTED] = null
-        candidates.value = if (list.isEmpty()) UiState.Empty else UiState.Success(list)
+        candidates.value = if (list.isEmpty()) UiState.Empty else UiState.Success(newFirst(list))
+    }
+
+    /** Los premios creados aquí van arriba, el más reciente primero, y el resto queda en el orden en que llegó. */
+    private fun newFirst(list: List<PrizeCandidate>): List<PrizeCandidate> {
+        val newIds = newPrizeIds.value
+        if (newIds.isEmpty()) return list
+        val (created, rest) = list.partition { it.prize.id in newIds }
+        return created.sortedBy { newIds.indexOf(it.prize.id) } + rest
     }
 
     private fun currentSelection(): PrizeCandidate? {
@@ -203,6 +232,7 @@ class PrizeAddViewModel(
     companion object {
         private const val SELECTED = "selectedPrizeId"
         private const val DATE = "premiationDate"
+        private const val NEW_PRIZE_IDS = "newPrizeIds"
 
         fun factory(artistId: Int, artistType: ArtistType) = viewModelFactory {
             initializer {
