@@ -2,6 +2,7 @@ package com.equipo2.vinilos.data.network.artist
 
 import com.equipo2.vinilos.data.model.ArtistPrize
 import com.equipo2.vinilos.data.model.ArtistType
+import com.equipo2.vinilos.data.model.NewPrize
 import com.equipo2.vinilos.data.model.Prize
 import com.equipo2.vinilos.data.model.PrizeCandidate
 import com.equipo2.vinilos.data.network.ApiClient
@@ -25,6 +26,8 @@ class PrizeServiceAdapter(apiClient: ApiClient) {
         }
         prizeCandidates(prizes.await(), received.await())
     }
+
+    suspend fun createPrize(prize: NewPrize): Prize = api.createPrize(prize.toRequest()).toPrize()
 
     /** Entrega el premio al artista en esa fecha. La API responde con la entrega, de la que se usa el id. */
     suspend fun addPrize(artistId: Int, type: ArtistType, prize: Prize, date: LocalDate): ArtistPrize {

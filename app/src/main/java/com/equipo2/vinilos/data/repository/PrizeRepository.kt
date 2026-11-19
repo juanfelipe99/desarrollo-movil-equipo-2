@@ -2,6 +2,7 @@ package com.equipo2.vinilos.data.repository
 
 import com.equipo2.vinilos.data.model.ArtistPrize
 import com.equipo2.vinilos.data.model.ArtistType
+import com.equipo2.vinilos.data.model.NewPrize
 import com.equipo2.vinilos.data.model.Prize
 import com.equipo2.vinilos.data.model.PrizeCandidate
 import com.equipo2.vinilos.data.network.artist.PrizeServiceAdapter
@@ -18,6 +19,9 @@ interface PrizeRepository {
      * y si la API no acepta la fecha, con [DataError.Request].
      */
     suspend fun addPrize(artistId: Int, type: ArtistType, prize: Prize, date: LocalDate): Result<ArtistPrize>
+
+    /** Crea el premio en el catálogo y lo devuelve con su id. Si la API no acepta los datos, falla con [DataError.Request]. */
+    suspend fun createPrize(prize: NewPrize): Result<Prize>
 }
 
 /**
@@ -33,4 +37,8 @@ class PrizeRepositoryImpl(
 
     override suspend fun addPrize(artistId: Int, type: ArtistType, prize: Prize, date: LocalDate): Result<ArtistPrize> =
         resultOf { serviceAdapter.addPrize(artistId, type, prize, date) }.onSuccess { onPrizesChanged() }
+
+    // Un premio recién creado no se ha entregado a nadie, así que ningún detalle de artista guardado cambia
+    override suspend fun createPrize(prize: NewPrize): Result<Prize> =
+        resultOf { serviceAdapter.createPrize(prize) }
 }

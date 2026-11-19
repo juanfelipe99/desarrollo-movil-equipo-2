@@ -1,5 +1,6 @@
 package com.equipo2.vinilos.data.network.artist
 
+import com.equipo2.vinilos.data.model.NewPrize
 import com.equipo2.vinilos.data.model.Prize
 import com.equipo2.vinilos.data.model.PrizeCandidate
 import com.equipo2.vinilos.data.model.byName
@@ -9,6 +10,12 @@ import kotlinx.serialization.Serializable
 /** Cuerpo para entregar un premio a un artista. Sin la fecha la API responde 500. */
 @Serializable
 data class NewPerformerPrizeDto(val premiationDate: String)
+
+/** Cuerpo para crear un premio. La API valida que los tres sean texto, pero acepta uno con solo espacios. */
+@Serializable
+data class NewPrizeDto(val name: String, val organization: String, val description: String)
+
+internal fun NewPrize.toRequest() = NewPrizeDto(name, organization, description)
 
 internal fun PrizeDto.toPrize() = Prize(id, name, organization)
 
