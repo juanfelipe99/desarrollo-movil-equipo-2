@@ -3,6 +3,7 @@
     <string name="prize_add_title">Agregar premio</string>
     <string name="prize_add_subtitle">Elige el premio que recibió %1$s y la fecha en que lo recibió.</string>
     <string name="prize_add_group_title">Premio *</string>
+    <string name="prize_add_create_new">Crear premio nuevo</string>
 
     <!-- «Ya lo recibió el 10 de diciembre de 1978.» o, con varias fechas, «el … y el …» -->
     <string name="prize_already_received">Ya lo recibió %1$s. Puedes agregarlo otra vez con otra fecha.</string>

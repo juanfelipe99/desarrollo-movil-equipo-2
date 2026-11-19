@@ -15,9 +15,12 @@ import com.equipo2.vinilos.data.model.ArtistPrize
 import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.model.PrizeCandidate
 import com.equipo2.vinilos.databinding.FragmentPrizeAddBinding
+import com.equipo2.vinilos.ui.artists.prizes.create.PrizeCreateFragment
 import com.equipo2.vinilos.ui.common.buttonProgress
+import com.equipo2.vinilos.ui.common.collectResult
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.keepSnackbarsAbove
+import com.equipo2.vinilos.ui.common.navigateIfPossible
 import com.equipo2.vinilos.ui.common.reconnectDatePicker
 import com.equipo2.vinilos.ui.common.releaseTextFieldsOnDestroyView
 import com.equipo2.vinilos.ui.common.showError
@@ -32,12 +35,13 @@ import com.equipo2.vinilos.ui.state.showLoading
 import kotlinx.coroutines.flow.combine
 import java.time.LocalDate
 
-/** Lo que muestra el listado: los premios, el elegido, si se está enviando y si el artista ya no existe. */
+/** Lo que muestra el listado: los premios, el elegido, si se está enviando, si el artista ya no existe y los recién creados. */
 private data class ListScreen(
     val state: UiState<List<PrizeCandidate>>,
     val selectedId: Int?,
     val saving: Boolean,
     val artistMissing: Boolean,
+    val newIds: IntArray,
 )
 
 /** Elegir el premio que recibió un artista y la fecha en que lo recibió (HU14). */
@@ -60,6 +64,7 @@ class PrizeAddFragment : Fragment(R.layout.fragment_prize_add) {
         setUpErrors(binding)
         setUpSaving(binding)
         setUpEvents(binding)
+        setUpCreatePrize(binding)
 
         binding.prizeCancelButton.setOnClickListener { findNavController().navigateUp() }
         binding.prizeSaveButton.setOnClickListener { save(binding) }
@@ -76,8 +81,10 @@ class PrizeAddFragment : Fragment(R.layout.fragment_prize_add) {
         // Al elegir, la fila cambia en su lugar sin el fundido, que la hacía parpadear
         (binding.prizeList.itemAnimator as? SimpleItemAnimator)?.supportsChangeAnimations = false
 
-        val screen = combine(viewModel.state, viewModel.selectedPrizeId, viewModel.isSaving, viewModel.artistMissing, ::ListScreen)
-        viewLifecycleOwner.collectWhileVisible(screen) { (state, selectedId, saving, artistMissing) ->
+        val screen = combine(
+            viewModel.state, viewModel.selectedPrizeId, viewModel.isSaving, viewModel.artistMissing, viewModel.newPrizeIds, ::ListScreen,
+        )
+        viewLifecycleOwner.collectWhileVisible(screen) { (state, selectedId, saving, artistMissing, newIds) ->
             when (state) {
                 UiState.Loading ->
                     binding.prizeLoading.showLoading(getString(R.string.prize_add_loading), R.layout.view_skeleton_rows)
@@ -94,7 +101,13 @@ class PrizeAddFragment : Fragment(R.layout.fragment_prize_add) {
                     val last = state.data.lastIndex
                     adapter.submitList(
                         state.data.mapIndexed { index, candidate ->
-                            PrizeRow(candidate, selected = candidate.prize.id == selectedId, enabled = !saving, isLast = index == last)
+                            PrizeRow(
+                                candidate,
+                                selected = candidate.prize.id == selectedId,
+                                enabled = !saving,
+                                isLast = index == last,
+                                isNew = candidate.prize.id in newIds,
+                            )
                         },
                     )
                 }
@@ -138,6 +151,7 @@ class PrizeAddFragment : Fragment(R.layout.fragment_prize_add) {
             binding.prizeSavingProgress.isVisible = saving
             binding.premiationDateField.isEnabled = !saving
             binding.prizeCancelButton.isEnabled = !saving
+            binding.prizeCreateButton.isEnabled = !saving
             binding.prizeSaveButton.isEnabled = !saving
             binding.prizeSaveButton.icon = progress.takeIf { saving }
             binding.prizeSaveButton.setText(if (saving) R.string.prize_add_saving else R.string.action_save)
@@ -153,6 +167,20 @@ class PrizeAddFragment : Fragment(R.layout.fragment_prize_add) {
                 is PrizeAddEvent.Added -> returnToArtist(event.prize)
                 is PrizeAddEvent.Failed -> showFailure(binding, event.failure)
             }
+        }
+    }
+
+    /**
+     * «Crear premio nuevo» abre Crear premio (HU13). Al volver con el premio creado, aparece primero, elegido y marcado
+     * como «Nuevo», con el aviso «Premio creado».
+     */
+    private fun setUpCreatePrize(binding: FragmentPrizeAddBinding) {
+        binding.prizeCreateButton.setOnClickListener { findNavController().navigateIfPossible(R.id.action_prizeAdd_to_prizeCreate) }
+
+        collectResult<Bundle>(PrizeCreateFragment.CREATED_PRIZE) { created ->
+            viewModel.onPrizeCreated(PrizeCreateFragment.prizeOf(created))
+            showSnackbar(getString(R.string.snackbar_prize_created))
+            scrollTo(binding, null)
         }
     }
 

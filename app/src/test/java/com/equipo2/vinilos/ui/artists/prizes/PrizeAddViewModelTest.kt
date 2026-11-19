@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.data.model.ArtistPrize
 import com.equipo2.vinilos.data.model.ArtistType
+import com.equipo2.vinilos.data.model.Prize
 import com.equipo2.vinilos.data.model.PrizeCandidate
 import com.equipo2.vinilos.data.repository.DataError
 import com.equipo2.vinilos.support.FakePrizeRepository
@@ -316,6 +317,82 @@ class PrizeAddViewModelTest {
 
         viewModel.setDate(awardDate.plusDays(1))
         assertNull(viewModel.dateError.value)
+    }
+
+    // Premio creado desde Crear premio (HU13)
+
+    private val latinGrammy = Prize(205, "Latin Grammy", "Academia Latina")
+
+    @Test
+    fun alCrearUnPremio_quedaPrimero_elegido_yMarcadoComoNuevo_sinVolverAPedirElListado() {
+        val viewModel = viewModelWith()
+
+        viewModel.onPrizeCreated(latinGrammy)
+
+        assertEquals(UiState.Success(listOf(PrizeCandidate(latinGrammy)) + all), viewModel.state.value)
+        assertEquals(205, viewModel.selectedPrizeId.value)
+        assertEquals(listOf(205), viewModel.newPrizeIds.value.toList())
+        assertEquals(1, repository.candidateRequests.size)
+    }
+
+    @Test
+    fun conElCatalogoVacio_elPremioCreadoEsElUnico() {
+        val viewModel = viewModelWith(emptyList())
+
+        viewModel.onPrizeCreated(latinGrammy)
+
+        assertEquals(UiState.Success(listOf(PrizeCandidate(latinGrammy))), viewModel.state.value)
+        assertEquals(205, viewModel.selectedPrizeId.value)
+    }
+
+    @Test
+    fun alCrearUnPremio_seQuitaElErrorDeElegirUno() {
+        val viewModel = viewModelWith()
+        viewModel.save()
+        assertTrue(viewModel.prizeMissing.value)
+
+        viewModel.onPrizeCreated(latinGrammy)
+
+        assertFalse(viewModel.prizeMissing.value)
+    }
+
+    @Test
+    fun variosPremiosCreados_vanArriba_elMasRecientePrimero() {
+        val viewModel = viewModelWith()
+        val brit = Prize(206, "Brit Awards", "British Phonographic Industry")
+
+        viewModel.onPrizeCreated(latinGrammy)
+        viewModel.onPrizeCreated(brit)
+
+        val ids = (viewModel.state.value as UiState.Success).data.map { it.prize.id }
+        assertEquals(listOf(206, 205, 100, 8), ids)
+        assertEquals(206, viewModel.selectedPrizeId.value)
+    }
+
+    @Test
+    fun alRecargar_elPremioCreadoSigueArriba_yMarcado() {
+        val viewModel = viewModelWith()
+        viewModel.onPrizeCreated(latinGrammy)
+
+        // La API lo devuelve en su orden alfabético, después de los otros
+        repository.candidates = { Result.success(all + PrizeCandidate(latinGrammy)) }
+        viewModel.retry()
+
+        assertEquals(UiState.Success(listOf(PrizeCandidate(latinGrammy)) + all), viewModel.state.value)
+        assertEquals(205, viewModel.selectedPrizeId.value)
+    }
+
+    @Test
+    fun alGirar_seConservanElPremioElegidoYLaMarcaDeNuevo() {
+        val savedState = SavedStateHandle()
+        viewModelWith(savedState = savedState).onPrizeCreated(latinGrammy)
+
+        repository.candidates = { Result.success(all + PrizeCandidate(latinGrammy)) }
+        val recreated = PrizeAddViewModel(repository, artistId = 7, artistType = ArtistType.MUSICIAN, savedState, today = { today })
+
+        assertEquals(205, recreated.selectedPrizeId.value)
+        assertEquals(listOf(205), recreated.newPrizeIds.value.toList())
+        assertEquals(205, (recreated.state.value as UiState.Success).data.first().prize.id)
     }
 
     /** ViewModel con el Grammy y la fecha elegidos y el envío esperando la respuesta. */

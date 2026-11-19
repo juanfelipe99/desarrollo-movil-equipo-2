@@ -2,12 +2,14 @@ package com.equipo2.vinilos.ui.artists.prizes.create
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.equipo2.vinilos.R
+import com.equipo2.vinilos.data.model.Prize
 import com.equipo2.vinilos.databinding.FragmentPrizeCreateBinding
 import com.equipo2.vinilos.ui.common.buttonProgress
 import com.equipo2.vinilos.ui.common.collectWhileVisible
@@ -60,16 +62,23 @@ class PrizeCreateFragment : Fragment(R.layout.fragment_prize_create) {
         }
     }
 
-    /** Si falla avisa encima de los botones y conserva lo escrito. El regreso tras crearlo llega en T5. */
+    /** Si se creó vuelve a Agregar premio con el premio, y si falló avisa encima de los botones y conserva lo escrito. */
     private fun setUpResults(binding: FragmentPrizeCreateBinding) {
         keepSnackbarsAbove(binding.actionBar)
 
         viewLifecycleOwner.collectWhileVisible(viewModel.events) { event ->
             when (event) {
-                is PrizeCreateEvent.Created -> Unit
+                is PrizeCreateEvent.Created -> returnToPrizeAdd(event.prize)
                 PrizeCreateEvent.Failed -> showSnackbar(getString(R.string.error_prize_create_failed), isError = true)
             }
         }
+    }
+
+    /** Vuelve a Agregar premio, que pone el premio primero, lo elige, lo marca como «Nuevo» y muestra «Premio creado». */
+    private fun returnToPrizeAdd(prize: Prize) {
+        val navController = findNavController()
+        navController.previousBackStackEntry?.savedStateHandle?.set(CREATED_PRIZE, prize.toResult())
+        navController.navigateUp()
     }
 
     /** Si hay errores, lleva la pantalla al primero y le da el foco. */
@@ -85,5 +94,23 @@ class PrizeCreateFragment : Fragment(R.layout.fragment_prize_create) {
         PrizeField.NAME -> nameField
         PrizeField.ORGANIZATION -> organizationField
         PrizeField.DESCRIPTION -> descriptionField
+    }
+
+    companion object {
+        /** Clave con la que Agregar premio recibe el premio recién creado. */
+        const val CREATED_PRIZE = "createdPrize"
+
+        private const val PRIZE_ID = "id"
+        private const val PRIZE_NAME = "name"
+        private const val PRIZE_ORGANIZATION = "organization"
+
+        /** El premio recién creado que llegó en [CREATED_PRIZE]. */
+        fun prizeOf(result: Bundle) = Prize(
+            id = result.getInt(PRIZE_ID),
+            name = result.getString(PRIZE_NAME).orEmpty(),
+            organization = result.getString(PRIZE_ORGANIZATION).orEmpty(),
+        )
+
+        private fun Prize.toResult(): Bundle = bundleOf(PRIZE_ID to id, PRIZE_NAME to name, PRIZE_ORGANIZATION to organization)
     }
 }

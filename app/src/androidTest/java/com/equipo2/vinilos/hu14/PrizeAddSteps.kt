@@ -76,8 +76,22 @@ class InMemoryPrizeRepository(candidates: List<PrizeCandidate>) : PrizeRepositor
         return Result.success(ArtistPrize(1_000 + added.size, prize.name, prize.organization, date))
     }
 
-    // Las pruebas de HU14 no crean premios
-    override suspend fun createPrize(prize: NewPrize): Result<Prize> = Result.failure(UnsupportedOperationException())
+    /** Fallos de las primeras creaciones (HU13), en orden. Las siguientes crean el premio. */
+    var createFailures: List<Throwable> = emptyList()
+
+    /** Si no es null, crear no responde hasta que la prueba lo complete. */
+    var createGate: CompletableDeferred<Unit>? = null
+
+    /** Premios que se pidió crear, en orden. */
+    val created: MutableList<NewPrize> = Collections.synchronizedList(mutableListOf())
+
+    /** Los premios creados reciben ids desde 2001, como los asignaría la API. */
+    override suspend fun createPrize(prize: NewPrize): Result<Prize> {
+        created += prize
+        createGate?.await()
+        createFailures.getOrNull(created.size - 1)?.let { return Result.failure(it) }
+        return Result.success(Prize(2_000 + created.size, prize.name, prize.organization))
+    }
 }
 
 /** Entra con el rol, abre la pestaña Artistas y el detalle del artista. */
@@ -100,11 +114,17 @@ fun candidatePrizeName(name: String): Matcher<View> =
 fun candidatePrizeRow(name: String): Matcher<View> =
     allOf(withParent(withId(R.id.prizeList)), hasDescendant(candidatePrizeName(name)))
 
+// El nombre va junto a «Nuevo» en su propio contenedor, que es el hermano de la organización y la nota
 fun candidatePrizeOrganization(name: String): Matcher<View> =
-    allOf(withId(R.id.prizeOrganization), hasSibling(candidatePrizeName(name)))
+    allOf(withId(R.id.prizeOrganization), hasSibling(hasDescendant(candidatePrizeName(name))))
 
 /** Nota «Ya lo recibió…» del premio. */
-fun candidatePrizeReceived(name: String): Matcher<View> = allOf(withId(R.id.prizeReceived), hasSibling(candidatePrizeName(name)))
+fun candidatePrizeReceived(name: String): Matcher<View> =
+    allOf(withId(R.id.prizeReceived), hasSibling(hasDescendant(candidatePrizeName(name))))
+
+/** «Nuevo» junto al premio recién creado en el listado (HU13). */
+fun candidatePrizeNewBadge(name: String): Matcher<View> =
+    allOf(withId(R.id.prizeNewBadge), hasSibling(candidatePrizeName(name)))
 
 fun candidatePrizeRadio(name: String): Matcher<View> =
     allOf(withId(R.id.prizeRadio), hasSibling(hasDescendant(candidatePrizeName(name))))

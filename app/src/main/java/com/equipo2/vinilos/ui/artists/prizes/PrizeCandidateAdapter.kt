@@ -14,12 +14,16 @@ import com.equipo2.vinilos.databinding.ItemPrizeCandidateBinding
 import com.equipo2.vinilos.ui.common.toLongText
 import java.time.LocalDate
 
-/** Fila del listado: el premio, si es el elegido, si se puede tocar mientras no haya un envío en curso y si es la última. */
+/**
+ * Fila del listado: el premio, si es el elegido, si se puede tocar mientras no haya un envío en curso, si es la última
+ * y si se acaba de crear desde esta pantalla (HU13).
+ */
 data class PrizeRow(
     val candidate: PrizeCandidate,
     val selected: Boolean,
     val enabled: Boolean,
     val isLast: Boolean,
+    val isNew: Boolean = false,
 )
 
 /** Lista de selección única de premios. Al tocar uno avisa con él. Ninguno se deshabilita por haberlo recibido antes. */
@@ -47,6 +51,7 @@ class PrizeCandidateAdapter(
             val prize = row.candidate.prize
 
             binding.prizeName.text = prize.name
+            binding.prizeNewBadge.isVisible = row.isNew
             binding.prizeOrganization.text = prize.organization
 
             val received = row.candidate.receivedDates
