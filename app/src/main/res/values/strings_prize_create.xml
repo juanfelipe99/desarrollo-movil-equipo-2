@@ -12,4 +12,8 @@
     <string name="placeholder_prize_description">¿Qué reconoce este premio?</string>
 
     <string name="prize_create_action">Crear premio</string>
+
+    <string name="error_prize_name_required">Escribe el nombre del premio.</string>
+    <string name="error_prize_organization_required">Escribe la organización que otorga el premio.</string>
+    <string name="error_prize_description_required">Escribe una descripción del premio.</string>
 </resources>
