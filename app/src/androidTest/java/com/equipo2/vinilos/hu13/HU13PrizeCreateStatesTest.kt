@@ -1,6 +1,7 @@
 package com.equipo2.vinilos.hu13
 
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.action.ViewActions.replaceText
@@ -21,12 +22,17 @@ import com.equipo2.vinilos.data.model.PrizeCandidate
 import com.equipo2.vinilos.data.repository.DataError
 import com.equipo2.vinilos.hu03.testMusician
 import com.equipo2.vinilos.hu04.InMemoryArtistDetailRepository
+import com.equipo2.vinilos.hu04.checkShowingArtist
 import com.equipo2.vinilos.hu14.InMemoryPrizeRepository
 import com.equipo2.vinilos.hu14.candidatePrizeNamesInOrder
 import com.equipo2.vinilos.hu14.candidatePrizeNewBadge
 import com.equipo2.vinilos.hu14.candidatePrizeRadio
+import com.equipo2.vinilos.hu14.choosePrize
 import com.equipo2.vinilos.hu14.openArtistDetail
 import com.equipo2.vinilos.hu14.openPrizeAdd
+import com.equipo2.vinilos.hu14.pickTodayAsPremiationDate
+import com.equipo2.vinilos.hu14.tapSavePrize
+import com.equipo2.vinilos.hu14.todayInField
 import com.equipo2.vinilos.hu14.waitForPrizes
 import com.equipo2.vinilos.support.VinilosRule
 import com.equipo2.vinilos.support.checkSnackbar
@@ -44,7 +50,8 @@ import org.junit.runner.RunWith
 
 /**
  * UI de HU13 con repositorios en memoria, sin tocar la API: entrar desde Agregar premio, campos obligatorios,
- * «Creando…», el error al guardar, y el regreso con el premio nuevo primero, elegido y marcado.
+ * «Creando…», el error al guardar, el regreso con el premio nuevo primero, elegido y marcado, cancelar con
+ * el botón, la X o atrás de Android, y agregar al artista el premio recién creado.
  */
 @RunWith(AndroidJUnit4::class)
 class HU13PrizeCreateStatesTest {
@@ -207,6 +214,51 @@ class HU13PrizeCreateStatesTest {
         waitUntil { runCatching { onView(toolbarTitle(R.string.prize_add_title)).check(matches(isDisplayed())) }.isSuccess }
         assertTrue(prizes.created.isEmpty())
         assertEquals(listOf(grammy.prize.name), candidatePrizeNamesInOrder())
+    }
+
+    // Recorrido completo (T6)
+
+    @Test
+    fun elPremioCreado_conservaLaFechaElegida_ySeAgregaAlArtista() {
+        val prizes = InMemoryPrizeRepository(listOf(grammy))
+        usePrizeRepositories(InMemoryArtistDetailRepository(listOf(rubenDetail)), prizes)
+        app.launch()
+        openArtistDetail(ruben.name)
+        openPrizeAdd()
+        pickTodayAsPremiationDate()
+        onView(withId(R.id.prizeCreateButton)).perform(scrollTo(), click())
+        fillGardel()
+
+        tapCreate()
+        checkSnackbar(R.string.snackbar_prize_created)
+
+        // La fecha elegida antes de crear el premio sigue en su campo
+        onView(withId(R.id.premiationDateInput)).perform(scrollTo()).check(matches(withText(todayInField())))
+        tapSavePrize()
+
+        checkSnackbar(R.string.snackbar_prize_added)
+        checkShowingArtist(ruben.name)
+        // Se agregó el premio recién creado, con el id que devolvió la creación
+        assertEquals(listOf(2_001), prizes.added.map { it.prizeId })
+    }
+
+    @Test
+    fun atrasDeAndroid_vuelveSinCrear_yConservaElPremioElegidoAntes() {
+        val prizes = InMemoryPrizeRepository(listOf(grammy, latinGrammy))
+        usePrizeRepositories(InMemoryArtistDetailRepository(listOf(rubenDetail)), prizes)
+        app.launch()
+        openArtistDetail(ruben.name)
+        openPrizeAdd()
+        choosePrize(latinGrammy.prize.name)
+        onView(withId(R.id.prizeCreateButton)).perform(scrollTo(), click())
+        fillGardel()
+
+        pressBack()
+
+        onView(toolbarTitle(R.string.prize_add_title)).check(matches(isDisplayed()))
+        onView(candidatePrizeRadio(latinGrammy.prize.name)).perform(scrollTo()).check(matches(isChecked()))
+        assertEquals(listOf(grammy.prize.name, latinGrammy.prize.name), candidatePrizeNamesInOrder())
+        assertTrue(prizes.created.isEmpty())
     }
 
     private companion object {
