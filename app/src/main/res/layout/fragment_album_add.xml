@@ -24,7 +24,6 @@
                 android:orientation="vertical"
                 android:paddingHorizontal="16dp"
                 android:paddingTop="12dp"
-                android:paddingBottom="8dp"
                 android:visibility="gone"
                 tools:visibility="visible">
 
@@ -90,11 +89,19 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
+                    android:layout_marginBottom="24dp"
                     android:accessibilityLiveRegion="polite"
                     android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
                     android:textColor="@color/md_on_surface_variant"
                     tools:text="13 álbumes en el catálogo" />
             </LinearLayout>
+
+            <!-- Como en el prototipo, una línea de borde a borde separa el encabezado de la lista. Se ve solo con la lista -->
+            <View
+                android:id="@+id/albumAddListDivider"
+                style="@style/Widget.Vinilos.Divider"
+                android:visibility="gone"
+                tools:visibility="visible" />
 
             <FrameLayout
                 android:layout_width="match_parent"
