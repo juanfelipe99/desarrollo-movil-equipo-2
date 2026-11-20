@@ -30,5 +30,7 @@
     <string name="cd_theme_mode_light">Tema claro</string>
     <string name="cd_theme_mode_system">Tema del sistema</string>
     <string name="cd_theme_mode_dark">Tema oscuro</string>
-    <string name="cd_theme_mode_toggle">Tema: %1$s. Toca para cambiar a %2$s</string>
+    <string name="cd_theme_mode_toggle">Tema: %1$s</string>
+    <!-- TalkBack lo lee como «toca dos veces para cambiar a Claro» -->
+    <string name="action_theme_mode_toggle">cambiar a %1$s</string>
 </resources>

@@ -6,7 +6,7 @@
     <string name="artist_detail_creation_date_label">Fecha de creación</string>
     <string name="artist_detail_band_label">Banda</string>
     <string name="artist_detail_no_band">No pertenece a una banda</string>
-    <string name="cd_artist_detail_band">Banda: %1$s. Toca para ver su detalle</string>
+    <string name="cd_artist_detail_band">Banda: %1$s</string>
 
     <string name="artist_detail_description_title">Descripción</string>
 

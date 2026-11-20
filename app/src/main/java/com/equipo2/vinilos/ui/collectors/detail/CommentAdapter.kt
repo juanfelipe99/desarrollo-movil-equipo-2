@@ -10,6 +10,7 @@ import com.equipo2.vinilos.R
 import com.equipo2.vinilos.data.model.CollectorComment
 import com.equipo2.vinilos.databinding.ItemCollectorCommentBinding
 import com.equipo2.vinilos.ui.common.showStars
+import com.equipo2.vinilos.ui.common.setClickLabel
 
 /** Comentarios de un coleccionista. Al tocar el nombre del álbum avisa con el comentario para abrir ese álbum (HU06). */
 class CommentAdapter(
@@ -41,6 +42,7 @@ class CommentAdapter(
             val context = binding.root.context
             binding.commentAlbum.text = comment.albumName
             binding.commentAlbum.contentDescription = context.getString(R.string.cd_collector_detail_comment_album, comment.albumName)
+            binding.commentAlbum.setClickLabel(context.getString(R.string.action_view_detail))
             binding.commentStars.showStars(comment.rating)
             binding.commentRating.text = context.getString(R.string.album_detail_comment_rating, comment.rating)
             binding.commentRatingRow.contentDescription = context.getString(R.string.cd_album_detail_comment_rating, comment.rating)

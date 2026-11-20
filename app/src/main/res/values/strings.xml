@@ -49,4 +49,6 @@
     <string name="badge_new">Nuevo</string>
 
     <string name="cd_close_snackbar">Cerrar aviso</string>
+    <!-- Acción de los enlaces a un detalle. TalkBack la lee como «toca dos veces para ver su detalle» -->
+    <string name="action_view_detail">ver su detalle</string>
 </resources>

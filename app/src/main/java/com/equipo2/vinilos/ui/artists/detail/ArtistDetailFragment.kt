@@ -35,6 +35,7 @@ import com.equipo2.vinilos.ui.common.navigateIfPossible
 import com.equipo2.vinilos.ui.common.ownBackStackEntry
 import com.equipo2.vinilos.ui.common.showSnackbar
 import com.equipo2.vinilos.ui.common.toLongText
+import com.equipo2.vinilos.ui.common.setClickLabel
 import com.equipo2.vinilos.ui.role.RoleViewModel
 import com.equipo2.vinilos.ui.state.UiState
 import com.equipo2.vinilos.ui.state.addEmptyNote
@@ -182,6 +183,7 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         value.setTextColor(ContextCompat.getColor(requireContext(), R.color.md_primary))
         value.paintFlags = value.paintFlags or Paint.UNDERLINE_TEXT_FLAG
         binding.artistBandRow.contentDescription = getString(R.string.cd_artist_detail_band, band.name)
+        binding.artistBandRow.setClickLabel(getString(R.string.action_view_detail))
         binding.artistBandRow.setOnClickListener { openArtist(band) }
     }
 

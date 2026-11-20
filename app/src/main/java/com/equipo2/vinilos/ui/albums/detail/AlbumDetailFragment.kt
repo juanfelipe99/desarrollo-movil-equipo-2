@@ -34,6 +34,7 @@ import com.equipo2.vinilos.ui.common.navigateIfPossible
 import com.equipo2.vinilos.ui.common.showSnackbar
 import com.equipo2.vinilos.ui.common.showStars
 import com.equipo2.vinilos.ui.common.toLongText
+import com.equipo2.vinilos.ui.common.setClickLabel
 import com.equipo2.vinilos.ui.role.RoleViewModel
 import com.equipo2.vinilos.ui.state.UiState
 import com.equipo2.vinilos.ui.state.addEmptySection
@@ -125,6 +126,7 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
             chip.performerName.text = performer.name
             chip.performerPhoto.load(performer.image)
             chip.root.contentDescription = getString(R.string.cd_album_detail_performer, performer.name)
+            chip.root.setClickLabel(getString(R.string.action_view_detail))
             chip.root.setOnClickListener {
                 findNavController().navigateIfPossible(
                     R.id.action_albumDetail_to_artistDetail,
