@@ -149,6 +149,7 @@
                         android:id="@+id/genreField"
                         style="@style/Widget.Vinilos.FormField.Dropdown"
                         android:hint="@string/field_genre"
+                        app:endIconContentDescription="@string/cd_open_genres"
                         app:placeholderText="@string/placeholder_genre">
 
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -161,6 +162,7 @@
                         android:id="@+id/recordLabelField"
                         style="@style/Widget.Vinilos.FormField.Dropdown"
                         android:hint="@string/field_record_label"
+                        app:endIconContentDescription="@string/cd_open_record_labels"
                         app:placeholderText="@string/placeholder_record_label">
 
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView

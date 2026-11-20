@@ -61,6 +61,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/member_add_search_hint"
+                        android:textColorHint="@color/md_on_surface_variant"
                         android:imeOptions="actionSearch"
                         android:inputType="textPersonName"
                         android:maxLines="1"
