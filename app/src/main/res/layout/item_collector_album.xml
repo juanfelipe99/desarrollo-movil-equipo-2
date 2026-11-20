@@ -18,6 +18,7 @@
         android:paddingHorizontal="16dp"
         android:paddingVertical="8dp">
 
+        <!-- El marcador queda detrás y se ve mientras la portada carga o si falla, como en el catálogo -->
         <FrameLayout
             android:layout_width="56dp"
             android:layout_height="56dp"
@@ -30,6 +31,14 @@
                 android:importantForAccessibility="no"
                 app:srcCompat="@drawable/ic_album"
                 app:tint="@color/placeholder_icon" />
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/collectorAlbumCover"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Vinilos.AlbumCover" />
         </FrameLayout>
 
         <LinearLayout
