@@ -118,6 +118,10 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.espresso.core)
+    // Revisiones de Accessibility Scanner (Accessibility Test Framework) para la auditoría de accesibilidad
+    androidTestImplementation(libs.androidx.espresso.accessibility)
+    // Accessibility Test Framework usa Guava y no lo trae como dependencia
+    androidTestImplementation(libs.guava.android)
     androidTestImplementation(libs.androidx.junit)
 }
 
