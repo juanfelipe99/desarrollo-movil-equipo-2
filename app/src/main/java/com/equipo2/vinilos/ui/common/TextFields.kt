@@ -24,7 +24,10 @@ private fun View.forEachTextField(action: (EditText) -> Unit) {
     if (this is ViewGroup) children.forEach { it.forEachTextField(action) }
 }
 
-private fun Editable.release() {
-    clearSpans()
+internal fun Editable.release() {
+    // Se quitan uno por uno y no con clearSpans. Si el teclado sigue conectado, al quitar el span de la selección
+    // Android cierra la conexión y el teclado quita sus spans del mismo texto mientras clearSpans lo recorre, y en
+    // Android 8 eso termina en ArrayIndexOutOfBoundsException (lo encontró Monkey). Quitar uno que ya no está no hace nada
+    getSpans(0, length, Any::class.java).forEach(::removeSpan)
     filters = emptyArray()
 }

@@ -51,6 +51,9 @@ android {
             optimization {
                 enable = true
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
+                keepRules {
+                    files.add(file("r8-reglas.pro"))
+                }
             }
         }
         // Igual a release pero perfilable, para medir el desempeño de la versión que se entrega con el Profiler
