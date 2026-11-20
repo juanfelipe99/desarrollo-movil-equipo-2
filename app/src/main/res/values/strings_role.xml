@@ -8,14 +8,14 @@
     <string name="role_visitor_enter">Entrar como visitante</string>
     <string name="role_visitor_enter_desc">Consulta álbumes, artistas y coleccionistas.</string>
     <string name="role_collector_enter">Entrar como coleccionista</string>
-    <string name="role_collector_enter_desc">Además puedes crear álbumes y agregarles tracks.</string>
+    <string name="role_collector_enter_desc">Además puedes crear y completar álbumes y artistas.</string>
 
     <string name="role_visitor">Visitante</string>
     <string name="role_collector">Coleccionista</string>
 
     <string name="role_menu_current">MODO ACTUAL: %1$s</string>
     <string name="role_visitor_desc">Solo consulta</string>
-    <string name="role_collector_desc">Crea álbumes y agrega tracks</string>
+    <string name="role_collector_desc">Crea y completa álbumes y artistas</string>
     <string name="role_menu_role_select">Volver a la pantalla de inicio</string>
 
     <string name="theme_mode_header">Tema</string>
