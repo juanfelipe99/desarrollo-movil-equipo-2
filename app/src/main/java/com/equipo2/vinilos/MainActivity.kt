@@ -199,7 +199,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private companion object {
-        // Pantallas que ocupan todo y se cierran con una X. Las de agregar integrante y premio están en las pestañas Artistas y Álbumes
+        // Pantallas que ocupan todo y se cierran con una X. Las de agregar integrante y premio están en las pestañas Artistas y Álbumes,
+        // y la de agregar álbum en las tres, porque el detalle del artista se abre desde cualquiera
         val FORM_DESTINATIONS = setOf(
             R.id.albumCreateFragment,
             R.id.memberAddFragment,
@@ -210,6 +211,9 @@ class MainActivity : AppCompatActivity() {
             R.id.prizeCreateFragment,
             R.id.albumPrizeCreateFragment,
             R.id.collectorPrizeCreateFragment,
+            R.id.albumAddFragment,
+            R.id.albumAlbumAddFragment,
+            R.id.collectorAlbumAddFragment,
         )
     }
 }

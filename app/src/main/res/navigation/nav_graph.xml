@@ -97,6 +97,10 @@
                 app:destination="@id/albumPrizeAddFragment" />
 
             <action
+                android:id="@+id/action_artistDetail_to_albumAdd"
+                app:destination="@id/albumAlbumAddFragment" />
+
+            <action
                 android:id="@+id/action_artistDetail_to_albumDetail"
                 app:destination="@id/albumDetailFragment" />
         </fragment>
@@ -141,6 +145,24 @@
             android:id="@+id/albumPrizeCreateFragment"
             android:name="com.equipo2.vinilos.ui.artists.prizes.create.PrizeCreateFragment"
             android:label="@string/prize_create_title" />
+
+        <fragment
+            android:id="@+id/albumAlbumAddFragment"
+            android:name="com.equipo2.vinilos.ui.artists.albums.AlbumAddFragment"
+            android:label="@string/album_add_title">
+
+            <argument
+                android:name="artistId"
+                app:argType="integer" />
+
+            <argument
+                android:name="artistType"
+                app:argType="string" />
+
+            <argument
+                android:name="artistName"
+                app:argType="string" />
+        </fragment>
     </navigation>
 
     <navigation
@@ -182,6 +204,10 @@
             <action
                 android:id="@+id/action_artistDetail_to_prizeAdd"
                 app:destination="@id/prizeAddFragment" />
+
+            <action
+                android:id="@+id/action_artistDetail_to_albumAdd"
+                app:destination="@id/albumAddFragment" />
 
             <!-- Del carrusel de álbumes al detalle del álbum, sin salir de la pestaña -->
             <action
@@ -229,6 +255,24 @@
             android:id="@+id/prizeCreateFragment"
             android:name="com.equipo2.vinilos.ui.artists.prizes.create.PrizeCreateFragment"
             android:label="@string/prize_create_title" />
+
+        <fragment
+            android:id="@+id/albumAddFragment"
+            android:name="com.equipo2.vinilos.ui.artists.albums.AlbumAddFragment"
+            android:label="@string/album_add_title">
+
+            <argument
+                android:name="artistId"
+                app:argType="integer" />
+
+            <argument
+                android:name="artistType"
+                app:argType="string" />
+
+            <argument
+                android:name="artistName"
+                app:argType="string" />
+        </fragment>
 
         <!-- El detalle de álbum también vive en esta pestaña, para abrirlo desde un artista sin cambiar de pestaña -->
         <fragment
@@ -350,6 +394,10 @@
                 app:destination="@id/collectorPrizeAddFragment" />
 
             <action
+                android:id="@+id/action_artistDetail_to_albumAdd"
+                app:destination="@id/collectorAlbumAddFragment" />
+
+            <action
                 android:id="@+id/action_artistDetail_to_albumDetail"
                 app:destination="@id/collectorAlbumDetailFragment" />
         </fragment>
@@ -394,5 +442,23 @@
             android:id="@+id/collectorPrizeCreateFragment"
             android:name="com.equipo2.vinilos.ui.artists.prizes.create.PrizeCreateFragment"
             android:label="@string/prize_create_title" />
+
+        <fragment
+            android:id="@+id/collectorAlbumAddFragment"
+            android:name="com.equipo2.vinilos.ui.artists.albums.AlbumAddFragment"
+            android:label="@string/album_add_title">
+
+            <argument
+                android:name="artistId"
+                app:argType="integer" />
+
+            <argument
+                android:name="artistType"
+                app:argType="string" />
+
+            <argument
+                android:name="artistName"
+                app:argType="string" />
+        </fragment>
     </navigation>
 </navigation>

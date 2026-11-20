@@ -32,6 +32,17 @@
             android:importantForAccessibility="no"
             android:scaleType="centerCrop"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.Vinilos.AlbumCover" />
+
+        <!-- Solo en el álbum recién agregado desde el detalle (HU15) -->
+        <TextView
+            android:id="@+id/artistAlbumNewBadge"
+            style="@style/Widget.Vinilos.BadgeNew"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:layout_margin="8dp"
+            android:visibility="gone"
+            tools:visibility="visible" />
     </FrameLayout>
 
     <TextView

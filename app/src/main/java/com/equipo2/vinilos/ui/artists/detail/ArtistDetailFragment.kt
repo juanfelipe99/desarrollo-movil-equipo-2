@@ -23,6 +23,7 @@ import com.equipo2.vinilos.data.model.Role
 import com.equipo2.vinilos.databinding.FragmentArtistDetailBinding
 import com.equipo2.vinilos.databinding.ItemArtistPrizeBinding
 import com.equipo2.vinilos.ui.albums.detail.AlbumDetailFragment
+import com.equipo2.vinilos.ui.artists.albums.AlbumAddFragment
 import com.equipo2.vinilos.ui.artists.members.MemberAddFragment
 import com.equipo2.vinilos.ui.artists.prizes.PrizeAddFragment
 import com.equipo2.vinilos.ui.common.bindExpandableText
@@ -43,7 +44,7 @@ import com.equipo2.vinilos.ui.state.showLoading
 
 /**
  * Detalle de un músico o de una banda (HU04). Desde aquí se pasa del músico a su banda y de la banda a sus integrantes,
- * y el coleccionista agrega integrantes a la banda (HU12) y premios a cualquier artista (HU14).
+ * y el coleccionista agrega integrantes a la banda (HU12), álbumes (HU15) y premios (HU14) a cualquier artista.
  */
 class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
 
@@ -79,12 +80,14 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
             binding.artistRefresh.isEnabled = state != UiState.Loading
         }
 
-        // Solo el coleccionista agrega integrantes y premios, y el vacío de cada sección le dice cómo
+        // Solo el coleccionista agrega integrantes, álbumes y premios, y el vacío de cada sección le dice cómo
         viewLifecycleOwner.collectWhileVisible(roleViewModel.role) { role ->
             binding.addMemberButton.isVisible = role == Role.COLLECTOR
+            binding.addAlbumButton.isVisible = role == Role.COLLECTOR
             binding.addPrizeButton.isVisible = role == Role.COLLECTOR
             (viewModel.state.value as? UiState.Success)?.let {
                 showMembers(binding, it.data.members)
+                showAlbums(binding, it.data.albums)
                 showPrizes(binding, it.data.prizes)
             }
         }
@@ -94,8 +97,20 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         viewLifecycleOwner.collectWhileVisible(viewModel.newPrizeIds) {
             (viewModel.state.value as? UiState.Success)?.let { showPrizes(binding, it.data.prizes) }
         }
+        viewLifecycleOwner.collectWhileVisible(viewModel.newAlbumIds) {
+            (viewModel.state.value as? UiState.Success)?.let { showAlbums(binding, it.data.albums) }
+        }
         showAddedMember()
+        showAddedAlbum()
         showAddedPrize()
+    }
+
+    /** Al volver de Agregar álbum, el álbum aparece primero en el carrusel marcado y con el aviso «Álbum agregado». */
+    private fun showAddedAlbum() {
+        collectResult<Bundle>(AlbumAddFragment.ADDED_ALBUM) { added ->
+            viewModel.onAlbumAdded(AlbumAddFragment.albumOf(added))
+            showSnackbar(getString(R.string.snackbar_album_added))
+        }
     }
 
     /** Al volver de Agregar integrante, el músico aparece al final de la lista marcado y con el aviso «Integrante agregado». */
@@ -139,7 +154,8 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
             showMembers(binding, detail.members)
             binding.addMemberButton.setOnClickListener { openMemberAdd(artist) }
         }
-        showAlbums(binding, detail)
+        showAlbums(binding, detail.albums)
+        binding.addAlbumButton.setOnClickListener { openAlbumAdd(artist) }
         showPrizes(binding, detail.prizes)
         binding.addPrizeButton.setOnClickListener { openPrizeAdd(artist) }
     }
@@ -190,15 +206,34 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         }
     }
 
-    private fun showAlbums(binding: FragmentArtistDetailBinding, detail: ArtistDetail) {
-        val albums = detail.albums
+    /**
+     * Los álbumes agregados desde aquí van primero y marcados como «Nuevo», el último antes, también tras recargar.
+     * Los demás siguen en el orden en que llegan.
+     */
+    private fun showAlbums(binding: FragmentArtistDetailBinding, albums: List<Album>) {
         binding.albumsCount.text = resources.getQuantityString(R.plurals.artist_detail_albums_count, albums.size, albums.size)
-        (binding.albumsList.adapter as ArtistAlbumAdapter).submitList(albums)
+        val newIds = viewModel.newAlbumIds.value
+        val rows = albums
+            .sortedBy { album -> newIds.indexOf(album.id).let { if (it < 0) Int.MAX_VALUE else it } }
+            .map { ArtistAlbumRow(it, isNew = it.id in newIds) }
+
+        val adapter = binding.albumsList.adapter as ArtistAlbumAdapter
+        val firstBefore = adapter.currentList.firstOrNull()?.album?.id
+        adapter.submitList(rows) {
+            // Al insertar al principio, el carrusel se queda en el álbum que veía y el nuevo quedaría fuera de la vista
+            val first = rows.firstOrNull()
+            if (first != null && first.isNew && first.album.id != firstBefore) binding.albumsList.scrollToPosition(0)
+        }
         binding.albumsList.isVisible = albums.isNotEmpty()
 
         binding.albumsEmpty.removeAllViews()
         if (albums.isEmpty()) {
-            binding.albumsEmpty.addEmptyNote(getString(R.string.artist_detail_albums_empty_body))
+            val body = if (roleViewModel.role.value == Role.COLLECTOR) {
+                R.string.artist_detail_albums_empty_body_collector
+            } else {
+                R.string.artist_detail_albums_empty_body
+            }
+            binding.albumsEmpty.addEmptyNote(getString(body))
         }
     }
 
@@ -254,6 +289,14 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         // Si ya no es la pantalla actual, un toque anterior ya abrió otra
         if (navController.currentBackStackEntry != ownBackStackEntry) return
         navController.navigateIfPossible(R.id.action_artistDetail_to_memberAdd, MemberAddFragment.args(band.id, band.name))
+    }
+
+    /** Abre Agregar álbum para el músico o la banda (HU15). */
+    private fun openAlbumAdd(artist: Artist) {
+        val navController = findNavController()
+        // Si ya no es la pantalla actual, un toque anterior ya abrió otra
+        if (navController.currentBackStackEntry != ownBackStackEntry) return
+        navController.navigateIfPossible(R.id.action_artistDetail_to_albumAdd, AlbumAddFragment.args(artist))
     }
 
     /** Abre Agregar premio para el artista (HU14). */
