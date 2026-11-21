@@ -18,4 +18,5 @@ fun ViewStateMessageBinding.showError(objectName: CharSequence, reason: ErrorRea
 
     stateRetry.isVisible = true
     stateRetry.setOnClickListener { onRetry() }
+    announceTitleWhenShown()
 }
