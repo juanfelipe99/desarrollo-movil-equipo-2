@@ -94,6 +94,7 @@
 
                     <!-- Artistas favoritos -->
                     <TextView
+                        android:id="@+id/favoritesTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp"
@@ -123,6 +124,7 @@
 
                     <!-- Colección de álbumes -->
                     <LinearLayout
+                        android:id="@+id/collectorAlbumsTitleGroup"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp"
@@ -168,6 +170,7 @@
 
                     <!-- Comentarios -->
                     <TextView
+                        android:id="@+id/commentsTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp"

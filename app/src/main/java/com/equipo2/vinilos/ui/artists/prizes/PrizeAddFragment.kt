@@ -133,6 +133,8 @@ class PrizeAddFragment : Fragment(R.layout.fragment_prize_add) {
         }
         binding.premiationDateInput.setOnClickListener { openPicker() }
         binding.premiationDateField.setEndIconOnClickListener { openPicker() }
+        // El ícono del calendario es un botón que se puede marcar en Material, y TalkBack decía «no marcado»
+        binding.premiationDateField.isEndIconCheckable = false
         reconnectDatePicker(DATE_PICKER_TAG, onPicked)
 
         viewLifecycleOwner.collectWhileVisible(viewModel.date) { date -> binding.premiationDateInput.setText(date?.toShortText()) }

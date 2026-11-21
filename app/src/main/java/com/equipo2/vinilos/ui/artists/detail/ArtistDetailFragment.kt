@@ -31,8 +31,12 @@ import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectResult
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.initialsOf
+import com.equipo2.vinilos.ui.common.markAsHeading
+import com.equipo2.vinilos.ui.common.markAsSectionTitle
 import com.equipo2.vinilos.ui.common.navigateIfPossible
 import com.equipo2.vinilos.ui.common.ownBackStackEntry
+import com.equipo2.vinilos.ui.common.readAsOne
+import com.equipo2.vinilos.ui.common.setSectionCount
 import com.equipo2.vinilos.ui.common.showSnackbar
 import com.equipo2.vinilos.ui.common.toLongText
 import com.equipo2.vinilos.ui.common.setClickLabel
@@ -144,6 +148,11 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         binding.artistDate.infoIcon.setImageResource(R.drawable.ic_calendar_today)
         binding.artistDate.infoLabel.setText(if (isMusician) R.string.artist_detail_birth_date_label else R.string.artist_detail_creation_date_label)
         binding.artistDate.infoValue.text = artist.date.toLongText()
+        binding.artistDate.root.readAsOne()
+        binding.descriptionTitle.markAsHeading()
+        binding.membersTitleGroup.markAsSectionTitle()
+        binding.albumsTitleGroup.markAsSectionTitle()
+        binding.prizesTitleGroup.markAsSectionTitle()
         showBand(binding, detail.band, isMusician)
 
         bindExpandableText(binding.artistDescription, binding.artistDescriptionToggle, detail.description, viewModel.descriptionExpanded) {
@@ -170,6 +179,8 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
         binding.artistBand.infoIcon.setImageResource(R.drawable.ic_groups)
         binding.artistBand.infoLabel.setText(R.string.artist_detail_band_label)
         val value = binding.artistBand.infoValue
+        // Con banda, la fila entera es el enlace y ya se lee en un paso. Sin banda, la etiqueta y «No pertenece a una banda» van juntas
+        binding.artistBand.root.readAsOne(band == null)
         if (band == null) {
             value.setText(R.string.artist_detail_no_band)
             value.setTextColor(ContextCompat.getColor(requireContext(), R.color.md_on_surface))
@@ -188,7 +199,7 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
     }
 
     private fun showMembers(binding: FragmentArtistDetailBinding, members: List<Artist>) {
-        binding.membersCount.text = resources.getQuantityString(R.plurals.artist_detail_members_count, members.size, members.size)
+        binding.membersCount.setSectionCount(resources.getQuantityString(R.plurals.artist_detail_members_count, members.size, members.size))
         val newIds = viewModel.newMemberIds.value
         (binding.membersList.adapter as MemberAdapter).submitList(members.map { BandMemberRow(it, isNew = it.id in newIds) })
         binding.membersList.isVisible = members.isNotEmpty()
@@ -213,7 +224,7 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
      * Los demás siguen en el orden en que llegan.
      */
     private fun showAlbums(binding: FragmentArtistDetailBinding, albums: List<Album>) {
-        binding.albumsCount.text = resources.getQuantityString(R.plurals.artist_detail_albums_count, albums.size, albums.size)
+        binding.albumsCount.setSectionCount(resources.getQuantityString(R.plurals.artist_detail_albums_count, albums.size, albums.size))
         val newIds = viewModel.newAlbumIds.value
         val rows = albums
             .sortedBy { album -> newIds.indexOf(album.id).let { if (it < 0) Int.MAX_VALUE else it } }
@@ -240,7 +251,7 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
     }
 
     private fun showPrizes(binding: FragmentArtistDetailBinding, prizes: List<ArtistPrize>) {
-        binding.prizesCount.text = resources.getQuantityString(R.plurals.artist_detail_prizes_count, prizes.size, prizes.size)
+        binding.prizesCount.setSectionCount(resources.getQuantityString(R.plurals.artist_detail_prizes_count, prizes.size, prizes.size))
         binding.prizesList.removeAllViews()
 
         if (prizes.isEmpty()) {
@@ -260,6 +271,8 @@ class ArtistDetailFragment : Fragment(R.layout.fragment_artist_detail) {
             card.prizeName.text = prize.name
             card.prizeOrganization.text = prize.organization
             card.prizeDate.text = prize.date.toLongText()
+            // Nombre, organización y fecha en un solo paso de TalkBack
+            card.root.readAsOne()
             // El premio recién agregado lleva «Nuevo» y el fondo de fila nueva
             if (prize.id in newIds) {
                 card.prizeNewBadge.isVisible = true

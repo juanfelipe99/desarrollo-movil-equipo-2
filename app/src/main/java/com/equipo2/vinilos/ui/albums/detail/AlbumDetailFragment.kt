@@ -30,7 +30,12 @@ import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectResult
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.initialsOf
+import com.equipo2.vinilos.ui.common.markAsHeading
+import com.equipo2.vinilos.ui.common.markAsSectionTitle
 import com.equipo2.vinilos.ui.common.navigateIfPossible
+import com.equipo2.vinilos.ui.common.readAsOne
+import com.equipo2.vinilos.ui.common.setDuration
+import com.equipo2.vinilos.ui.common.setSectionCount
 import com.equipo2.vinilos.ui.common.showSnackbar
 import com.equipo2.vinilos.ui.common.showStars
 import com.equipo2.vinilos.ui.common.toLongText
@@ -93,6 +98,9 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
         binding.albumCover.load(album.cover)
         binding.albumName.text = album.name
         showPerformers(binding, album.performers)
+        binding.descriptionTitle.markAsHeading()
+        binding.tracksTitleGroup.markAsSectionTitle()
+        binding.commentsTitleGroup.markAsSectionTitle()
 
         val releaseDate = album.releaseDate.toLongText()
         binding.albumReleaseDate.show(R.drawable.ic_calendar_today, R.string.album_detail_release_date_label, releaseDate)
@@ -113,6 +121,7 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
         infoIcon.setImageResource(icon)
         infoLabel.setText(label)
         infoValue.text = value
+        root.readAsOne()
     }
 
     /** Un chip por intérprete, con su foto o sus iniciales. */
@@ -137,7 +146,7 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
     }
 
     private fun showTracks(binding: FragmentAlbumDetailBinding, tracks: List<Track>) {
-        binding.tracksCount.text = resources.getQuantityString(R.plurals.album_detail_tracks_count, tracks.size, tracks.size)
+        binding.tracksCount.setSectionCount(resources.getQuantityString(R.plurals.album_detail_tracks_count, tracks.size, tracks.size))
         binding.tracksList.removeAllViews()
         binding.tracksEmpty.removeAllViews()
         binding.tracksListEnd.isVisible = tracks.isNotEmpty()
@@ -161,7 +170,9 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
             val row = ItemTrackBinding.inflate(layoutInflater, binding.tracksList, true)
             row.trackNumber.text = getString(R.string.album_detail_track_number, index + 1)
             row.trackName.text = track.name
-            row.trackDuration.text = track.duration
+            row.trackDuration.setDuration(track.duration)
+            // Número, nombre y duración en un solo paso de TalkBack
+            row.trackRow.readAsOne()
 
             val isNew = track.id in newIds
             row.trackNewBadge.isVisible = isNew
@@ -170,7 +181,7 @@ class AlbumDetailFragment : Fragment(R.layout.fragment_album_detail) {
     }
 
     private fun showComments(binding: FragmentAlbumDetailBinding, comments: List<AlbumComment>) {
-        binding.commentsCount.text = resources.getQuantityString(R.plurals.album_detail_comments_count, comments.size, comments.size)
+        binding.commentsCount.setSectionCount(resources.getQuantityString(R.plurals.album_detail_comments_count, comments.size, comments.size))
         binding.commentsList.removeAllViews()
 
         if (comments.isEmpty()) {

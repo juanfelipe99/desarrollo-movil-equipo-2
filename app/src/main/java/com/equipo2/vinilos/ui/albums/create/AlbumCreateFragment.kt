@@ -77,6 +77,8 @@ class AlbumCreateFragment : Fragment(R.layout.fragment_album_create) {
         }
         binding.releaseDateInput.setOnClickListener { openPicker() }
         binding.releaseDateField.setEndIconOnClickListener { openPicker() }
+        // El ícono del calendario es un botón que se puede marcar en Material, y TalkBack decía «no marcado»
+        binding.releaseDateField.isEndIconCheckable = false
         reconnectDatePicker(DATE_PICKER_TAG, onPicked)
 
         val releaseDate = viewModel.form.map { it.releaseDate }.distinctUntilChanged()
