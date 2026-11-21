@@ -1,5 +1,6 @@
 package com.equipo2.vinilos.data.repository
 
+import com.equipo2.vinilos.data.model.Album
 import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.network.ApiClient
 import com.equipo2.vinilos.data.network.artist.ArtistAlbumServiceAdapter
@@ -10,6 +11,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.net.ServerSocket
+import java.time.LocalDate
 
 /** Prueba el repositorio con Retrofit y el adaptador reales contra un servidor local. */
 class ArtistAlbumRepositoryImplTest {
@@ -154,6 +156,35 @@ class ArtistAlbumRepositoryImplTest {
 
         assertEquals(0, changes)
     }
+
+    // Catálogo de la app
+
+    @Test
+    fun getAlbumCandidates_conElCatalogoDeLaApp_noPideLosAlbumes_ySoloPideElArtista() = runTest {
+        server.respond("musicians/100", MUSICIAN_JSON)
+        val catalog = listOf(album(1, "Buscando América"), album(173, "Abbey Road"))
+        val adapter = ArtistAlbumServiceAdapter(ApiClient(server.baseUrl), catalog = { catalog })
+
+        val candidates = ArtistAlbumRepositoryImpl(adapter).getAlbumCandidates(100, ArtistType.MUSICIAN).getOrThrow()
+
+        assertEquals(listOf("musicians/100"), server.requests)
+        assertEquals(listOf("Abbey Road", "Buscando América"), candidates.map { it.album.name })
+    }
+
+    @Test
+    fun getAlbumCandidates_siElCatalogoDeLaAppFalla_fallaElListadoConSuError() = runTest {
+        server.respond("musicians/100", MUSICIAN_JSON)
+        val adapter = ArtistAlbumServiceAdapter(ApiClient(server.baseUrl), catalog = { throw DataError.Network() })
+
+        val error = ArtistAlbumRepositoryImpl(adapter).getAlbumCandidates(100, ArtistType.MUSICIAN).exceptionOrNull()
+
+        assertTrue(error is DataError.Network)
+    }
+
+    private fun album(id: Int, name: String) = Album(
+        id = id, name = name, cover = "", releaseDate = LocalDate.of(1984, 1, 1), description = "", genre = "Salsa",
+        recordLabel = "Elektra",
+    )
 
     private companion object {
         // Así responde BackVynils: cada álbum trae sus intérpretes, y los músicos se distinguen por la fecha de nacimiento

@@ -3,6 +3,7 @@ package com.equipo2.vinilos
 import android.app.ActivityManager
 import android.app.Application
 import android.content.ComponentCallbacks2
+import android.os.StrictMode
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.getSystemService
@@ -33,6 +34,32 @@ class VinilosApplication : Application(), SingletonImageLoader.Factory {
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("es"))
         container = AppContainer(this)
         applySavedThemeMode()
+        if (BuildConfig.DEBUG) watchMainThread()
+    }
+
+    /**
+     * En la versión debug, StrictMode escribe en el registro (etiqueta StrictMode) cualquier lectura o escritura de
+     * disco o petición de red en el hilo principal, que puede terminar en un ANR, y los recursos o actividades que
+     * quedan sin cerrar. Solo avisa, no cierra la app. Se activa después de leer el tema guardado, que se lee a
+     * propósito antes de la primera pantalla para no mostrar un instante el tema equivocado.
+     */
+    private fun watchMainThread() {
+        StrictMode.setThreadPolicy(
+            StrictMode.ThreadPolicy.Builder()
+                .detectDiskReads()
+                .detectDiskWrites()
+                .detectNetwork()
+                .penaltyLog()
+                .build(),
+        )
+        StrictMode.setVmPolicy(
+            StrictMode.VmPolicy.Builder()
+                .detectLeakedClosableObjects()
+                .detectActivityLeaks()
+                .detectLeakedRegistrationObjects()
+                .penaltyLog()
+                .build(),
+        )
     }
 
     private fun applySavedThemeMode() {

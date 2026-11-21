@@ -7,20 +7,22 @@ import com.equipo2.vinilos.data.local.appDataStore
 import com.equipo2.vinilos.data.network.ApiClient
 import com.equipo2.vinilos.data.network.album.AlbumServiceAdapter
 import com.equipo2.vinilos.data.network.artist.ArtistAlbumServiceAdapter
+import com.equipo2.vinilos.data.network.artist.ArtistApi
 import com.equipo2.vinilos.data.network.artist.ArtistServiceAdapter
-import com.equipo2.vinilos.data.network.collector.CollectorServiceAdapter
 import com.equipo2.vinilos.data.network.artist.BandServiceAdapter
+import com.equipo2.vinilos.data.network.artist.PrizeCatalog
 import com.equipo2.vinilos.data.network.artist.PrizeServiceAdapter
+import com.equipo2.vinilos.data.network.collector.CollectorServiceAdapter
 import com.equipo2.vinilos.data.repository.AlbumRepository
 import com.equipo2.vinilos.data.repository.AlbumRepositoryImpl
 import com.equipo2.vinilos.data.repository.ArtistAlbumRepository
 import com.equipo2.vinilos.data.repository.ArtistAlbumRepositoryImpl
 import com.equipo2.vinilos.data.repository.ArtistRepository
 import com.equipo2.vinilos.data.repository.ArtistRepositoryImpl
-import com.equipo2.vinilos.data.repository.CollectorRepository
-import com.equipo2.vinilos.data.repository.CollectorRepositoryImpl
 import com.equipo2.vinilos.data.repository.BandRepository
 import com.equipo2.vinilos.data.repository.BandRepositoryImpl
+import com.equipo2.vinilos.data.repository.CollectorRepository
+import com.equipo2.vinilos.data.repository.CollectorRepositoryImpl
 import com.equipo2.vinilos.data.repository.PrizeRepository
 import com.equipo2.vinilos.data.repository.PrizeRepositoryImpl
 import com.equipo2.vinilos.data.repository.RoleRepository
@@ -33,12 +35,17 @@ open class AppContainer(context: Context) {
     val apiClient by lazy { ApiClient(BuildConfig.API_BASE_URL) }
 
     open val albumRepository: AlbumRepository by lazy { AlbumRepositoryImpl(AlbumServiceAdapter(apiClient)) }
-    open val artistRepository: ArtistRepository by lazy { ArtistRepositoryImpl(ArtistServiceAdapter(apiClient)) }
+    // El detalle del artista y Agregar premio comparten el catálogo de premios
+    private val prizeCatalog by lazy { PrizeCatalog(apiClient.create(ArtistApi::class.java)) }
+
+    open val artistRepository: ArtistRepository by lazy { ArtistRepositoryImpl(ArtistServiceAdapter(apiClient, prizeCatalog)) }
     open val collectorRepository: CollectorRepository by lazy { CollectorRepositoryImpl(CollectorServiceAdapter(apiClient)) }
     open val bandRepository: BandRepository by lazy { BandRepositoryImpl(BandServiceAdapter(apiClient), onMembersChanged = { artistRepository.clearCache() }) }
-    open val prizeRepository: PrizeRepository by lazy { PrizeRepositoryImpl(PrizeServiceAdapter(apiClient), onPrizesChanged = { artistRepository.clearCache() }) }
+    open val prizeRepository: PrizeRepository by lazy { PrizeRepositoryImpl(PrizeServiceAdapter(apiClient, prizeCatalog), onPrizesChanged = { artistRepository.clearCache() }) }
     open val artistAlbumRepository: ArtistAlbumRepository by lazy {
-        ArtistAlbumRepositoryImpl(ArtistAlbumServiceAdapter(apiClient), onAlbumsChanged = {
+        // Agregar álbum usa el catálogo que el repositorio de álbumes ya tiene en memoria
+        val catalog = suspend { albumRepository.getAlbums().getOrThrow() }
+        ArtistAlbumRepositoryImpl(ArtistAlbumServiceAdapter(apiClient, catalog), onAlbumsChanged = {
             artistRepository.clearCache()
             albumRepository.clearCache()
         })
