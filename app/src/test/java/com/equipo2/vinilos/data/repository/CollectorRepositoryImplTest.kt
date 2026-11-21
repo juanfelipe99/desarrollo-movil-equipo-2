@@ -1,5 +1,7 @@
 package com.equipo2.vinilos.data.repository
 
+import com.equipo2.vinilos.data.model.Album
+import com.equipo2.vinilos.data.model.AlbumComment
 import com.equipo2.vinilos.data.model.AlbumStatus
 import com.equipo2.vinilos.data.model.Collector
 import com.equipo2.vinilos.data.model.CollectorAlbum
@@ -13,6 +15,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.net.ServerSocket
+import java.time.LocalDate
 
 /** Prueba el repositorio con Retrofit y el adaptador reales contra un servidor local. */
 class CollectorRepositoryImplTest {
@@ -182,6 +185,37 @@ class CollectorRepositoryImplTest {
         val offline = repositoryFor("http://127.0.0.1:$freePort/")
 
         assertTrue(offline.getCollectorDetail(100).exceptionOrNull() is DataError.Network)
+    }
+
+    // Catálogo de la app
+
+    @Test
+    fun getCollectorDetail_conElCatalogoDeLaApp_noPideLosAlbumes_ySacaDeAhiElAlbumDeCadaComentario() = runTest {
+        server.respond("collectors/100", COLLECTOR_100_JSON)
+        server.respond("collectors/100/albums", COLLECTOR_100_ALBUMS_JSON)
+        val catalogo = listOf(
+            Album(100, "Buscando América", "", LocalDate.of(1984, 8, 1), "", "Salsa", "Elektra",
+                comments = listOf(AlbumComment(100, "The most relevant album of Ruben Blades", 5))),
+            Album(101, "A Day at the Races", "", LocalDate.of(1976, 12, 10), "", "Rock", "EMI"),
+        )
+        val repository = CollectorRepositoryImpl(CollectorServiceAdapter(ApiClient(server.baseUrl), catalog = { catalogo }))
+
+        val detail = repository.getCollectorDetail(100).getOrThrow()
+
+        assertEquals(setOf("collectors/100", "collectors/100/albums"), server.requests.toSet())
+        assertEquals(
+            listOf(CollectorComment(100, 100, "Buscando América", 5, "The most relevant album of Ruben Blades")),
+            detail.comments,
+        )
+    }
+
+    @Test
+    fun getCollectorDetail_siElCatalogoDeLaAppFalla_fallaElDetalleConSuError() = runTest {
+        server.respond("collectors/100", COLLECTOR_100_JSON)
+        server.respond("collectors/100/albums", COLLECTOR_100_ALBUMS_JSON)
+        val adapter = CollectorServiceAdapter(ApiClient(server.baseUrl), catalog = { throw DataError.Network() })
+
+        assertTrue(CollectorRepositoryImpl(adapter).getCollectorDetail(100).exceptionOrNull() is DataError.Network)
     }
 
     private companion object {

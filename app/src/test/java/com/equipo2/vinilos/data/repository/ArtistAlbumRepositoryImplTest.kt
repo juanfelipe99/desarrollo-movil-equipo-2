@@ -186,6 +186,18 @@ class ArtistAlbumRepositoryImplTest {
         recordLabel = "Elektra",
     )
 
+    @Test
+    fun getAlbumCandidates_conElCatalogoYElDetalleDeLaApp_noPideNada() = runTest {
+        val catalog = listOf(album(100, "Buscando América"), album(173, "Abbey Road"))
+        val adapter = ArtistAlbumServiceAdapter(ApiClient(server.baseUrl), catalog = { catalog }, artistAlbums = { _, _ -> setOf(100) })
+
+        val candidates = ArtistAlbumRepositoryImpl(adapter).getAlbumCandidates(100, ArtistType.MUSICIAN).getOrThrow()
+
+        assertTrue(server.requests.isEmpty())
+        assertEquals(listOf("Abbey Road", "Buscando América"), candidates.map { it.album.name })
+        assertEquals(listOf(false, true), candidates.map { it.alreadyAdded })
+    }
+
     private companion object {
         // Así responde BackVynils: cada álbum trae sus intérpretes, y los músicos se distinguen por la fecha de nacimiento
         const val ALBUMS_JSON = """

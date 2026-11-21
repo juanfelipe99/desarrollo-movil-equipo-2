@@ -23,8 +23,11 @@ internal fun PrizeDto.toPrize() = Prize(id, name, organization)
  * Premios del catálogo en orden alfabético, cada uno con las fechas en que el artista ya lo recibió.
  * [received] son las entregas del artista, que se buscan por su id entre las de cada premio.
  */
-internal fun prizeCandidates(prizes: List<PrizeDto>, received: List<PerformerPrizeDto>): List<PrizeCandidate> {
-    val receivedIds = received.mapTo(HashSet()) { it.id }
+internal fun prizeCandidates(prizes: List<PrizeDto>, received: List<PerformerPrizeDto>): List<PrizeCandidate> =
+    prizeCandidates(prizes, received.mapTo(HashSet()) { it.id })
+
+/** Lo mismo con los id de las entregas del artista, por ejemplo los del detalle que la app ya tiene. */
+internal fun prizeCandidates(prizes: List<PrizeDto>, receivedIds: Set<Int>): List<PrizeCandidate> {
     return prizes
         .map { prize ->
             val dates = prize.performerPrizes.filter { it.id in receivedIds }.map { fromApiDate(it.premiationDate) }

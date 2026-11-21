@@ -16,6 +16,7 @@ import coil3.disk.directory
 import coil3.memory.MemoryCache
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.allowRgb565
+import com.equipo2.vinilos.data.network.WikimediaThumbnails
 import com.equipo2.vinilos.data.network.imageHttpClient
 import com.equipo2.vinilos.ui.thememode.applyThemeMode
 import kotlinx.coroutines.MainScope
@@ -78,7 +79,10 @@ class VinilosApplication : Application(), SingletonImageLoader.Factory {
         // En un teléfono con poca memoria cada portada ocupa la mitad y la caché en memoria es más chica
         val lowRam = getSystemService<ActivityManager>()?.isLowRamDevice == true
         return ImageLoader.Builder(context)
-            .components { add(OkHttpNetworkFetcherFactory(callFactory = { client })) }
+            .components {
+                add(WikimediaThumbnails())
+                add(OkHttpNetworkFetcherFactory(callFactory = { client }))
+            }
             .memoryCache { MemoryCache.Builder().maxSizePercent(context, if (lowRam) 0.15 else 0.25).build() }
             .diskCache { DiskCache.Builder().directory(cacheDir.resolve("portadas")).maxSizeBytes(IMAGE_DISK_CACHE_BYTES).build() }
             .allowRgb565(lowRam)

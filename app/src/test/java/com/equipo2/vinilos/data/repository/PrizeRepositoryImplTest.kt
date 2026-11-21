@@ -245,7 +245,8 @@ class PrizeRepositoryImplTest {
         catalog.get()
         server.requests.clear()
 
-        PrizeRepositoryImpl(PrizeServiceAdapter(ApiClient(server.baseUrl), catalog)).getPrizeCandidates(100, ArtistType.MUSICIAN).getOrThrow()
+        val repository = PrizeRepositoryImpl(PrizeServiceAdapter(ApiClient(server.baseUrl), catalog))
+        repository.getPrizeCandidates(100, ArtistType.MUSICIAN).getOrThrow()
 
         assertEquals(listOf("musicians/100"), server.requests)
     }
@@ -276,6 +277,28 @@ class PrizeRepositoryImplTest {
 
         // La primera consulta, la creación y la consulta después de crear
         assertEquals(3, server.requests.count { it == "prizes" })
+    }
+
+    // Detalle que la app ya tiene
+
+    @Test
+    fun getPrizeCandidates_conLasEntregasDelDetalleDeLaApp_noPideElArtista() = runTest {
+        server.respond("prizes", PRIZES_JSON)
+        // La entrega 100 es la del Grammy que trae MUSICIAN_JSON, aquí sale del detalle sin pedir el músico
+        val adapter = PrizeServiceAdapter(ApiClient(server.baseUrl), receivedDeliveries = { _, _ -> setOf(100) })
+
+        val candidates = PrizeRepositoryImpl(adapter).getPrizeCandidates(100, ArtistType.MUSICIAN).getOrThrow()
+
+        assertEquals(listOf("prizes"), server.requests)
+        assertEquals(listOf(LocalDate.of(1978, 12, 10)), candidates.first().receivedDates)
+    }
+
+    @Test
+    fun getPrizeCandidates_siElDetalleDeLaAppDiceQueElArtistaNoExiste_devuelveNoEncontrado() = runTest {
+        server.respond("prizes", PRIZES_JSON)
+        val adapter = PrizeServiceAdapter(ApiClient(server.baseUrl), receivedDeliveries = { _, _ -> throw DataError.NotFound() })
+
+        assertTrue(PrizeRepositoryImpl(adapter).getPrizeCandidates(100, ArtistType.MUSICIAN).exceptionOrNull() is DataError.NotFound)
     }
 
     private companion object {

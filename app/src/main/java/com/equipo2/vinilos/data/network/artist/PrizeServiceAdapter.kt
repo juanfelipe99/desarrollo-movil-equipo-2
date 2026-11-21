@@ -11,21 +11,30 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import java.time.LocalDate
 
-/** [prizeCatalog] es el mismo del detalle del artista, así abrir Agregar premio desde el detalle no lo pide otra vez. */
-class PrizeServiceAdapter(apiClient: ApiClient, prizeCatalog: PrizeCatalog? = null) {
+/**
+ * [prizeCatalog] es el mismo del detalle del artista, así abrir Agregar premio desde el detalle no lo pide otra vez.
+ * [receivedDeliveries] da los id de las entregas que ya recibió el artista. La app los toma del detalle que ya tiene
+ * en memoria. Sin él, se pide el artista a la API.
+ */
+class PrizeServiceAdapter(
+    apiClient: ApiClient,
+    prizeCatalog: PrizeCatalog? = null,
+    receivedDeliveries: (suspend (Int, ArtistType) -> Set<Int>)? = null,
+) {
 
     private val api = apiClient.create(ArtistApi::class.java)
     private val prizeCatalog = prizeCatalog ?: PrizeCatalog(api)
+    private val receivedDeliveries = receivedDeliveries ?: { artistId, type ->
+        when (type) {
+            ArtistType.MUSICIAN -> api.getMusician(artistId).performerPrizes
+            ArtistType.BAND -> api.getBand(artistId).performerPrizes
+        }.mapTo(HashSet()) { it.id }
+    }
 
     // Los premios y el artista se piden a la vez, y si falla cualquiera de los dos falla el listado
     suspend fun getPrizeCandidates(artistId: Int, type: ArtistType): List<PrizeCandidate> = coroutineScope {
         val prizes = async { prizeCatalog.get() }
-        val received = async {
-            when (type) {
-                ArtistType.MUSICIAN -> api.getMusician(artistId).performerPrizes
-                ArtistType.BAND -> api.getBand(artistId).performerPrizes
-            }
-        }
+        val received = async { receivedDeliveries(artistId, type) }
         prizeCandidates(prizes.await(), received.await())
     }
 

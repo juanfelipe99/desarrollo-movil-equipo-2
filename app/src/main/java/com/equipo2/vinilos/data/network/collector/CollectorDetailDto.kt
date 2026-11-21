@@ -1,5 +1,6 @@
 package com.equipo2.vinilos.data.network.collector
 
+import com.equipo2.vinilos.data.model.Album
 import com.equipo2.vinilos.data.model.AlbumStatus
 import com.equipo2.vinilos.data.model.Artist
 import com.equipo2.vinilos.data.model.ArtistType
@@ -73,6 +74,11 @@ data class CommentRefDto(val id: Int)
 internal data class CommentedAlbum(val id: Int, val name: String)
 
 internal fun List<CommentedAlbumDto>.byComment(): Map<Int, CommentedAlbum> =
+    flatMap { album -> album.comments.map { it.id to CommentedAlbum(album.id, album.name) } }.toMap()
+
+/** Lo mismo a partir del catálogo que la app ya tiene, cuyos álbumes traen sus comentarios. */
+@JvmName("byCommentFromCatalog")
+internal fun List<Album>.byComment(): Map<Int, CommentedAlbum> =
     flatMap { album -> album.comments.map { it.id to CommentedAlbum(album.id, album.name) } }.toMap()
 
 internal fun CollectorDetailDto.toCollectorDetail(
