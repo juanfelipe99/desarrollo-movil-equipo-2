@@ -4,7 +4,9 @@
     <!-- center_horizontal -->
     <integer name="state_message_gravity">1</integer>
     <dimen name="state_message_padding_top">120dp</dimen>
-    <dimen name="state_message_padding_bottom">32dp</dimen>
+    <!-- 32 dp más los 81 dp de la barra inferior (dimens_nav.xml). Con la letra al 200 % el mensaje es más alto que
+         la pantalla y, al desplazarlo hasta el final, «Reintentar» quedaba debajo de la barra -->
+    <dimen name="state_message_padding_bottom">113dp</dimen>
     <dimen name="state_icon_circle_size">88dp</dimen>
     <dimen name="state_icon_margin_bottom">24dp</dimen>
     <dimen name="state_retry_margin_top">24dp</dimen>

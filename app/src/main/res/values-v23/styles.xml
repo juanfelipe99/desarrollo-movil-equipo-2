@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Parte con guion por sílabas la palabra que no cabe en la línea, en lugar de cortarla en cualquier letra -->
+    <style name="Widget.Vinilos.Hyphenated" parent="">
+        <item name="android:hyphenationFrequency">normal</item>
+    </style>
+</resources>

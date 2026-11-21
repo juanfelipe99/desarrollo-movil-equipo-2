@@ -54,6 +54,7 @@
 
             <TextView
                 android:id="@+id/artistName"
+                style="@style/Widget.Vinilos.Hyphenated"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
@@ -62,14 +63,15 @@
                 android:textColor="@color/md_on_surface"
                 tools:text="Rubén Blades Bellido de Luna" />
 
-            <LinearLayout
+            <!-- El tipo y el año van en la misma línea, y el año baja a la siguiente si no cabe, por ejemplo con
+                 la letra del sistema al 200 %. Antes la palabra se partía en cualquier letra («Naci» y «ó en 1908») -->
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_marginTop="4dp">
 
                 <LinearLayout
+                    android:id="@+id/artistTypeTag"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_artist_type_tag"
@@ -98,13 +100,28 @@
 
                 <TextView
                     android:id="@+id/artistYear"
+                    style="@style/Widget.Vinilos.Hyphenated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
                     android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
                     android:textColor="@color/md_on_surface_variant"
+                    app:layout_constrainedWidth="true"
                     tools:text="Nació en 1948" />
-            </LinearLayout>
+
+                <androidx.constraintlayout.helper.widget.Flow
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:constraint_referenced_ids="artistTypeTag,artistYear"
+                    app:flow_horizontalBias="0"
+                    app:flow_horizontalGap="8dp"
+                    app:flow_horizontalStyle="packed"
+                    app:flow_verticalAlign="center"
+                    app:flow_verticalGap="4dp"
+                    app:flow_wrapMode="chain"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
 
         <ImageView

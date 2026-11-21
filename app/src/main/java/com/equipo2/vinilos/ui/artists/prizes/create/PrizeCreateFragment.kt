@@ -14,6 +14,7 @@ import com.equipo2.vinilos.databinding.FragmentPrizeCreateBinding
 import com.equipo2.vinilos.ui.common.buttonProgress
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.hideFromScreenReaderWhileItFits
+import com.equipo2.vinilos.ui.common.keepPlaceholdersOnOneLine
 import com.equipo2.vinilos.ui.common.keepSnackbarsAbove
 import com.equipo2.vinilos.ui.common.releaseTextFieldsOnDestroyView
 import com.equipo2.vinilos.ui.common.showError
@@ -32,6 +33,7 @@ class PrizeCreateFragment : Fragment(R.layout.fragment_prize_create) {
         // TalkBack enfocaba el formulario entero y leía el texto de introducción antes de leerlo otra vez solo
         binding.formScroll.hideFromScreenReaderWhileItFits()
         releaseTextFieldsOnDestroyView(view)
+        view.keepPlaceholdersOnOneLine()
         setUpTextFields(binding)
         setUpErrors(binding)
         setUpSaving(binding)

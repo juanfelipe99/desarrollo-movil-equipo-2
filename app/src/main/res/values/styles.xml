@@ -319,4 +319,8 @@
         <item name="lineHeight">18sp</item>
         <item name="android:lineHeight" tools:targetApi="28">18sp</item>
     </style>
+
+    <!-- Textos angostos que con la letra grande podían partir una palabra («Desaparicione» y «s»).
+         En Android 6 y posteriores la parten con guion por sílabas (values-v23). En Android 5 no existe la opción -->
+    <style name="Widget.Vinilos.Hyphenated" parent="" />
 </resources>

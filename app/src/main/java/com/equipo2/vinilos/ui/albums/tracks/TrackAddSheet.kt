@@ -13,6 +13,7 @@ import com.equipo2.vinilos.ui.common.AppSnackbar
 import com.equipo2.vinilos.ui.common.buttonProgress
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.hideFromScreenReaderWhileItFits
+import com.equipo2.vinilos.ui.common.keepPlaceholdersOnOneLine
 import com.equipo2.vinilos.ui.common.releaseTextFieldsOnDestroyView
 import com.equipo2.vinilos.ui.common.showError
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -34,6 +35,7 @@ class TrackAddSheet : BottomSheetDialogFragment(R.layout.sheet_track_add) {
         // TalkBack enfocaba la hoja entera y leía todo su texto antes de leerlo otra vez por partes
         binding.root.hideFromScreenReaderWhileItFits()
         releaseTextFieldsOnDestroyView(view)
+        view.keepPlaceholdersOnOneLine()
         binding.trackAddSubtitle.text = getString(R.string.track_add_subtitle, requireArguments().getString(ARG_ALBUM_NAME))
 
         binding.trackNameInput.doAfterTextChanged { text -> viewModel.update { copy(name = text.toString()) } }

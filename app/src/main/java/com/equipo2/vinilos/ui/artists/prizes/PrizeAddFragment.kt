@@ -19,6 +19,7 @@ import com.equipo2.vinilos.ui.artists.prizes.create.PrizeCreateFragment
 import com.equipo2.vinilos.ui.common.buttonProgress
 import com.equipo2.vinilos.ui.common.collectResult
 import com.equipo2.vinilos.ui.common.collectWhileVisible
+import com.equipo2.vinilos.ui.common.keepPlaceholdersOnOneLine
 import com.equipo2.vinilos.ui.common.keepSnackbarsAbove
 import com.equipo2.vinilos.ui.common.navigateIfPossible
 import com.equipo2.vinilos.ui.common.reconnectDatePicker
@@ -32,8 +33,8 @@ import com.equipo2.vinilos.ui.state.addEmptyNote
 import com.equipo2.vinilos.ui.state.showEmpty
 import com.equipo2.vinilos.ui.state.showError
 import com.equipo2.vinilos.ui.state.showLoading
-import kotlinx.coroutines.flow.combine
 import java.time.LocalDate
+import kotlinx.coroutines.flow.combine
 
 /** Lo que muestra el listado: los premios, el elegido, si se está enviando, si el artista ya no existe y los recién creados. */
 private data class ListScreen(
@@ -57,6 +58,7 @@ class PrizeAddFragment : Fragment(R.layout.fragment_prize_add) {
 
         val binding = FragmentPrizeAddBinding.bind(view)
         releaseTextFieldsOnDestroyView(view)
+        view.keepPlaceholdersOnOneLine()
         binding.prizeAddSubtitle.text = getString(R.string.prize_add_subtitle, requireArguments().getString(ARG_ARTIST_NAME))
         binding.prizeEmpty.addEmptyNote(getString(R.string.prize_add_empty))
         setUpList(binding)
