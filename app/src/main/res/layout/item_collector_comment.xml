@@ -14,13 +14,14 @@
         android:paddingTop="4dp"
         android:paddingBottom="16dp">
 
-        <!-- Alto mínimo de 48dp para que el enlace sea fácil de tocar -->
+        <!-- Alto y ancho mínimos de 48dp para que el enlace sea fácil de tocar, también con un nombre corto como «Re» (lo encontró Robo) -->
         <TextView
             android:id="@+id/commentAlbum"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
             android:gravity="center_vertical"
+            android:minWidth="48dp"
             android:minHeight="48dp"
             android:textAppearance="@style/TextAppearance.Vinilos.BodyLarge.SemiBold"
             android:textColor="@color/md_primary"
