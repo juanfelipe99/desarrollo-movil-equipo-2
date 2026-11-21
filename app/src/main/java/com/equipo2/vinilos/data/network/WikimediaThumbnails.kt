@@ -5,6 +5,8 @@ import coil3.request.ErrorResult
 import coil3.request.ImageResult
 import coil3.size.Dimension
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import kotlin.math.abs
+import kotlin.math.ln
 
 /**
  * Pide a Wikimedia la miniatura del ancho en que se va a mostrar cada imagen, en lugar de la que trae la API.
@@ -29,17 +31,24 @@ private val THUMBNAIL_SIZE = Regex("/\\d+px-")
 private val PHOTO = Regex("\\.jpe?g$", RegexOption.IGNORE_CASE)
 
 /**
- * Miniatura de [url] del ancho permitido por Wikimedia que alcanza para [widthPx], o null si no hay que cambiarla.
+ * Miniatura de [url] del ancho permitido por Wikimedia más cercano a [widthPx], o null si no hay que cambiarla.
  * Cambia las miniaturas de cualquier tamaño y las fotos originales de Commons. Las portadas originales de la Wikipedia
  * en inglés ya son pequeñas y su miniatura pesa más que el original, así que no se cambian, y tampoco los PNG o SVG.
  */
 internal fun wikimediaThumbnail(url: String, widthPx: Int): String? {
     val parsed = url.toHttpUrlOrNull() ?: return null
     if (parsed.host !in WIKIMEDIA_HOSTS) return null
-    val width = THUMBNAIL_WIDTHS.firstOrNull { it >= widthPx } ?: THUMBNAIL_WIDTHS.last()
+    // El ancho permitido más cercano al de la vista. Subir al siguiente descargaba, por ejemplo, 960 px para una celda
+    // de 540, más pesada que muchas portadas originales y más grande que algunas, que Wikimedia rechaza
+    val width = THUMBNAIL_WIDTHS.minBy { abs(ln(it.toDouble() / widthPx)) }
     val path = parsed.encodedPath
     val thumbnailPath = when {
-        "/thumb/" in path && THUMBNAIL_SIZE.containsMatchIn(path) -> path.replace(THUMBNAIL_SIZE, "/${width}px-")
+        "/thumb/" in path && THUMBNAIL_SIZE.containsMatchIn(path) -> {
+            // Una miniatura solo se achica: una más grande podría superar al original, y Wikimedia la rechaza
+            val current = THUMBNAIL_SIZE.find(path)!!.value.filter(Char::isDigit).toInt()
+            if (width >= current) return null
+            path.replace(THUMBNAIL_SIZE, "/${width}px-")
+        }
         path.startsWith("/wikipedia/commons/") && PHOTO.containsMatchIn(path) -> {
             val file = path.substringAfterLast('/')
             path.replaceFirst("/wikipedia/commons/", "/wikipedia/commons/thumb/") + "/${width}px-$file"

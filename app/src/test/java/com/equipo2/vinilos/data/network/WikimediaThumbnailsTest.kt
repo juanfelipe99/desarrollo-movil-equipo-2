@@ -10,23 +10,21 @@ class WikimediaThumbnailsTest {
         "?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
 
     @Test
-    fun unaMiniaturaGrande_sePideDelAnchoPermitidoQueAlcanzaParaLaVista() {
+    fun unaMiniaturaGrande_sePideDelAnchoPermitidoMasCercanoAlDeLaVista() {
         assertEquals(
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Who_-_1975.jpg/250px-Who_-_1975.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Who_-_1975.jpg/120px-Who_-_1975.jpg",
             wikimediaThumbnail(who, 146),
         )
         assertEquals(
             "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Who_-_1975.jpg/500px-Who_-_1975.jpg",
-            wikimediaThumbnail(who, 442),
+            wikimediaThumbnail(who, 540),
         )
     }
 
     @Test
-    fun unaVistaMasAnchaQueLaMiniaturaMasGrande_pideLaDe960() {
-        assertEquals(
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Who_-_1975.jpg/960px-Who_-_1975.jpg",
-            wikimediaThumbnail(who, 1400),
-        )
+    fun unaMiniaturaNoSeAgranda_porquePodriaSuperarAlOriginal() {
+        assertNull(wikimediaThumbnail(who, 1400))
+        assertNull(wikimediaThumbnail(who, 800))
     }
 
     @Test
@@ -43,6 +41,13 @@ class WikimediaThumbnailsTest {
         assertNull(wikimediaThumbnail("https://upload.wikimedia.org/wikipedia/commons/3/3b/Dark_Side_of_the_Moon.png", 442))
         assertNull(wikimediaThumbnail("https://i.pinimg.com/564x/aa/5f/ed/aa5fed7fac61cc8f41d1e79db917a7cd.jpg", 442))
         assertNull(wikimediaThumbnail("no es una url", 442))
+    }
+
+    @Test
+    fun entreDosAnchosPermitidos_eligeElMasCercano() {
+        val base = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Who_-_1975.jpg/%dpx-Who_-_1975.jpg"
+        assertEquals(base.format(250), wikimediaThumbnail(who, 200))
+        assertEquals(base.format(330), wikimediaThumbnail(who, 300))
     }
 
     @Test
