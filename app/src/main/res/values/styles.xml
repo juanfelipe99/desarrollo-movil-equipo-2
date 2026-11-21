@@ -227,6 +227,13 @@
         <item name="android:textColor">@color/md_on_surface</item>
     </style>
 
+    <!-- Título del mensaje dentro de una lista, debajo de su encabezado (vacío y sin resultados), más chico que el de pantalla completa -->
+    <style name="TextAppearance.Vinilos.StateTitleCompact" parent="TextAppearance.Vinilos.HeadlineSmall">
+        <item name="android:textSize">20sp</item>
+        <item name="lineHeight">26sp</item>
+        <item name="android:lineHeight" tools:targetApi="28">26sp</item>
+    </style>
+
     <style name="TextAppearance.Vinilos.TitleLarge" parent="TextAppearance.Material3.TitleLarge">
         <item name="android:fontFamily">@font/roboto_medium</item>
         <item name="fontFamily">@font/roboto_medium</item>
@@ -312,4 +319,8 @@
         <item name="lineHeight">18sp</item>
         <item name="android:lineHeight" tools:targetApi="28">18sp</item>
     </style>
+
+    <!-- Textos angostos que con la letra grande podían partir una palabra («Desaparicione» y «s»).
+         En Android 6 y posteriores la parten con guion por sílabas (values-v23). En Android 5 no existe la opción -->
+    <style name="Widget.Vinilos.Hyphenated" parent="" />
 </resources>

@@ -3,6 +3,7 @@ package com.equipo2.vinilos.data.network.artist
 import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.network.album.AlbumDto
 import com.equipo2.vinilos.data.network.album.PerformerDto
+import com.equipo2.vinilos.data.network.album.toAlbum
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -66,6 +67,7 @@ class AlbumCandidatesTest {
         assertTrue(albumCandidates(emptyList(), artistAlbumIds = setOf(1)).isEmpty())
     }
 
+    // Los álbumes llegan de la API y se convierten como en la app, para revisar también el tipo de cada intérprete
     private fun album(id: Int, name: String, vararg performers: PerformerDto) = AlbumDto(
         id = id,
         name = name,
@@ -75,5 +77,5 @@ class AlbumCandidatesTest {
         genre = "Salsa",
         recordLabel = "Fania Records",
         performers = performers.toList(),
-    )
+    ).toAlbum()
 }

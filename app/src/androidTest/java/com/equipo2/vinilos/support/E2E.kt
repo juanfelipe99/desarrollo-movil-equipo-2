@@ -13,6 +13,7 @@ import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.scrollTo
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
@@ -107,6 +108,14 @@ fun RecyclerView.isSettled() = !hasPendingAdapterUpdates() && !isAnimating && !i
 /** Espera a que se vea el aviso, que aparece cuando responde la API y se desliza unos instantes. */
 fun checkSnackbar(@StringRes text: Int) {
     waitUntil { runCatching { onView(withText(text)).check(matches(isDisplayed())) }.isSuccess }
+}
+
+/**
+ * Espera a que se vaya el aviso. Mientras está, tapa lo que queda justo encima de los botones de abajo,
+ * y un toque ahí le llega al aviso y no a la vista.
+ */
+fun waitForSnackbarGone(@StringRes text: Int) {
+    waitUntil(timeoutMs = 15_000) { runCatching { onView(withText(text)).check(doesNotExist()) }.isSuccess }
 }
 
 /** Espera algo que Espresso no vigila, como un guardado en DataStore. */

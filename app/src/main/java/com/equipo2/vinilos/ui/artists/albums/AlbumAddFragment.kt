@@ -113,12 +113,14 @@ class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
                         getString(R.string.album_add_all_added_title),
                         getString(R.string.album_add_all_added_body),
                         R.drawable.ic_album,
+                        compact = true,
                     )
                 } else {
                     binding.albumAddMessage.showEmpty(
                         getString(R.string.album_add_empty_title),
                         getString(R.string.album_add_empty_body),
                         R.drawable.ic_album,
+                        compact = true,
                     )
                 }
                 is UiState.Error -> if (reasons.artistMissing) {
@@ -146,6 +148,7 @@ class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
                         getString(R.string.album_add_no_results_title),
                         getString(R.string.album_add_no_results_body, query.trim()),
                         R.drawable.ic_album,
+                        compact = true,
                     )
                 }
             }
@@ -158,6 +161,7 @@ class AlbumAddFragment : Fragment(R.layout.fragment_album_add) {
             binding.albumAddLoading.root.isVisible = state == UiState.Loading
             binding.albumAddMessage.root.isVisible = state == UiState.Empty || state is UiState.Error || noResults
             binding.albumAddList.isVisible = state is UiState.Success && !noResults
+            binding.albumAddListDivider.isVisible = binding.albumAddList.isVisible
         }
     }
 

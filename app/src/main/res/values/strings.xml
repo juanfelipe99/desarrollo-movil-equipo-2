@@ -49,4 +49,18 @@
     <string name="badge_new">Nuevo</string>
 
     <string name="cd_close_snackbar">Cerrar aviso</string>
+    <!-- Acción de los enlaces a un detalle. TalkBack la lee como «toca dos veces para ver su detalle» -->
+    <string name="action_view_detail">ver su detalle</string>
+    <!-- Duración de un track como la lee TalkBack, por ejemplo «5 minutos y 5 segundos» en vez de «5:05» -->
+    <plurals name="spoken_minutes">
+        <item quantity="one">%d minuto</item>
+        <item quantity="many">%d minutos</item>
+        <item quantity="other">%d minutos</item>
+    </plurals>
+    <plurals name="spoken_seconds">
+        <item quantity="one">%d segundo</item>
+        <item quantity="many">%d segundos</item>
+        <item quantity="other">%d segundos</item>
+    </plurals>
+    <string name="spoken_duration">%1$s y %2$s</string>
 </resources>

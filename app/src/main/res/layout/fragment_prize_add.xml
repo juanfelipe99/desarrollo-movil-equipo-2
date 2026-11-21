@@ -182,7 +182,7 @@
             android:layout_height="wrap_content">
 
             <!-- Sin alinear por el texto: al mostrar «Guardando…» con el círculo, el botón bajaba y quedaba cortado -->
-            <LinearLayout
+            <com.equipo2.vinilos.ui.common.ButtonBar
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:baselineAligned="false"
@@ -214,7 +214,7 @@
                     app:backgroundTint="@color/button_save_background"
                     app:iconGravity="textStart"
                     app:iconTint="@color/md_on_surface_variant" />
-            </LinearLayout>
+            </com.equipo2.vinilos.ui.common.ButtonBar>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 </LinearLayout>

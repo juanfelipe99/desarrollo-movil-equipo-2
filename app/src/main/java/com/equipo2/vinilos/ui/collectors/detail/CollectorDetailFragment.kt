@@ -21,7 +21,12 @@ import com.equipo2.vinilos.ui.albums.detail.AlbumDetailFragment
 import com.equipo2.vinilos.ui.common.bindPullToRefresh
 import com.equipo2.vinilos.ui.common.collectWhileVisible
 import com.equipo2.vinilos.ui.common.initialsOf
+import com.equipo2.vinilos.ui.common.markAsHeading
+import com.equipo2.vinilos.ui.common.markAsSectionTitle
 import com.equipo2.vinilos.ui.common.navigateIfPossible
+import com.equipo2.vinilos.ui.common.readAsOne
+import com.equipo2.vinilos.ui.common.setPhoneNumber
+import com.equipo2.vinilos.ui.common.setSectionCount
 import com.equipo2.vinilos.ui.state.UiState
 import com.equipo2.vinilos.ui.state.addEmptyNote
 import com.equipo2.vinilos.ui.state.showError
@@ -76,14 +81,19 @@ class CollectorDetailFragment : Fragment(R.layout.fragment_collector_detail) {
         binding.collectorSubtitle.text = resources.getQuantityString(R.plurals.collector_detail_subtitle, albumCount, albumCount)
 
         showContact(binding.collectorPhone, R.drawable.ic_phone, R.string.collector_detail_phone_label, detail.telephone)
+        if (detail.telephone.isNotBlank()) binding.collectorPhone.infoValue.setPhoneNumber(detail.telephone)
         showContact(binding.collectorEmail, R.drawable.ic_mail, R.string.collector_detail_email_label, collector.email)
 
         (binding.favoritesList.adapter as FavoriteArtistAdapter).submitList(detail.favorites)
         binding.favoritesList.isVisible = detail.favorites.isNotEmpty()
         showEmptyNote(binding.favoritesEmpty, detail.favorites.isEmpty(), R.string.collector_detail_favorites_empty_body)
 
-        binding.collectorAlbumsCount.text =
-            resources.getQuantityString(R.plurals.collector_detail_albums_count, albumCount, albumCount)
+        binding.collectorAlbumsCount.setSectionCount(
+            resources.getQuantityString(R.plurals.collector_detail_albums_count, albumCount, albumCount),
+        )
+        binding.favoritesTitle.markAsHeading()
+        binding.collectorAlbumsTitleGroup.markAsSectionTitle()
+        binding.commentsTitle.markAsHeading()
         (binding.collectorAlbumsList.adapter as CollectorAlbumAdapter).submitList(detail.albums)
         binding.collectorAlbumsList.isVisible = detail.albums.isNotEmpty()
         showEmptyNote(binding.collectorAlbumsEmpty, detail.albums.isEmpty(), R.string.collector_detail_albums_empty_body)
@@ -98,6 +108,7 @@ class CollectorDetailFragment : Fragment(R.layout.fragment_collector_detail) {
         row.infoIcon.setImageResource(icon)
         row.infoLabel.setText(label)
         row.infoValue.text = value.ifBlank { getString(R.string.collector_detail_no_data) }
+        row.root.readAsOne()
     }
 
     private fun showEmptyNote(container: ViewGroup,isEmpty: Boolean, @StringRes body: Int) {

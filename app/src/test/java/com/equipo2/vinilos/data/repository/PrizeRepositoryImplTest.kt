@@ -5,6 +5,8 @@ import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.model.NewPrize
 import com.equipo2.vinilos.data.model.Prize
 import com.equipo2.vinilos.data.network.ApiClient
+import com.equipo2.vinilos.data.network.artist.ArtistApi
+import com.equipo2.vinilos.data.network.artist.PrizeCatalog
 import com.equipo2.vinilos.data.network.artist.PrizeServiceAdapter
 import com.equipo2.vinilos.support.FakeApiServer
 import kotlinx.coroutines.test.runTest
@@ -219,6 +221,84 @@ class PrizeRepositoryImplTest {
         repository.createPrize(gardel).getOrThrow()
 
         assertEquals(0, changes)
+    }
+
+    // Catálogo compartido con el detalle del artista
+
+    @Test
+    fun getPrizeCandidates_otraVez_usaLosPremiosGuardados_yPideSoloElArtista() = runTest {
+        server.respond("prizes", PRIZES_JSON)
+        server.respond("musicians/100", MUSICIAN_JSON)
+
+        repository.getPrizeCandidates(100, ArtistType.MUSICIAN).getOrThrow()
+        repository.getPrizeCandidates(100, ArtistType.MUSICIAN).getOrThrow()
+
+        assertEquals(listOf("musicians/100", "musicians/100"), server.requests.filter { it != "prizes" })
+        assertEquals(1, server.requests.count { it == "prizes" })
+    }
+
+    @Test
+    fun getPrizeCandidates_conElCatalogoQueYaCargoElDetalle_noPideLosPremios() = runTest {
+        server.respond("prizes", PRIZES_JSON)
+        server.respond("musicians/100", MUSICIAN_JSON)
+        val catalog = PrizeCatalog(ApiClient(server.baseUrl).create(ArtistApi::class.java))
+        catalog.get()
+        server.requests.clear()
+
+        val repository = PrizeRepositoryImpl(PrizeServiceAdapter(ApiClient(server.baseUrl), catalog))
+        repository.getPrizeCandidates(100, ArtistType.MUSICIAN).getOrThrow()
+
+        assertEquals(listOf("musicians/100"), server.requests)
+    }
+
+    @Test
+    fun addPrize_olvidaLosPremiosGuardados_paraMostrarLaFechaNueva() = runTest {
+        server.respond("prizes", PRIZES_JSON)
+        server.respond("musicians/100", MUSICIAN_JSON)
+        server.respond("prizes/100/musicians/100", DELIVERY_JSON)
+
+        repository.getPrizeCandidates(100, ArtistType.MUSICIAN).getOrThrow()
+        repository.addPrize(100, ArtistType.MUSICIAN, grammy, date).getOrThrow()
+        repository.getPrizeCandidates(100, ArtistType.MUSICIAN).getOrThrow()
+
+        assertEquals(2, server.requests.count { it == "prizes" })
+    }
+
+    @Test
+    fun createPrize_olvidaLosPremiosGuardados_paraQueElNuevoSalgaEnLaLista() = runTest {
+        server.respond("prizes", PRIZES_JSON)
+        server.respond("musicians/100", MUSICIAN_JSON)
+        repository.getPrizeCandidates(100, ArtistType.MUSICIAN).getOrThrow()
+
+        server.respond("prizes", CREATED_PRIZE_JSON)
+        repository.createPrize(gardel).getOrThrow()
+        server.respond("prizes", PRIZES_JSON)
+        repository.getPrizeCandidates(100, ArtistType.MUSICIAN).getOrThrow()
+
+        // La primera consulta, la creación y la consulta después de crear
+        assertEquals(3, server.requests.count { it == "prizes" })
+    }
+
+    // Detalle que la app ya tiene
+
+    @Test
+    fun getPrizeCandidates_conLasEntregasDelDetalleDeLaApp_noPideElArtista() = runTest {
+        server.respond("prizes", PRIZES_JSON)
+        // La entrega 100 es la del Grammy que trae MUSICIAN_JSON, aquí sale del detalle sin pedir el músico
+        val adapter = PrizeServiceAdapter(ApiClient(server.baseUrl), receivedDeliveries = { _, _ -> setOf(100) })
+
+        val candidates = PrizeRepositoryImpl(adapter).getPrizeCandidates(100, ArtistType.MUSICIAN).getOrThrow()
+
+        assertEquals(listOf("prizes"), server.requests)
+        assertEquals(listOf(LocalDate.of(1978, 12, 10)), candidates.first().receivedDates)
+    }
+
+    @Test
+    fun getPrizeCandidates_siElDetalleDeLaAppDiceQueElArtistaNoExiste_devuelveNoEncontrado() = runTest {
+        server.respond("prizes", PRIZES_JSON)
+        val adapter = PrizeServiceAdapter(ApiClient(server.baseUrl), receivedDeliveries = { _, _ -> throw DataError.NotFound() })
+
+        assertTrue(PrizeRepositoryImpl(adapter).getPrizeCandidates(100, ArtistType.MUSICIAN).exceptionOrNull() is DataError.NotFound)
     }
 
     private companion object {

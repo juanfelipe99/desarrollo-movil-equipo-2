@@ -99,6 +99,7 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
                     getString(R.string.member_add_empty_title),
                     getString(R.string.member_add_empty_body),
                     R.drawable.ic_groups,
+                    compact = true,
                 )
                 is UiState.Error -> if (bandMissing) {
                     binding.memberMessage.showEmpty(
@@ -115,6 +116,7 @@ class MemberAddFragment : Fragment(R.layout.fragment_member_add) {
                         getString(R.string.member_add_no_results_title),
                         getString(R.string.member_add_no_results_body, query.trim()),
                         R.drawable.ic_search,
+                        compact = true,
                     )
                 }
             }

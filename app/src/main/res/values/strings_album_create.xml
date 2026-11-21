@@ -36,4 +36,7 @@
     <string name="cd_create_album">Crear álbum</string>
     <string name="cd_close_without_saving">Cerrar sin guardar</string>
     <string name="cd_open_date_picker">Abrir el selector de fecha</string>
+    <!-- Ícono de los desplegables. Sin esto TalkBack lee «Show dropdown menu», en inglés y repetido en los dos -->
+    <string name="cd_open_genres">Ver los géneros</string>
+    <string name="cd_open_record_labels">Ver los sellos discográficos</string>
 </resources>

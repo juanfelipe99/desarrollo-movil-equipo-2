@@ -8,6 +8,8 @@ import com.equipo2.vinilos.databinding.ViewStateMessageBinding
 fun ViewStateMessageBinding.showError(objectName: CharSequence, reason: ErrorReason, onRetry: () -> Unit) {
     val context = root.context
 
+    // El error ocupa la pantalla completa, aunque antes el mismo mensaje se haya mostrado compacto
+    useSize(compact = false)
     stateIconCircle.isVisible = true
     stateIcon.setImageResource(if (reason == ErrorReason.CONNECTION) R.drawable.ic_cloud_off else R.drawable.ic_error)
 
@@ -16,4 +18,5 @@ fun ViewStateMessageBinding.showError(objectName: CharSequence, reason: ErrorRea
 
     stateRetry.isVisible = true
     stateRetry.setOnClickListener { onRetry() }
+    announceTitleWhenShown()
 }

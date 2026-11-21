@@ -52,6 +52,7 @@
 
         <TextView
             android:id="@+id/albumName"
+            style="@style/Widget.Vinilos.Hyphenated"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="12dp"
@@ -67,6 +68,7 @@
 
         <TextView
             android:id="@+id/albumPerformers"
+            style="@style/Widget.Vinilos.Hyphenated"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="12dp"

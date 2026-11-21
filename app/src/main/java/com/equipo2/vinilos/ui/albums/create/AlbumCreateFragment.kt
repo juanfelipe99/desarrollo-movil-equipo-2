@@ -14,6 +14,7 @@ import com.equipo2.vinilos.data.model.AlbumCatalog
 import com.equipo2.vinilos.databinding.FragmentAlbumCreateBinding
 import com.equipo2.vinilos.ui.common.buttonProgress
 import com.equipo2.vinilos.ui.common.collectWhileVisible
+import com.equipo2.vinilos.ui.common.keepPlaceholdersOnOneLine
 import com.equipo2.vinilos.ui.common.keepSnackbarsAbove
 import com.equipo2.vinilos.ui.common.reconnectDatePicker
 import com.equipo2.vinilos.ui.common.releaseTextFieldsOnDestroyView
@@ -23,9 +24,9 @@ import com.equipo2.vinilos.ui.common.showSnackbar
 import com.equipo2.vinilos.ui.common.toShortText
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputLayout
+import java.time.LocalDate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import java.time.LocalDate
 
 /** Formulario para crear un álbum (HU07). */
 class AlbumCreateFragment : Fragment(R.layout.fragment_album_create) {
@@ -37,6 +38,7 @@ class AlbumCreateFragment : Fragment(R.layout.fragment_album_create) {
 
         val binding = FragmentAlbumCreateBinding.bind(view)
         releaseTextFieldsOnDestroyView(view)
+        view.keepPlaceholdersOnOneLine()
         setUpTextFields(binding)
         setUpCoverPreview(binding)
         setUpReleaseDate(binding)
@@ -77,6 +79,8 @@ class AlbumCreateFragment : Fragment(R.layout.fragment_album_create) {
         }
         binding.releaseDateInput.setOnClickListener { openPicker() }
         binding.releaseDateField.setEndIconOnClickListener { openPicker() }
+        // El ícono del calendario es un botón que se puede marcar en Material, y TalkBack decía «no marcado»
+        binding.releaseDateField.isEndIconCheckable = false
         reconnectDatePicker(DATE_PICKER_TAG, onPicked)
 
         val releaseDate = viewModel.form.map { it.releaseDate }.distinctUntilChanged()
