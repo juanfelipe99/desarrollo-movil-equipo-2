@@ -17,6 +17,11 @@ class OwnData {
     private val albums = mutableListOf<Int>()
     private val musicians = mutableListOf<Int>()
     private val bands = mutableListOf<Int>()
+    private val collectors = mutableListOf<Int>()
+
+    /** Comentarios creados, con el álbum al que pertenecen, que la API pide para borrarlos. */
+    private val comments = mutableListOf<Pair<Int, Int>>()
+    private val prizes = mutableListOf<Int>()
     private var count = 0
 
     /** Nombre único de esta ejecución, por ejemplo «E2E HU04 Banda 34-123456 1». */
@@ -30,10 +35,34 @@ class OwnData {
 
     fun band(name: String): Int = BackVynils.createBand(name).also { bands += it }
 
-    /** Primero los álbumes y luego los artistas, que la API no borra si una banda aún tiene integrantes. */
+    fun collector(name: String): Int = BackVynils.createCollector(name).also { collectors += it }
+
+    fun comment(albumId: Int, collectorId: Int, description: String, rating: Int): Int =
+        BackVynils.addComment(albumId, collectorId, description, rating).also { comments += albumId to it }
+
+    /** Las pruebas solo entregan premios creados aquí, así al borrarlos se van también sus entregas. */
+    fun prize(name: String, organization: String = "Organización E2E"): Int =
+        BackVynils.createPrize(name, organization).also { prizes += it }
+
+    /** Un premio que creó la app durante la prueba (HU13), para borrarlo al terminar con lo demás. */
+    fun keepPrize(id: Int) {
+        if (id !in prizes) prizes += id
+    }
+
+    /**
+     * Primero los comentarios y los coleccionistas, que la API no borra mientras tengan álbumes o favoritos.
+     * Después los premios con sus entregas, porque la API no borra un artista que tenga premios.
+     * Al final los álbumes y los artistas, que tampoco se borran si una banda aún tiene integrantes.
+     */
     fun deleteAll() {
+        comments.forEach { (albumId, commentId) -> BackVynils.deleteComment(albumId, commentId) }
+        collectors.forEach(BackVynils::deleteCollector)
+        prizes.forEach(BackVynils::deletePrize)
         albums.forEach(BackVynils::deleteAlbum)
         BackVynils.deleteArtists(musicians, bands)
+        comments.clear()
+        collectors.clear()
+        prizes.clear()
         albums.clear()
         musicians.clear()
         bands.clear()

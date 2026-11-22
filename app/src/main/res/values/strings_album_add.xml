@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="es">
+    <string name="album_add_title">Agregar álbum</string>
+    <string name="album_add_subtitle">Elige el álbum que quieres agregar a %1$s.</string>
+    <string name="album_add_search_hint">Buscar álbum o intérprete</string>
+    <string name="cd_album_add_search_clear">Borrar búsqueda</string>
+    <!-- Sin búsqueda se usa «%d álbumes en el catálogo» del catálogo (HU01) -->
+    <plurals name="album_add_result_count">
+        <item quantity="one">%d resultado</item>
+        <item quantity="many">%d resultados</item>
+        <item quantity="other">%d resultados</item>
+    </plurals>
+    <string name="album_add_no_results_title">Sin resultados</string>
+    <string name="album_add_no_results_body">Ningún álbum ni intérprete coincide con %1$s.</string>
+
+    <!-- «1978 · Salsa» como en el catálogo (HU01), seguido de los intérpretes: «1978 · Salsa · Rubén Blades» -->
+    <string name="album_candidate_details">%1$s · %2$s</string>
+    <string name="album_candidate_already_added">Ya está en sus álbumes</string>
+    <string name="cd_album_selected">Elegido</string>
+    <string name="cd_album_not_selected">No elegido</string>
+
+    <string name="album_add_loading">Cargando álbumes…</string>
+    <string name="album_add_object">los álbumes</string>
+    <string name="album_add_empty_title">Aún no hay álbumes en el catálogo</string>
+    <string name="album_add_empty_body">Crea uno desde la lista de álbumes con el botón +.</string>
+    <string name="album_add_all_added_title">Ya tiene todos los álbumes</string>
+    <string name="album_add_all_added_body">Todos los álbumes del catálogo ya están en sus álbumes. Crea uno nuevo desde la lista de álbumes con el botón +.</string>
+    <string name="album_add_artist_missing_title">Este artista ya no existe</string>
+    <string name="album_add_artist_missing_body">Puede que lo hayan eliminado. Cierra esta pantalla para volver.</string>
+
+    <!-- Reemplazo de intérpretes al agregar a una banda (T5) -->
+    <string name="album_add_band_notice">Al agregar un álbum a una banda, la banda reemplaza a los intérpretes que tenga el álbum.</string>
+    <string name="album_candidate_replaces">Se reemplazará a %1$s</string>
+    <!-- Une los nombres: «Willie Colón y Rubén Blades», o «A, B y C» -->
+    <string name="performer_names_separator">", "</string>
+    <string name="performer_names_last">%1$s y %2$s</string>
+    <string name="album_replace_title">¿Reemplazar intérpretes?</string>
+    <!-- %1$s el álbum, %2$s los intérpretes que tiene, %3$s la banda -->
+    <plurals name="album_replace_body">
+        <item quantity="one">%1$s tiene como intérprete a %2$s. Si lo agregas a %3$s, el álbum quedará solo con %3$s como intérprete.</item>
+        <item quantity="many">%1$s tiene como intérpretes a %2$s. Si lo agregas a %3$s, el álbum quedará solo con %3$s como intérprete.</item>
+        <item quantity="other">%1$s tiene como intérpretes a %2$s. Si lo agregas a %3$s, el álbum quedará solo con %3$s como intérprete.</item>
+    </plurals>
+    <string name="album_replace_confirm">Agregar y reemplazar</string>
+
+    <string name="error_album_required">Elige un álbum.</string>
+    <string name="album_add_saving">Agregando…</string>
+    <string name="snackbar_album_added">Álbum agregado</string>
+
+    <string name="error_album_add_connection">No pudimos agregar el álbum. Revisa tu conexión a internet.</string>
+    <string name="error_album_add_failed">No pudimos agregar el álbum. Inténtalo de nuevo.</string>
+    <string name="error_album_add_not_found">El álbum o el artista ya no existen. Actualizamos el listado.</string>
+</resources>

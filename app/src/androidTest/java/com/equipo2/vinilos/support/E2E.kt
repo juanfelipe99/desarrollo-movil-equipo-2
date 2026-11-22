@@ -13,11 +13,13 @@ import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.scrollTo
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
+import androidx.test.espresso.matcher.ViewMatchers.isSelected
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.platform.app.InstrumentationRegistry
@@ -29,6 +31,19 @@ import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.TypeSafeMatcher
+
+/**
+ * Toca una pestaña de la barra inferior y espera a que quede marcada.
+ * En emuladores lentos el toque a veces se pierde y la app sigue en la pestaña anterior, por eso lo repite si hace falta.
+ */
+fun openTab(@IdRes tab: Int) {
+    onView(withId(tab)).perform(click())
+    waitUntil {
+        val selected = runCatching { onView(withId(tab)).check(matches(isSelected())) }.isSuccess
+        if (!selected) runCatching { onView(withId(tab)).perform(click()) }
+        selected
+    }
+}
 
 /** Título de la barra superior, sin confundirlo con textos iguales de la pantalla. */
 fun toolbarTitle(@StringRes title: Int): Matcher<View> = allOf(withText(title), isDescendantOfA(withId(R.id.toolbar)))
@@ -93,6 +108,14 @@ fun RecyclerView.isSettled() = !hasPendingAdapterUpdates() && !isAnimating && !i
 /** Espera a que se vea el aviso, que aparece cuando responde la API y se desliza unos instantes. */
 fun checkSnackbar(@StringRes text: Int) {
     waitUntil { runCatching { onView(withText(text)).check(matches(isDisplayed())) }.isSuccess }
+}
+
+/**
+ * Espera a que se vaya el aviso. Mientras está, tapa lo que queda justo encima de los botones de abajo,
+ * y un toque ahí le llega al aviso y no a la vista.
+ */
+fun waitForSnackbarGone(@StringRes text: Int) {
+    waitUntil(timeoutMs = 15_000) { runCatching { onView(withText(text)).check(doesNotExist()) }.isSuccess }
 }
 
 /** Espera algo que Espresso no vigila, como un guardado en DataStore. */

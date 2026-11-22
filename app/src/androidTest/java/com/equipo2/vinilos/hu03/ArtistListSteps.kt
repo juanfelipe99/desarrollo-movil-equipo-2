@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
-import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
@@ -20,6 +19,7 @@ import com.equipo2.vinilos.data.model.ArtistType
 import com.equipo2.vinilos.data.repository.ArtistRepository
 import com.equipo2.vinilos.support.enterAs
 import com.equipo2.vinilos.support.isSettled
+import com.equipo2.vinilos.support.openTab
 import com.equipo2.vinilos.support.waitUntil
 import com.equipo2.vinilos.ui.artists.list.ArtistAdapter
 import org.hamcrest.Matcher
@@ -58,7 +58,7 @@ fun testBand(id: Int, name: String, creationYear: Int) =
 /** Entra como visitante y abre la pestaña Artistas de la barra inferior. */
 fun openArtists() {
     enterAs(collector = false)
-    onView(withId(R.id.artistsGraph)).perform(click())
+    openTab(R.id.artistsGraph)
 }
 
 /** Nombre de una fila del listado, sin confundirlo con otros textos de la pantalla. */

@@ -157,7 +157,7 @@ class MainActivity : AppCompatActivity() {
     /** Oculta las barras que no lleva cada pantalla y muestra las que se habían escondido al bajar. */
     private fun updateBars(@IdRes destinationId: Int) {
         val roleSelect = destinationId == R.id.roleSelectFragment
-        // Crear álbum y Agregar integrante ocupan la pantalla y se cierran con una X
+        // Crear álbum, Agregar integrante y Agregar premio ocupan la pantalla y se cierran con una X
         val form = destinationId in FORM_DESTINATIONS
 
         // Se ocultan la barra y la línea, no el AppBarLayout, porque sin él la pantalla quedaría debajo de la barra de estado
@@ -199,7 +199,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private companion object {
-        // Pantallas que ocupan todo y se cierran con una X. Agregar integrante está en las pestañas Artistas y Álbumes
-        val FORM_DESTINATIONS = setOf(R.id.albumCreateFragment, R.id.memberAddFragment, R.id.albumMemberAddFragment)
+        // Pantallas que ocupan todo y se cierran con una X. Las de agregar integrante y premio están en las pestañas Artistas y Álbumes,
+        // y la de agregar álbum en las tres, porque el detalle del artista se abre desde cualquiera
+        val FORM_DESTINATIONS = setOf(
+            R.id.albumCreateFragment,
+            R.id.memberAddFragment,
+            R.id.albumMemberAddFragment,
+            R.id.prizeAddFragment,
+            R.id.albumPrizeAddFragment,
+            // Crear premio se abre desde Agregar premio en las tres pestañas (HU13)
+            R.id.prizeCreateFragment,
+            R.id.albumPrizeCreateFragment,
+            R.id.collectorPrizeCreateFragment,
+            R.id.albumAddFragment,
+            R.id.albumAlbumAddFragment,
+            R.id.collectorAlbumAddFragment,
+        )
     }
 }

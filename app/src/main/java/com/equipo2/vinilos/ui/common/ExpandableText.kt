@@ -9,20 +9,30 @@ private const val PREVIEW_LENGTH = 170
 /**
  * Muestra [content] en [text]. Los textos largos se cortan en la última palabra antes de 170 caracteres,
  * y [toggle] alterna entre «Ver más» y «Ver menos». Lo usan los detalles de álbum (HU02) y de artista (HU04).
+ *
+ * Empieza como diga [expanded] y avisa cada cambio con [onExpandedChange]. Quien lo guarde decide cuánto dura:
+ * en el ViewModel sigue igual al redibujar la pantalla, al volver de otra y al girar.
  */
-fun bindExpandableText(text: TextView, toggle: TextView, content: String) {
+fun bindExpandableText(
+    text: TextView,
+    toggle: TextView,
+    content: String,
+    expanded: Boolean = false,
+    onExpandedChange: (Boolean) -> Unit = {},
+) {
     val isLong = content.length > PREVIEW_LENGTH
     val preview = content.take(PREVIEW_LENGTH).substringBeforeLast(' ').trimEnd() + "…"
-    var expanded = false
+    var isExpanded = expanded
 
     fun render() {
-        text.text = if (expanded || !isLong) content else preview
-        toggle.setText(if (expanded) R.string.description_collapse else R.string.description_expand)
+        text.text = if (isExpanded || !isLong) content else preview
+        toggle.setText(if (isExpanded) R.string.description_collapse else R.string.description_expand)
     }
 
     toggle.isVisible = isLong
     toggle.setOnClickListener {
-        expanded = !expanded
+        isExpanded = !isExpanded
+        onExpandedChange(isExpanded)
         render()
     }
     render()

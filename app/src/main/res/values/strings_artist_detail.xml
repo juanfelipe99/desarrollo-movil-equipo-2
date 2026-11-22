@@ -6,7 +6,7 @@
     <string name="artist_detail_creation_date_label">Fecha de creación</string>
     <string name="artist_detail_band_label">Banda</string>
     <string name="artist_detail_no_band">No pertenece a una banda</string>
-    <string name="cd_artist_detail_band">Banda: %1$s. Toca para ver su detalle</string>
+    <string name="cd_artist_detail_band">Banda: %1$s</string>
 
     <string name="artist_detail_description_title">Descripción</string>
 
@@ -28,6 +28,8 @@
         <item quantity="other">· %d álbumes</item>
     </plurals>
     <string name="artist_detail_albums_empty_body">Este artista aún no tiene álbumes registrados.</string>
+    <string name="artist_detail_albums_empty_body_collector">Este artista aún no tiene álbumes. Usa «Agregar álbum» para asociarle uno.</string>
+    <string name="artist_detail_add_album">Agregar álbum</string>
 
     <string name="artist_detail_prizes_title">Premios</string>
     <plurals name="artist_detail_prizes_count">
@@ -36,6 +38,8 @@
         <item quantity="other">· %d premios</item>
     </plurals>
     <string name="artist_detail_prizes_empty_body">Sin premios registrados.</string>
+    <string name="artist_detail_prizes_empty_body_collector">Sin premios registrados. Usa «Agregar premio» para asociarle uno.</string>
+    <string name="artist_detail_add_prize">Agregar premio</string>
 
     <string name="artist_detail_loading">Cargando artista…</string>
     <string name="artist_detail_object">el artista</string>

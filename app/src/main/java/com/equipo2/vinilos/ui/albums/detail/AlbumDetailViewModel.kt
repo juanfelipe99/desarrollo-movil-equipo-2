@@ -32,6 +32,13 @@ class AlbumDetailViewModel(
     /** Ids de los tracks agregados desde esta pantalla, que se marcan como «Nuevo». */
     val newTrackIds: StateFlow<IntArray> = savedState.getStateFlow(NEW_TRACK_IDS, IntArray(0))
 
+    /** Si la descripción larga se ve completa. Sigue igual al redibujar la pantalla, al volver de otra y al girar. */
+    var descriptionExpanded: Boolean
+        get() = savedState[DESCRIPTION_EXPANDED] ?: false
+        set(value) {
+            savedState[DESCRIPTION_EXPANDED] = value
+        }
+
     private var loading: Job? = null
 
     val pullRefresh = PullRefresh(viewModelScope)
@@ -44,7 +51,7 @@ class AlbumDetailViewModel(
 
     /** Agrega el track al final de la lista sin volver a pedir el álbum, y lo marca como «Nuevo». */
     fun onTrackAdded(track: Track) {
-        savedState[NEW_TRACK_IDS] = newTrackIds.value + track.id
+        if (track.id !in newTrackIds.value) savedState[NEW_TRACK_IDS] = newTrackIds.value + track.id
         val album = (_state.value as? UiState.Success)?.data ?: return
         if (album.tracks.none { it.id == track.id }) _state.value = UiState.Success(album.copy(tracks = album.tracks + track))
     }
@@ -73,6 +80,7 @@ class AlbumDetailViewModel(
 
     companion object {
         private const val NEW_TRACK_IDS = "newTrackIds"
+        private const val DESCRIPTION_EXPANDED = "descriptionExpanded"
 
         fun factory(albumId: Int) = viewModelFactory {
             initializer { AlbumDetailViewModel(VinilosApplication.container.albumRepository, albumId, createSavedStateHandle()) }

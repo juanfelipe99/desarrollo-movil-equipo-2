@@ -1,6 +1,7 @@
 package com.equipo2.vinilos.support
 
 import com.equipo2.vinilos.data.model.Collector
+import com.equipo2.vinilos.data.model.CollectorDetail
 import com.equipo2.vinilos.data.repository.CollectorRepository
 import kotlinx.coroutines.CompletableDeferred
 
@@ -16,6 +17,25 @@ class FakeCollectorRepository : CollectorRepository {
     override suspend fun getCollectors(): Result<List<Collector>> {
         calls++
         return response.await()
+    }
+
+    /** Coleccionistas pedidos al detalle, en orden. */
+    val detailRequests = mutableListOf<Int>()
+
+    /** Veces que se pidió olvidar lo guardado. */
+    var cacheClears = 0
+        private set
+
+    /** Respuesta del detalle, que puede esperar un CompletableDeferred para probar la carga. */
+    var detail: suspend () -> Result<CollectorDetail> = { Result.failure(UnsupportedOperationException()) }
+
+    override suspend fun getCollectorDetail(id: Int): Result<CollectorDetail> {
+        detailRequests += id
+        return detail()
+    }
+
+    override fun clearCache() {
+        cacheClears++
     }
 }
 

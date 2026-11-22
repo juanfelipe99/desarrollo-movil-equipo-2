@@ -22,6 +22,7 @@ import com.equipo2.vinilos.data.model.MusicianCandidate
 import com.equipo2.vinilos.data.repository.BandRepository
 import com.equipo2.vinilos.hu04.openArtist
 import com.equipo2.vinilos.support.enterAs
+import com.equipo2.vinilos.support.openTab
 import com.equipo2.vinilos.support.scrollToWithBarsHidden
 import com.equipo2.vinilos.support.waitUntil
 import com.equipo2.vinilos.ui.artists.members.MemberCandidateAdapter
@@ -65,7 +66,7 @@ class InMemoryBandRepository(candidates: List<MusicianCandidate>) : BandReposito
 /** Entra con el rol, abre la pestaña Artistas y el detalle de la banda. */
 fun openBand(name: String, collector: Boolean = true) {
     enterAs(collector)
-    onView(withId(R.id.artistsGraph)).perform(click())
+    openTab(R.id.artistsGraph)
     openArtist(name)
 }
 

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Detalle de coleccionista (HU06) -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="es">
+    <plurals name="collector_detail_subtitle">
+        <item quantity="one">Coleccionista · %d álbum</item>
+        <item quantity="many">Coleccionista · %d álbumes</item>
+        <item quantity="other">Coleccionista · %d álbumes</item>
+    </plurals>
+
+    <string name="collector_detail_phone_label">Teléfono</string>
+    <string name="collector_detail_email_label">Correo electrónico</string>
+    <string name="collector_detail_no_data">Sin registrar</string>
+
+    <string name="collector_detail_favorites_title">Artistas favoritos</string>
+    <string name="collector_detail_favorites_empty_body">Este coleccionista aún no tiene artistas favoritos.</string>
+
+    <string name="collector_detail_albums_title">Colección de álbumes</string>
+    <plurals name="collector_detail_albums_count">
+        <item quantity="one">· %d álbum</item>
+        <item quantity="many">· %d álbumes</item>
+        <item quantity="other">· %d álbumes</item>
+    </plurals>
+    <string name="collector_detail_albums_empty_body">Este coleccionista aún no tiene álbumes en su colección.</string>
+    <string name="collector_detail_album_price">Precio: $%1$d</string>
+    <string name="collector_detail_status_active">Activo</string>
+    <string name="collector_detail_status_inactive">Inactivo</string>
+
+    <string name="collector_detail_comments_title">Comentarios</string>
+    <string name="collector_detail_comments_empty_body">Este coleccionista aún no ha comentado ningún álbum.</string>
+
+    <string name="collector_detail_loading">Cargando coleccionista…</string>
+    <string name="collector_detail_object">el coleccionista</string>
+
+    <string name="cd_collector_detail_album">%1$s. Precio: %2$d dólares. %3$s</string>
+    <string name="cd_collector_detail_comment_album">Álbum comentado: %1$s</string>
+</resources>

@@ -2,6 +2,7 @@ package com.equipo2.vinilos.data.network
 
 import android.content.Context
 import android.os.Build
+import com.equipo2.vinilos.BuildConfig
 import com.equipo2.vinilos.R
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
@@ -41,21 +42,32 @@ fun trustManagerWithLetsEncrypt(context: Context): X509TrustManager {
     return factory.trustManagers.filterIsInstance<X509TrustManager>().first()
 }
 
-private const val USER_AGENT = "Vinilos/1.0 (https://github.com/juanfelipe99/desarrollo-movil-equipo-2)"
+private const val USER_AGENT = "Vinilos/${BuildConfig.VERSION_NAME} (https://github.com/juanfelipe99/desarrollo-movil-equipo-2)"
 private const val WIKIMEDIA_HOST = "upload.wikimedia.org"
 private val WIKIMEDIA_SIZES = listOf(120, 250, 330, 500, 960)
 private val THUMB_SIZE = Regex("/(\\d+)px-")
 
 /** Wikipedia exige un User-Agent propio y solo tiene miniaturas de ciertos tamaños, así que se pide el siguiente permitido. */
 private fun forImageHosts(chain: Interceptor.Chain): Response {
-    val request = chain.request()
-    return chain.proceed(
-        request.newBuilder()
-            .url(withWikimediaSize(request.url))
-            .header("User-Agent", USER_AGENT)
-            .build()
-    )
+    val request = chain.request().newBuilder()
+        .url(withWikimediaSize(chain.request().url))
+        .header("User-Agent", USER_AGENT)
+        .build()
+    val response = chain.proceed(request)
+    // Al desplazar rápido el catálogo se piden muchas imágenes seguidas y Wikimedia responde 429 a una parte, con
+    // Retry-After de unos 11 s. Antes esas portadas quedaban sin imagen. Se espera lo que pide y se intenta una vez más,
+    // en el hilo de la descarga, no en el principal
+    if (response.code != HTTP_TOO_MANY_REQUESTS) return response
+    val wait = retryAfterSeconds(response.header("Retry-After"))
+    response.close()
+    Thread.sleep(wait * 1000)
+    return chain.proceed(request)
 }
+
+private const val HTTP_TOO_MANY_REQUESTS = 429
+
+/** Segundos que pide esperar el servidor, entre 1 y 15. Sin el encabezado o con una fecha, 2. */
+internal fun retryAfterSeconds(header: String?): Long = header?.trim()?.toLongOrNull()?.coerceIn(1, 15) ?: 2
 
 internal fun withWikimediaSize(url: HttpUrl): HttpUrl {
     if (url.host != WIKIMEDIA_HOST || "/thumb/" !in url.encodedPath) return url

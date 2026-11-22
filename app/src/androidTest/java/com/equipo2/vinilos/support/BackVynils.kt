@@ -67,6 +67,18 @@ object BackVynils {
         request("musicians/$musicianId/albums/$albumId", "POST", "")
     }
 
+    /** Asocia el álbum a la banda, que reemplaza a los intérpretes que tuviera (HU15). */
+    fun addAlbumToBand(bandId: Int, albumId: Int) {
+        // Sin cuerpo, pero el servidor publicado exige el Content-Length
+        request("bands/$bandId/albums/$albumId", "POST", "")
+    }
+
+    /** Nombres de los intérpretes del álbum, músicos o bandas, en orden alfabético. */
+    fun albumPerformerNames(albumId: Int): List<String> {
+        val performers = JSONObject(request("albums/$albumId", "GET")).optJSONArray("performers") ?: JSONArray()
+        return List(performers.length()) { performers.getJSONObject(it).getString("name") }.sorted()
+    }
+
     /** Crea una banda de prueba sin integrantes y devuelve su id. */
     fun createBand(name: String): Int {
         val band = JSONObject()
@@ -99,11 +111,112 @@ object BackVynils {
         return List(members.length()) { members.getJSONObject(it).getString("name") }
     }
 
+    /** Crea un premio de prueba y devuelve su id. */
+    fun createPrize(name: String, organization: String): Int {
+        val prize = JSONObject()
+            .put("name", name)
+            .put("organization", organization)
+            .put("description", "Premio creado por una prueba E2E.")
+        return JSONObject(request("prizes", "POST", prize.toString())).getInt("id")
+    }
+
+    /** El premio con ese nombre exacto, o null si no está. Sirve para encontrar uno que creó la app (HU13). */
+    fun prizeNamed(name: String): JSONObject? {
+        val prizes = JSONArray(request("prizes", "GET"))
+        return (0 until prizes.length()).map { prizes.getJSONObject(it) }.firstOrNull { it.getString("name") == name }
+    }
+
+    /** Entrega el premio al músico o a la banda en ese día, con el formato «2000-09-13». */
+    fun givePrize(prizeId: Int, artistId: Int, day: String) {
+        // La ruta de los músicos sirve también para las bandas, porque la API no revisa el tipo
+        request("prizes/$prizeId/musicians/$artistId", "POST", JSONObject().put("premiationDate", "${day}T00:00:00.000Z").toString())
+    }
+
+    /** Días en que el músico recibió premios, con el formato «2000-09-13», en orden. */
+    fun musicianPrizeDays(musicianId: Int): List<String> = prizeDays(JSONObject(request("musicians/$musicianId", "GET")))
+
+    /** Días en que la banda recibió premios, con el formato «2000-09-13», en orden. */
+    fun bandPrizeDays(bandId: Int): List<String> = prizeDays(JSONObject(request("bands/$bandId", "GET")))
+
+    private fun prizeDays(artist: JSONObject): List<String> {
+        val deliveries = artist.optJSONArray("performerPrizes") ?: JSONArray()
+        return List(deliveries.length()) { deliveries.getJSONObject(it).getString("premiationDate").take(10) }.sorted()
+    }
+
+    /** Borra el premio, primero cada una de sus entregas, porque la API no borra un artista ni un premio que las tenga. */
+    fun deletePrize(id: Int) {
+        val deliveries = JSONArray(request("prizes/$id/performers", "GET"))
+        for (d in 0 until deliveries.length()) {
+            val artistId = deliveries.getJSONObject(d).getJSONObject("performer").getInt("id")
+            request("prizes/$id/musicians/$artistId", "DELETE")
+        }
+        request("prizes/$id", "DELETE")
+    }
+
     /** Borra los músicos y luego las bandas indicados, para que ninguna banda se borre con integrantes. */
     fun deleteArtists(musicianIds: List<Int>, bandIds: List<Int>) {
         musicianIds.forEach { request("musicians/$it", "DELETE") }
         bandIds.forEach { request("bands/$it", "DELETE") }
     }
+
+    /** Crea un coleccionista de prueba sin álbumes, favoritos ni comentarios y devuelve su id (HU06). */
+    fun createCollector(name: String): Int {
+        val collector = JSONObject()
+            .put("name", name)
+            .put("telephone", TEST_TELEPHONE)
+            .put("email", TEST_EMAIL)
+        return JSONObject(request("collectors", "POST", collector.toString())).getInt("id")
+    }
+
+    /** Agrega el músico a los artistas favoritos del coleccionista. */
+    fun addFavoriteMusician(collectorId: Int, musicianId: Int) {
+        // Sin cuerpo, pero el servidor publicado exige el Content-Length
+        request("collectors/$collectorId/musicians/$musicianId", "POST", "")
+    }
+
+    /** Agrega el álbum a la colección con su precio y su estado, «Active» o «Inactive». */
+    fun addAlbumToCollector(collectorId: Int, albumId: Int, price: Int, status: String) {
+        val body = JSONObject().put("price", price).put("status", status)
+        request("collectors/$collectorId/albums/$albumId", "POST", body.toString())
+    }
+
+    /** Comenta el álbum en nombre del coleccionista y devuelve el id del comentario. */
+    fun addComment(albumId: Int, collectorId: Int, description: String, rating: Int): Int {
+        val comment = JSONObject()
+            .put("description", description)
+            .put("rating", rating)
+            .put("collector", JSONObject().put("id", collectorId))
+        return JSONObject(request("albums/$albumId/comments", "POST", comment.toString())).getInt("id")
+    }
+
+    fun deleteComment(albumId: Int, commentId: Int) {
+        request("albums/$albumId/comments/$commentId", "DELETE")
+    }
+
+    /**
+     * Borra el coleccionista. La API no lo borra mientras tenga favoritos o álbumes, así que primero los quita.
+     * Sus comentarios se borran antes con [deleteComment].
+     */
+    fun deleteCollector(id: Int) {
+        val (code, text) = send("collectors/$id", "GET", null)
+        // Si ya no existe es porque otra ejecución contra la misma API lo borró antes
+        if (code == 404) return
+        val favorites = JSONObject(text).optJSONArray("favoritePerformers") ?: JSONArray()
+        for (f in 0 until favorites.length()) {
+            val performer = favorites.getJSONObject(f)
+            val route = if (performer.has("birthDate")) "musicians" else "bands"
+            request("collectors/$id/$route/${performer.getInt("id")}", "DELETE")
+        }
+        val albums = JSONArray(request("collectors/$id/albums", "GET"))
+        for (a in 0 until albums.length()) {
+            val album = albums.getJSONObject(a).optJSONObject("album") ?: continue
+            request("collectors/$id/albums/${album.getInt("id")}", "DELETE")
+        }
+        request("collectors/$id", "DELETE")
+    }
+
+    const val TEST_TELEPHONE = "3000000000"
+    const val TEST_EMAIL = "e2e@ejemplo.com"
 
     /**
      * El servidor publicado a veces responde 404 o 5xx un momento mientras despierta o se reinicia.

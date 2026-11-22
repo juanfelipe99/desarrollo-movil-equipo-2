@@ -61,6 +61,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/member_add_search_hint"
+                        android:textColorHint="@color/md_on_surface_variant"
                         android:imeOptions="actionSearch"
                         android:inputType="textPersonName"
                         android:maxLines="1"
@@ -141,7 +142,7 @@
             android:layout_height="wrap_content">
 
             <!-- Sin alinear por el texto: al mostrar «Agregando…» con el círculo, el botón bajaba y quedaba cortado -->
-            <LinearLayout
+            <com.equipo2.vinilos.ui.common.ButtonBar
                 android:id="@+id/memberActionBar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -174,7 +175,7 @@
                     app:backgroundTint="@color/button_save_background"
                     app:iconGravity="textStart"
                     app:iconTint="@color/md_on_surface_variant" />
-            </LinearLayout>
+            </com.equipo2.vinilos.ui.common.ButtonBar>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 </LinearLayout>

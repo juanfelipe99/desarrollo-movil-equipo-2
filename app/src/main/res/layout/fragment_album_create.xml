@@ -149,6 +149,7 @@
                         android:id="@+id/genreField"
                         style="@style/Widget.Vinilos.FormField.Dropdown"
                         android:hint="@string/field_genre"
+                        app:endIconContentDescription="@string/cd_open_genres"
                         app:placeholderText="@string/placeholder_genre">
 
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -161,6 +162,7 @@
                         android:id="@+id/recordLabelField"
                         style="@style/Widget.Vinilos.FormField.Dropdown"
                         android:hint="@string/field_record_label"
+                        app:endIconContentDescription="@string/cd_open_record_labels"
                         app:placeholderText="@string/placeholder_record_label">
 
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -206,7 +208,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <LinearLayout
+        <com.equipo2.vinilos.ui.common.ButtonBar
             android:id="@+id/actionBar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -238,6 +240,6 @@
                 app:backgroundTint="@color/button_save_background"
                 app:iconGravity="textStart"
                 app:iconTint="@color/md_on_surface_variant" />
-        </LinearLayout>
+        </com.equipo2.vinilos.ui.common.ButtonBar>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>

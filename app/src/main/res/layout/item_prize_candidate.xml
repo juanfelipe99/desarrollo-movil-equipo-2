@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FrameLayout porque es el único que acepta foreground antes de Android 6, y así el toque se ve sobre el resaltado -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_member_row"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="72dp"
+        android:orientation="horizontal"
+        android:paddingVertical="12dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp">
+
+        <FrameLayout
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_circle_primary_container">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                app:srcCompat="@drawable/ic_trophy"
+                app:tint="@color/md_on_primary_container" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- «Nuevo» va justo después del nombre, como en el prototipo -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/prizeName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.Vinilos.BodyLarge.SemiBold"
+                    android:textColor="@color/md_on_surface"
+                    app:layout_constrainedWidth="true"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/prizeNewBadge"
+                    app:layout_constraintHorizontal_bias="0"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Premio Gardel" />
+
+                <!-- El premio recién creado desde Agregar premio (HU13) -->
+                <TextView
+                    android:id="@+id/prizeNewBadge"
+                    style="@style/Widget.Vinilos.BadgeNew"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/prizeName"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="visible" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:id="@+id/prizeOrganization"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+                android:textColor="@color/md_on_surface_variant"
+                tools:text="National Academy of Recording Arts &amp; Sciences" />
+
+            <!-- Solo si el artista ya recibió este premio, que igual se puede elegir -->
+            <TextView
+                android:id="@+id/prizeReceived"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+                android:textColor="@color/md_on_surface_variant"
+                android:textSize="13sp"
+                android:visibility="gone"
+                tools:text="Ya lo recibió el 10 de diciembre de 1978. Puedes agregarlo otra vez con otra fecha."
+                tools:visibility="visible" />
+        </LinearLayout>
+
+        <!-- La fila entera elige el premio, así que el radio solo muestra el estado -->
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/prizeRadio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:clickable="false"
+            android:focusable="false"
+            android:importantForAccessibility="no"
+            app:buttonTint="@color/selection_radio" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/prizeDivider"
+        style="@style/Widget.Vinilos.Divider"
+        android:layout_gravity="bottom" />
+</FrameLayout>

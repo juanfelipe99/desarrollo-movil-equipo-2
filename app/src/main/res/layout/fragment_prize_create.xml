@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/formScroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:id="@+id/form"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="32dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintWidth_max="528dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/prize_create_note"
+                        android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+                        android:textColor="@color/md_on_surface_variant" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/nameField"
+                        style="@style/Widget.Vinilos.FormField"
+                        android:hint="@string/field_prize_name"
+                        app:placeholderText="@string/placeholder_prize_name">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/nameInput"
+                            style="@style/Widget.Vinilos.FormField.Input"
+                            android:imeOptions="actionNext"
+                            android:inputType="textCapSentences"
+                            android:maxLength="100" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/organizationField"
+                        style="@style/Widget.Vinilos.FormField"
+                        android:hint="@string/field_prize_organization"
+                        app:placeholderText="@string/placeholder_prize_organization">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/organizationInput"
+                            style="@style/Widget.Vinilos.FormField.Input"
+                            android:imeOptions="actionNext"
+                            android:inputType="textCapSentences"
+                            android:maxLength="100" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/descriptionField"
+                        style="@style/Widget.Vinilos.FormField"
+                        android:hint="@string/field_prize_description"
+                        app:placeholderText="@string/placeholder_prize_description">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/descriptionInput"
+                            style="@style/Widget.Vinilos.FormField.Input"
+                            android:gravity="top|start"
+                            android:inputType="textMultiLine|textCapSentences"
+                            android:minHeight="120dp"
+                            android:maxLength="1000"
+                            android:minLines="4" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- Encima del formulario para no moverlo al aparecer -->
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/savingProgress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:indicatorColor="@color/md_primary"
+            app:trackColor="@color/md_primary_container"
+            app:trackThickness="4dp" />
+    </FrameLayout>
+
+    <View style="@style/Widget.Vinilos.Divider" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Sin alinear por el texto: al mostrar «Creando…» con el círculo, el botón no baja -->
+        <com.equipo2.vinilos.ui.common.ButtonBar
+            android:id="@+id/actionBar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_max="528dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/cancelButton"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                android:layout_weight="1"
+                android:text="@string/action_cancel" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/saveButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/prize_create_action"
+                android:textColor="@color/button_save_text"
+                app:backgroundTint="@color/button_save_background"
+                app:iconGravity="textStart"
+                app:iconTint="@color/md_on_surface_variant" />
+        </com.equipo2.vinilos.ui.common.ButtonBar>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

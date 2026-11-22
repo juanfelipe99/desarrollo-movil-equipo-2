@@ -5,7 +5,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
-import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
@@ -19,6 +18,7 @@ import com.equipo2.vinilos.hu03.openArtists
 import com.equipo2.vinilos.hu03.openFirstArtist
 import com.equipo2.vinilos.support.VinilosRule
 import com.equipo2.vinilos.support.enterAs
+import com.equipo2.vinilos.support.openTab
 import com.equipo2.vinilos.support.toolbarTitle
 import com.equipo2.vinilos.support.waitUntil
 import org.hamcrest.Matcher
@@ -40,7 +40,7 @@ class HU07NavigationTest {
         enterAs(collector = false)
         onView(withId(R.id.albumGrid)).perform(scrollToEnd())
 
-        onView(withId(R.id.albumsGraph)).perform(click())
+        openTab(R.id.albumsGraph)
 
         var grid: RecyclerView? = null
         onView(withId(R.id.albumGrid)).check { view, _ -> grid = view as RecyclerView }
@@ -54,7 +54,7 @@ class HU07NavigationTest {
         enterAs(collector = false)
         openAlbum(shownAlbums().first().album.name)
 
-        onView(withId(R.id.albumsGraph)).perform(click())
+        openTab(R.id.albumsGraph)
 
         onView(toolbarTitle(R.string.album_list_title)).check(matches(isDisplayed()))
     }
@@ -65,8 +65,8 @@ class HU07NavigationTest {
         enterAs(collector = false)
         openAlbum(shownAlbums().first().album.name)
 
-        onView(withId(R.id.artistsGraph)).perform(click())
-        onView(withId(R.id.albumsGraph)).perform(click())
+        openTab(R.id.artistsGraph)
+        openTab(R.id.albumsGraph)
 
         onView(toolbarTitle(R.string.album_detail_title)).check(matches(isDisplayed()))
         onView(withId(R.id.albumsGraph)).check(matches(isSelected()))
@@ -79,8 +79,8 @@ class HU07NavigationTest {
         openArtists()
         openFirstArtist()
 
-        onView(withId(R.id.albumsGraph)).perform(click())
-        onView(withId(R.id.artistsGraph)).perform(click())
+        openTab(R.id.albumsGraph)
+        openTab(R.id.artistsGraph)
 
         onView(toolbarTitle(R.string.artist_detail_title)).check(matches(isDisplayed()))
         onView(withId(R.id.artistsGraph)).check(matches(isSelected()))

@@ -5,6 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.data.model.ThemeMode
 import com.equipo2.vinilos.ui.common.collectWhileVisible
+import com.equipo2.vinilos.ui.common.setClickLabel
 import com.equipo2.vinilos.ui.thememode.ThemeModeViewModel
 import com.equipo2.vinilos.ui.thememode.iconRes
 import com.equipo2.vinilos.ui.thememode.nameRes
@@ -20,7 +21,8 @@ private fun ImageButton.show(mode: ThemeMode, themeVm: ThemeModeViewModel) {
     val current = context.getString(mode.nameRes)
 
     setImageResource(mode.iconRes)
-    contentDescription = context.getString(R.string.cd_theme_mode_toggle, current, context.getString(next.nameRes))
+    contentDescription = context.getString(R.string.cd_theme_mode_toggle, current)
+    setClickLabel(context.getString(R.string.action_theme_mode_toggle, context.getString(next.nameRes)))
     setOnClickListener { themeVm.setThemeMode(next) }
 }
 
