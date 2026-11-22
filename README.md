@@ -1,6 +1,6 @@
 # Vinilos · Equipo 2
 
-Aplicación Android nativa en Kotlin para consultar álbumes, artistas y coleccionistas de música en vinilo, y para que los coleccionistas registren álbumes nuevos, les agreguen tracks y sumen músicos a las bandas. Proyecto del curso Ingeniería de Software para Aplicaciones Móviles (MISO, Universidad de los Andes). Funciona desde Android 5.0 (API 21).
+Aplicación Android nativa en Kotlin para consultar álbumes, artistas y coleccionistas de música en vinilo, y para que los coleccionistas registren álbumes nuevos, les agreguen tracks, sumen músicos a las bandas, creen premios y agreguen premios y álbumes a los artistas. Proyecto del curso Ingeniería de Software para Aplicaciones Móviles (MISO, Universidad de los Andes). Funciona desde Android 5.0 (API 21).
 
 ## API
 
@@ -17,7 +17,7 @@ Para usar otra API, cambiar `publishedApiBaseUrl` en `app/build.gradle.kts` y vo
 El APK de cada versión está en [Releases](https://github.com/juanfelipe99/desarrollo-movil-equipo-2/releases). Se descarga en el teléfono y se abre, o se instala con el dispositivo conectado por USB:
 
 ```
-adb install vinilos-v2.0.0.apk
+adb install vinilos-v3.0.0.apk
 ```
 
 ## Construir la app
@@ -60,6 +60,8 @@ Están en `app/src/androidTest/java/com/equipo2/vinilos`, con una carpeta por hi
   adb shell am instrument -w com.equipo2.vinilos.test/androidx.test.runner.AndroidJUnitRunner
   ```
 
+Las dos auditorías de accesibilidad (`accesibilidad/AccessibilityAuditTest` y `AccessibilityStatesAuditTest`), que corren las revisiones de Accessibility Scanner sobre todas las pantallas, no corren con la suite. Se activan con `-e auditoria si`, y `-e capturas si` guarda además una captura de cada pantalla.
+
 ### Unitarias
 
 Están en `app/src/test/java/com/equipo2/vinilos` y no necesitan emulador ni API.
@@ -69,7 +71,7 @@ Están en `app/src/test/java/com/equipo2/vinilos` y no necesitan emulador ni API
 
 ## Documentación
 
-La [wiki](https://github.com/juanfelipe99/desarrollo-movil-equipo-2/wiki) tiene la estrategia y los resultados de pruebas, el diseño arquitectónico, el perfilamiento y las micro-optimizaciones, las actas de reuniones y las retrospectivas de cada sprint.
+La [wiki](https://github.com/juanfelipe99/desarrollo-movil-equipo-2/wiki) tiene la estrategia y los resultados de pruebas, el diseño arquitectónico, el perfilamiento, las micro-optimizaciones y las buenas prácticas, el análisis de accesibilidad, las actas de reuniones y las retrospectivas de cada sprint.
 
 ## Integrantes
 
