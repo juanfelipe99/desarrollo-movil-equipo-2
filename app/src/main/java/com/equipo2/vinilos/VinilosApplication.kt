@@ -3,6 +3,7 @@ package com.equipo2.vinilos
 import android.app.ActivityManager
 import android.app.Application
 import android.content.ComponentCallbacks2
+import android.os.StrictMode
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.getSystemService
@@ -15,6 +16,7 @@ import coil3.disk.directory
 import coil3.memory.MemoryCache
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.allowRgb565
+import com.equipo2.vinilos.data.network.WikimediaThumbnails
 import com.equipo2.vinilos.data.network.imageHttpClient
 import com.equipo2.vinilos.ui.thememode.applyThemeMode
 import kotlinx.coroutines.MainScope
@@ -33,6 +35,32 @@ class VinilosApplication : Application(), SingletonImageLoader.Factory {
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("es"))
         container = AppContainer(this)
         applySavedThemeMode()
+        if (BuildConfig.DEBUG) watchMainThread()
+    }
+
+    /**
+     * En la versión debug, StrictMode escribe en el registro (etiqueta StrictMode) cualquier lectura o escritura de
+     * disco o petición de red en el hilo principal, que puede terminar en un ANR, y los recursos o actividades que
+     * quedan sin cerrar. Solo avisa, no cierra la app. Se activa después de leer el tema guardado, que se lee a
+     * propósito antes de la primera pantalla para no mostrar un instante el tema equivocado.
+     */
+    private fun watchMainThread() {
+        StrictMode.setThreadPolicy(
+            StrictMode.ThreadPolicy.Builder()
+                .detectDiskReads()
+                .detectDiskWrites()
+                .detectNetwork()
+                .penaltyLog()
+                .build(),
+        )
+        StrictMode.setVmPolicy(
+            StrictMode.VmPolicy.Builder()
+                .detectLeakedClosableObjects()
+                .detectActivityLeaks()
+                .detectLeakedRegistrationObjects()
+                .penaltyLog()
+                .build(),
+        )
     }
 
     private fun applySavedThemeMode() {
@@ -51,7 +79,10 @@ class VinilosApplication : Application(), SingletonImageLoader.Factory {
         // En un teléfono con poca memoria cada portada ocupa la mitad y la caché en memoria es más chica
         val lowRam = getSystemService<ActivityManager>()?.isLowRamDevice == true
         return ImageLoader.Builder(context)
-            .components { add(OkHttpNetworkFetcherFactory(callFactory = { client })) }
+            .components {
+                add(WikimediaThumbnails())
+                add(OkHttpNetworkFetcherFactory(callFactory = { client }))
+            }
             .memoryCache { MemoryCache.Builder().maxSizePercent(context, if (lowRam) 0.15 else 0.25).build() }
             .diskCache { DiskCache.Builder().directory(cacheDir.resolve("portadas")).maxSizeBytes(IMAGE_DISK_CACHE_BYTES).build() }
             .allowRgb565(lowRam)

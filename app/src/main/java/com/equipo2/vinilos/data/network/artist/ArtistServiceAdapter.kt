@@ -7,13 +7,14 @@ import com.equipo2.vinilos.data.network.ApiClient
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
-class ArtistServiceAdapter(apiClient: ApiClient) {
+/** [prizeCatalog] se comparte con Agregar premio. Sin él, el adaptador guarda su propio catálogo. */
+class ArtistServiceAdapter(apiClient: ApiClient, prizeCatalog: PrizeCatalog? = null) {
 
     private val api = apiClient.create(ArtistApi::class.java)
+    private val prizeCatalog = prizeCatalog ?: PrizeCatalog(api)
 
     // Cada detalle necesita las bandas o los premios completos. Se guardan para no pedirlos otra vez en cada artista
     @Volatile private var bands: List<BandDto>? = null
-    @Volatile private var prizes: Map<Int, PrizeDto>? = null
 
     // Músicos y bandas se piden a la vez, y si falla cualquiera de los dos falla el listado
     suspend fun getArtists(): List<Artist> = coroutineScope {
@@ -49,11 +50,11 @@ class ArtistServiceAdapter(apiClient: ApiClient) {
         band.await().toArtistDetail(prizes.await())
     }
 
-    private suspend fun prizes(): Map<Int, PrizeDto> = prizes ?: api.getPrizes().byPerformerPrize().also { prizes = it }
+    private suspend fun prizes(): Map<Int, PrizeDto> = prizeCatalog.get().byPerformerPrize()
 
     /** Olvida las bandas y los premios guardados, para que el próximo detalle los pida a la API. */
     fun clearCache() {
         bands = null
-        prizes = null
+        prizeCatalog.clear()
     }
 }

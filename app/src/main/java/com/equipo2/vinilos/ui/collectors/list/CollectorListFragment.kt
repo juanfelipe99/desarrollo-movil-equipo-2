@@ -41,6 +41,8 @@ class CollectorListFragment : Fragment(R.layout.fragment_collector_list), Scroll
             findNavController().navigateIfPossible(R.id.action_collectorList_to_collectorDetail, CollectorDetailFragment.args(collector))
         }
         binding.collectorList.layoutManager = LinearLayoutManager(requireContext())
+        // La lista ocupa toda la pantalla, así los cambios de sus datos no la obligan a medirse de nuevo
+        binding.collectorList.setHasFixedSize(true)
         binding.collectorList.adapter = adapter
         bindPullToRefresh(binding.collectorsRefresh, viewModel.pullRefresh, binding.collectorList, binding.collectorsMessage.root) {
             viewModel.refresh()

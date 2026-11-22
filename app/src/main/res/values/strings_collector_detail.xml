@@ -32,5 +32,5 @@
     <string name="collector_detail_object">el coleccionista</string>
 
     <string name="cd_collector_detail_album">%1$s. Precio: %2$d dólares. %3$s</string>
-    <string name="cd_collector_detail_comment_album">Álbum comentado: %1$s. Toca para ver su detalle</string>
+    <string name="cd_collector_detail_comment_album">Álbum comentado: %1$s</string>
 </resources>

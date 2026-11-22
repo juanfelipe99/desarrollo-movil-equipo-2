@@ -94,11 +94,12 @@
 
                     <!-- Artistas favoritos -->
                     <TextView
+                        android:id="@+id/favoritesTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp"
+                        android:layout_marginBottom="12dp"
                         android:gravity="center_vertical"
-                        android:minHeight="48dp"
                         android:paddingHorizontal="16dp"
                         android:text="@string/collector_detail_favorites_title"
                         android:textAppearance="@style/TextAppearance.Vinilos.TitleMedium"
@@ -123,11 +124,12 @@
 
                     <!-- Colección de álbumes -->
                     <LinearLayout
+                        android:id="@+id/collectorAlbumsTitleGroup"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp"
+                        android:layout_marginBottom="12dp"
                         android:gravity="center_vertical"
-                        android:minHeight="48dp"
                         android:orientation="horizontal"
                         android:paddingHorizontal="16dp">
 
@@ -168,11 +170,12 @@
 
                     <!-- Comentarios -->
                     <TextView
+                        android:id="@+id/commentsTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp"
+                        android:layout_marginBottom="12dp"
                         android:gravity="center_vertical"
-                        android:minHeight="48dp"
                         android:paddingHorizontal="16dp"
                         android:text="@string/collector_detail_comments_title"
                         android:textAppearance="@style/TextAppearance.Vinilos.TitleMedium"

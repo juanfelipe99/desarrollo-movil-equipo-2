@@ -51,6 +51,9 @@ android {
             optimization {
                 enable = true
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
+                keepRules {
+                    files.add(file("r8-reglas.pro"))
+                }
             }
         }
         // Igual a release pero perfilable, para medir el desempeño de la versión que se entrega con el Profiler
@@ -115,6 +118,10 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.espresso.core)
+    // Revisiones de Accessibility Scanner (Accessibility Test Framework) para la auditoría de accesibilidad
+    androidTestImplementation(libs.androidx.espresso.accessibility)
+    // Accessibility Test Framework usa Guava y no lo trae como dependencia
+    androidTestImplementation(libs.guava.android)
     androidTestImplementation(libs.androidx.junit)
 }
 

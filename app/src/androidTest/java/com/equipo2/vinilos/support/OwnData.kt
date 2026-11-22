@@ -44,6 +44,11 @@ class OwnData {
     fun prize(name: String, organization: String = "Organización E2E"): Int =
         BackVynils.createPrize(name, organization).also { prizes += it }
 
+    /** Un premio que creó la app durante la prueba (HU13), para borrarlo al terminar con lo demás. */
+    fun keepPrize(id: Int) {
+        if (id !in prizes) prizes += id
+    }
+
     /**
      * Primero los comentarios y los coleccionistas, que la API no borra mientras tengan álbumes o favoritos.
      * Después los premios con sus entregas, porque la API no borra un artista que tenga premios.

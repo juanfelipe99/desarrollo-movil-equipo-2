@@ -120,6 +120,12 @@ object BackVynils {
         return JSONObject(request("prizes", "POST", prize.toString())).getInt("id")
     }
 
+    /** El premio con ese nombre exacto, o null si no está. Sirve para encontrar uno que creó la app (HU13). */
+    fun prizeNamed(name: String): JSONObject? {
+        val prizes = JSONArray(request("prizes", "GET"))
+        return (0 until prizes.length()).map { prizes.getJSONObject(it) }.firstOrNull { it.getString("name") == name }
+    }
+
     /** Entrega el premio al músico o a la banda en ese día, con el formato «2000-09-13». */
     fun givePrize(prizeId: Int, artistId: Int, day: String) {
         // La ruta de los músicos sirve también para las bandas, porque la API no revisa el tipo

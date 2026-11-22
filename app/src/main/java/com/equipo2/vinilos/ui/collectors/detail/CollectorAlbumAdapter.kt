@@ -8,6 +8,7 @@ import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil3.load
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.data.model.AlbumStatus
 import com.equipo2.vinilos.data.model.CollectorAlbum
@@ -28,6 +29,8 @@ class CollectorAlbumAdapter : ListAdapter<CollectorAlbum, CollectorAlbumAdapter.
             val isActive = album.status == AlbumStatus.ACTIVE
             val status = context.getString(if (isActive) R.string.collector_detail_status_active else R.string.collector_detail_status_inactive)
 
+            // Sin portada se borra la de la fila reciclada y queda el disco de fondo
+            binding.collectorAlbumCover.load(album.cover.ifBlank { null })
             binding.collectorAlbumName.text = album.name
             binding.collectorAlbumPrice.text = context.getString(R.string.collector_detail_album_price, album.price)
 

@@ -32,6 +32,7 @@
             <LinearLayout style="@style/Widget.Vinilos.RoleButton.Texts">
 
                 <TextView
+                    style="@style/Widget.Vinilos.Hyphenated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/role_visitor_enter"
@@ -39,6 +40,7 @@
                     android:textColor="@color/md_on_primary" />
 
                 <TextView
+                    style="@style/Widget.Vinilos.Hyphenated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/role_visitor_enter_desc"
@@ -72,6 +74,7 @@
             <LinearLayout style="@style/Widget.Vinilos.RoleButton.Texts">
 
                 <TextView
+                    style="@style/Widget.Vinilos.Hyphenated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/role_collector_enter"
@@ -79,6 +82,7 @@
                     android:textColor="@color/md_on_surface" />
 
                 <TextView
+                    style="@style/Widget.Vinilos.Hyphenated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/role_collector_enter_desc"
